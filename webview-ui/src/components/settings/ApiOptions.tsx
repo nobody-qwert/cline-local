@@ -7,7 +7,6 @@ import { useInterval } from "react-use"
 import styled from "styled-components"
 const OPENROUTER_MODEL_PICKER_Z_INDEX = 1000
 import { normalizeApiConfiguration } from "@/components/settings/utils/providerUtils"
-import { OpenAICompatibleProvider } from "./providers/OpenAICompatible"
 import { LMStudioProvider } from "./providers/LMStudioProvider"
 import { OllamaProvider } from "./providers/OllamaProvider"
 import { useApiConfigurationHandlers } from "./utils/useApiConfigurationHandlers"
@@ -35,15 +34,6 @@ export const DropdownContainer = styled.div<{ zIndex?: number }>`
 		bottom: auto !important;
 	}
 `
-
-declare module "vscode" {
-	interface LanguageModelChatSelector {
-		vendor?: string
-		family?: string
-		version?: string
-		id?: string
-	}
-}
 
 const ApiOptions = ({ showModelOptions, apiErrorMessage, modelIdErrorMessage, isPopup, currentMode }: ApiOptionsProps) => {
 	// Use full context state for immediate save payload
@@ -109,15 +99,10 @@ const ApiOptions = ({ showModelOptions, apiErrorMessage, modelIdErrorMessage, is
 						minWidth: 130,
 						position: "relative",
 					}}>
-					<VSCodeOption value="openai">OpenAI Compatible</VSCodeOption>
 					<VSCodeOption value="lmstudio">LM Studio</VSCodeOption>
 					<VSCodeOption value="ollama">Ollama</VSCodeOption>
 				</VSCodeDropdown>
 			</DropdownContainer>
-
-			{apiConfiguration && selectedProvider === "openai" && (
-				<OpenAICompatibleProvider showModelOptions={showModelOptions} isPopup={isPopup} currentMode={currentMode} />
-			)}
 
 			{apiConfiguration && selectedProvider === "lmstudio" && (
 				<LMStudioProvider showModelOptions={showModelOptions} isPopup={isPopup} currentMode={currentMode} />

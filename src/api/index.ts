@@ -1,6 +1,5 @@
 import { Anthropic } from "@anthropic-ai/sdk"
 import { ApiConfiguration, ModelInfo } from "../shared/api"
-import { OpenAiHandler } from "./providers/openai"
 import { OllamaHandler } from "./providers/ollama"
 import { LmStudioHandler } from "./providers/lmstudio"
 import { ApiStream, ApiStreamUsageChunk } from "./transform/stream"
@@ -22,16 +21,6 @@ function createHandlerForProvider(
 	mode: Mode,
 ): ApiHandler {
 	switch (apiProvider) {
-		case "openai":
-			return new OpenAiHandler({
-				openAiApiKey: options.openAiApiKey,
-				openAiBaseUrl: options.openAiBaseUrl,
-				azureApiVersion: options.azureApiVersion,
-				openAiHeaders: options.openAiHeaders,
-				openAiModelId: mode === "plan" ? options.planModeOpenAiModelId : options.actModeOpenAiModelId,
-				openAiModelInfo: mode === "plan" ? options.planModeOpenAiModelInfo : options.actModeOpenAiModelInfo,
-				reasoningEffort: mode === "plan" ? options.planModeReasoningEffort : options.actModeReasoningEffort,
-			})
 		case "ollama":
 			return new OllamaHandler({
 				ollamaBaseUrl: options.ollamaBaseUrl,
@@ -46,24 +35,13 @@ function createHandlerForProvider(
 				lmStudioModelId: mode === "plan" ? options.planModeLmStudioModelId : options.actModeLmStudioModelId,
 			})
 		default:
-			// Prefer OpenAI-compatible local when configured; otherwise fallback to Ollama
-			return options?.openAiBaseUrl || options?.openAiApiKey
-				? new OpenAiHandler({
-						openAiApiKey: options.openAiApiKey,
-						openAiBaseUrl: options.openAiBaseUrl,
-						azureApiVersion: options.azureApiVersion,
-						openAiHeaders: options.openAiHeaders,
-						openAiModelId: mode === "plan" ? options.planModeOpenAiModelId : options.actModeOpenAiModelId,
-						openAiModelInfo: mode === "plan" ? options.planModeOpenAiModelInfo : options.actModeOpenAiModelInfo,
-						reasoningEffort: mode === "plan" ? options.planModeReasoningEffort : options.actModeReasoningEffort,
-					})
-				: new OllamaHandler({
-						ollamaBaseUrl: options.ollamaBaseUrl,
-						ollamaApiKey: options.ollamaApiKey,
-						ollamaModelId: mode === "plan" ? options.planModeOllamaModelId : options.actModeOllamaModelId,
-						ollamaApiOptionsCtxNum: options.ollamaApiOptionsCtxNum,
-						requestTimeoutMs: options.requestTimeoutMs,
-					})
+			return new OllamaHandler({
+				ollamaBaseUrl: options.ollamaBaseUrl,
+				ollamaApiKey: options.ollamaApiKey,
+				ollamaModelId: mode === "plan" ? options.planModeOllamaModelId : options.actModeOllamaModelId,
+				ollamaApiOptionsCtxNum: options.ollamaApiOptionsCtxNum,
+				requestTimeoutMs: options.requestTimeoutMs,
+			})
 	}
 }
 
