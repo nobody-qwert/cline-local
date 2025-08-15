@@ -9,7 +9,6 @@ import { DEFAULT_PLATFORM, type ExtensionState } from "@shared/ExtensionMessage"
 import { DEFAULT_MCP_DISPLAY_MODE } from "@shared/McpDisplayMode"
 import type { UserInfo } from "@shared/proto/cline/account"
 import { EmptyRequest, StringRequest } from "@shared/proto/cline/common"
-import type { OpenRouterCompatibleModelInfo } from "@shared/proto/cline/models"
 import { type TerminalProfile, UpdateSettingsRequest } from "@shared/proto/cline/state"
 import { WebviewProviderType as WebviewProviderTypeEnum, WebviewProviderTypeRequest } from "@shared/proto/cline/ui"
 import { convertProtoToClineMessage } from "@shared/proto-conversions/cline-message"
@@ -76,7 +75,6 @@ interface ExtensionStateContextType extends ExtensionState {
 	setTotalTasksSize: (value: number | null) => void
 
 	// Refresh functions
-	refreshOpenRouterModels: () => void
 	setUserInfo: (userInfo?: UserInfo) => void
 
 	// Navigation state setters
@@ -240,7 +238,6 @@ export const ExtensionStateContextProvider: React.FC<{
 	const partialMessageUnsubscribeRef = useRef<(() => void) | null>(null)
 	const mcpMarketplaceUnsubscribeRef = useRef<(() => void) | null>(null)
 	const themeSubscriptionRef = useRef<(() => void) | null>(null)
-	const openRouterModelsUnsubscribeRef = useRef<(() => void) | null>(null)
 	const workspaceUpdatesUnsubscribeRef = useRef<(() => void) | null>(null)
 	const relinquishControlUnsubscribeRef = useRef<(() => void) | null>(null)
 
@@ -471,23 +468,7 @@ export const ExtensionStateContextProvider: React.FC<{
 			},
 		})
 
-		// Subscribe to OpenRouter models updates
-		openRouterModelsUnsubscribeRef.current = ModelsServiceClient.subscribeToOpenRouterModels(EmptyRequest.create({}), {
-			onResponse: (response: OpenRouterCompatibleModelInfo) => {
-				console.log("[DEBUG] Received OpenRouter models update from gRPC stream")
-				const models = response.models
-				setOpenRouterModels({
-					[openRouterDefaultModelId]: openRouterDefaultModelInfo, // in case the extension sent a model list without the default model
-					...models,
-				})
-			},
-			onError: (error) => {
-				console.error("Error in OpenRouter models subscription:", error)
-			},
-			onComplete: () => {
-				console.log("OpenRouter models subscription completed")
-			},
-		})
+		// Local-only build: OpenRouter models subscription removed
 
 		// Initialize webview using gRPC
 		UiServiceClient.initializeWebview(EmptyRequest.create({}))
@@ -590,10 +571,7 @@ export const ExtensionStateContextProvider: React.FC<{
 				themeSubscriptionRef.current()
 				themeSubscriptionRef.current = null
 			}
-			if (openRouterModelsUnsubscribeRef.current) {
-				openRouterModelsUnsubscribeRef.current()
-				openRouterModelsUnsubscribeRef.current = null
-			}
+			// Local-only build: no OpenRouter unsubscribe
 			if (workspaceUpdatesUnsubscribeRef.current) {
 				workspaceUpdatesUnsubscribeRef.current()
 				workspaceUpdatesUnsubscribeRef.current = null
@@ -615,18 +593,6 @@ export const ExtensionStateContextProvider: React.FC<{
 				didBecomeVisibleUnsubscribeRef.current = null
 			}
 		}
-	}, [])
-
-	const refreshOpenRouterModels = useCallback(() => {
-		ModelsServiceClient.refreshOpenRouterModels(EmptyRequest.create({}))
-			.then((response: OpenRouterCompatibleModelInfo) => {
-				const models = response.models
-				setOpenRouterModels({
-					[openRouterDefaultModelId]: openRouterDefaultModelInfo, // in case the extension sent a model list without the default model
-					...models,
-				})
-			})
-			.catch((error: Error) => console.error("Failed to refresh OpenRouter models:", error))
 	}, [])
 
 	const contextValue: ExtensionStateContextType = {
@@ -717,7 +683,6 @@ export const ExtensionStateContextProvider: React.FC<{
 			})),
 		setMcpTab,
 		setTotalTasksSize,
-		refreshOpenRouterModels,
 		onRelinquishControl,
 		setUserInfo: (userInfo?: UserInfo) => setState((prevState) => ({ ...prevState, userInfo })),
 	}

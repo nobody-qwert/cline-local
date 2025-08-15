@@ -1,7 +1,7 @@
 import { VSCodeLink } from "@vscode/webview-ui-toolkit/react"
 import { Fragment, useState } from "react"
 import { ModelInfo, geminiModels } from "@shared/api"
-import { ModelDescriptionMarkdown } from "../OpenRouterModelPicker"
+import { ModelDescriptionMarkdown } from "../ModelDescriptionMarkdown"
 import {
 	formatPrice,
 	hasThinkingBudget,
