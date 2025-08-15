@@ -5,40 +5,6 @@ import "cline/common.proto";
 option java_package = "bot.cline.proto";
 option java_multiple_files = true;
 
-// Service for account-related operations
-service AccountService {
-  // Handles the user clicking the login link in the UI.
-  // Generates a secure nonce for state validation, stores it in secrets,
-  // and opens the authentication URL in the external browser.
-  rpc accountLoginClicked(EmptyRequest) returns (String);
-    
-  // Handles the user clicking the logout button in the UI.
-  // Clears API keys and user state.
-  rpc accountLogoutClicked(EmptyRequest) returns (Empty);
-
-  // Subscribe to auth status update events (when authentication state changes)
-  rpc subscribeToAuthStatusUpdate(EmptyRequest) 
-      returns (stream AuthState);
-    
-  // Handles authentication state changes from the Firebase context.
-  // Updates the user info in global state and returns the updated value.
-  rpc authStateChanged(AuthStateChangedRequest) 
-      returns (AuthState);
-    
-  // Fetches all user credits data
-  // (balance, usage transactions, payment transactions)
-  rpc getUserCredits(EmptyRequest) returns (UserCreditsData);
-
-  rpc getOrganizationCredits(GetOrganizationCreditsRequest) returns (OrganizationCreditsData);
-
-  // Fetches all user organizations data
-  // Returns a list of UserOrganization objects
-  rpc getUserOrganizations(EmptyRequest) returns (UserOrganizationsResponse);
-
-  rpc setUserOrganization(UserOrganizationUpdateRequest) returns (Empty);
-
-  rpc openrouterAuthClicked(EmptyRequest) returns (Empty);
-}
 
 message AuthStateChangedRequest {
   Metadata metadata = 1;
