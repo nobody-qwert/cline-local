@@ -1,4 +1,3 @@
-import { telemetryService } from "@services/posthog/PostHogClientProvider"
 import fs from "fs/promises"
 import * as path from "path"
 import simpleGit from "simple-git"
@@ -124,7 +123,7 @@ class CheckpointTracker {
 			await newTracker.gitOperations.initShadowGit(gitPath, workingDir, taskId)
 
 			const durationMs = Math.round(performance.now() - startTime)
-			telemetryService.captureCheckpointUsage(taskId, "shadow_git_initialized", durationMs)
+			console.info("shadow_git_initialized", { taskId, durationMs })
 
 			return newTracker
 		} catch (error) {
@@ -184,7 +183,7 @@ class CheckpointTracker {
 			console.warn(`Checkpoint commit created: `, commitHash)
 
 			const durationMs = Math.round(performance.now() - startTime)
-			telemetryService.captureCheckpointUsage(this.taskId, "commit_created", durationMs)
+			console.info("checkpoint_commit_created", { taskId: this.taskId, durationMs })
 
 			return commitHash
 		} catch (error) {
@@ -260,7 +259,7 @@ class CheckpointTracker {
 		console.debug(`Successfully reset to checkpoint: ${commitHash}`)
 
 		const durationMs = Math.round(performance.now() - startTime)
-		telemetryService.captureCheckpointUsage(this.taskId, "restored", durationMs)
+		console.info("checkpoint_restored", { taskId: this.taskId, durationMs })
 	}
 
 	/**
@@ -338,7 +337,7 @@ class CheckpointTracker {
 		}
 
 		const durationMs = Math.round(performance.now() - startTime)
-		telemetryService.captureCheckpointUsage(this.taskId, "diff_generated", durationMs)
+		console.info("checkpoint_diff_generated", { taskId: this.taskId, durationMs })
 
 		return result
 	}
@@ -367,7 +366,7 @@ class CheckpointTracker {
 		const diffSummary = await git.diffSummary([diffRange])
 
 		const durationMs = Math.round(performance.now() - startTime)
-		telemetryService.captureCheckpointUsage(this.taskId, "diff_generated", durationMs)
+		console.info("checkpoint_diff_generated", { taskId: this.taskId, durationMs })
 
 		return diffSummary.files.length
 	}

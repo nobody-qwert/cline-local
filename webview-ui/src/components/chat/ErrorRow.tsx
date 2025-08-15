@@ -1,9 +1,6 @@
 import { memo } from "react"
-import { VSCodeButton } from "@vscode/webview-ui-toolkit/react"
 import { ClineMessage } from "@shared/ExtensionMessage"
 import { ClineError, ClineErrorType } from "../../../../src/services/error/ClineError"
-import CreditLimitError from "@/components/chat/CreditLimitError"
-import { handleSignIn, useClineAuth } from "@/context/ClineAuthContext"
 
 const errorColor = "var(--vscode-errorForeground)"
 
@@ -15,8 +12,6 @@ interface ErrorRowProps {
 }
 
 const ErrorRow = memo(({ message, errorType, apiRequestFailedMessage, apiReqStreamingFailedMessage }: ErrorRowProps) => {
-	const { clineUser } = useClineAuth()
-
 	const renderErrorContent = () => {
 		switch (errorType) {
 			case "error":
@@ -24,40 +19,14 @@ const ErrorRow = memo(({ message, errorType, apiRequestFailedMessage, apiReqStre
 			case "auto_approval_max_req_reached":
 				// Handle API request errors with special error parsing
 				if (apiRequestFailedMessage || apiReqStreamingFailedMessage) {
-					// FIXME: ClineError parsing should not be applied to non-Cline providers, but it seems we're using clineErrorMessage below in the default error display
 					const clineError = ClineError.parse(apiRequestFailedMessage || apiReqStreamingFailedMessage)
 					const clineErrorMessage = clineError?.message
 					const requestId = clineError?._error?.request_id
-					const isClineProvider = clineError?.providerId === "cline" // FIXME: since we are modifying backend to return generic error, we need to make sure we're not expecting providerId here
 
-					if (clineError) {
-						if (clineError.isErrorType(ClineErrorType.Balance)) {
-							const errorDetails = clineError._error?.details
-							return (
-								<CreditLimitError
-									currentBalance={errorDetails?.current_balance}
-									totalSpent={errorDetails?.total_spent}
-									totalPromotions={errorDetails?.total_promotions}
-									message={errorDetails?.message}
-									// buyCreditsUrl={errorDetails?.buy_credits_url}
-								/>
-							)
-						}
-					}
-
-					if (clineError?.isErrorType(ClineErrorType.RateLimit)) {
-						return (
-							<p className="m-0 whitespace-pre-wrap text-[var(--vscode-errorForeground)] wrap-anywhere">
-								{clineErrorMessage}
-								{requestId && <div>Request ID: {requestId}</div>}
-							</p>
-						)
-					}
-
-					// Default error display
+					// Default error display (no auth/account UI in lean local build)
 					return (
 						<p className="m-0 whitespace-pre-wrap text-[var(--vscode-errorForeground)] wrap-anywhere">
-							{clineErrorMessage}
+							{clineErrorMessage || apiRequestFailedMessage || apiReqStreamingFailedMessage}
 							{requestId && <div>Request ID: {requestId}</div>}
 							{clineErrorMessage?.toLowerCase()?.includes("powershell") && (
 								<>
@@ -70,22 +39,6 @@ const ErrorRow = memo(({ message, errorType, apiRequestFailedMessage, apiReqStre
 										troubleshooting guide
 									</a>
 									.
-								</>
-							)}
-							{clineError?.isErrorType(ClineErrorType.Auth) && (
-								<>
-									<br />
-									<br />
-									{/* The user is signed in or not using cline provider */}
-									{clineUser && !isClineProvider ? (
-										<span className="mb-4 text-[var(--vscode-descriptionForeground)]">
-											(Click "Retry" below)
-										</span>
-									) : (
-										<VSCodeButton onClick={handleSignIn} className="w-full mb-4">
-											Sign in to Cline
-										</VSCodeButton>
-									)}
 								</>
 							)}
 						</p>

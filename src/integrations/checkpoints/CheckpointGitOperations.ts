@@ -3,7 +3,6 @@ import fs from "fs/promises"
 import { globby } from "globby"
 import * as path from "path"
 import simpleGit, { type SimpleGit } from "simple-git"
-import { telemetryService } from "@/services/posthog/PostHogClientProvider"
 import { getLfsPatterns, writeExcludesFile } from "./CheckpointExclusions"
 
 interface CheckpointAddResult {
@@ -100,7 +99,7 @@ export class GitOperations {
 		await git.commit("initial commit", { "--allow-empty": null })
 
 		const durationMs = Math.round(performance.now() - startTime)
-		telemetryService.captureCheckpointUsage(taskId, "shadow_git_initialized", durationMs)
+		console.info("shadow_git_initialized", { taskId, durationMs })
 
 		console.warn(`Shadow git initialization completed`)
 

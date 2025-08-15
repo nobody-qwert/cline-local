@@ -1,5 +1,4 @@
 import React from "react"
-import TelemetryBanner from "@/components/common/TelemetryBanner"
 import Announcement from "@/components/chat/Announcement"
 import HomeHeader from "@/components/welcome/HomeHeader"
 import HistoryPreview from "@/components/history/HistoryPreview"
@@ -23,7 +22,6 @@ export const WelcomeSection: React.FC<WelcomeSectionProps> = ({
 	return (
 		<div className="flex flex-col flex-1 w-full h-full p-0 m-0">
 			<div className="overflow-y-auto flex flex-col pb-2.5">
-				{telemetrySetting === "unset" && <TelemetryBanner />}
 				{showAnnouncement && <Announcement version={version} hideAnnouncement={hideAnnouncement} />}
 				<HomeHeader shouldShowQuickWins={shouldShowQuickWins} />
 				{!shouldShowQuickWins && taskHistory.length > 0 && <HistoryPreview showHistoryView={showHistoryView} />}
