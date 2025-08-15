@@ -8,17 +8,7 @@ import { UserOrganizationUpdateRequest } from "@shared/proto/cline/account"
  * @param request UserOrganization to set as active
  * @returns Empty response
  */
-export async function setUserOrganization(controller: Controller, request: UserOrganizationUpdateRequest): Promise<Empty> {
-	try {
-		if (!controller.accountService) {
-			throw new Error("Account service not available")
-		}
-
-		// Switch to the specified organization using the account service
-		await controller.accountService.switchAccount(request.organizationId)
-
-		return Empty.create({})
-	} catch (error) {
-		throw error
-	}
+export async function setUserOrganization(_controller: Controller, _request: UserOrganizationUpdateRequest): Promise<Empty> {
+	// Local-only build: no organizations; no-op
+	return Empty.create({})
 }

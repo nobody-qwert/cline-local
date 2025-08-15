@@ -1,5 +1,4 @@
 import { ApiHandler } from "@api/index"
-import { OpenAiHandler } from "@api/providers/openai"
 
 /**
  * Gets context window information for the given API handler
@@ -10,11 +9,6 @@ import { OpenAiHandler } from "@api/providers/openai"
 export function getContextWindowInfo(api: ApiHandler) {
 	let contextWindow = api.getModel().info.contextWindow || 128_000
 	// FIXME: hack to get anyone using openai compatible with deepseek to have the proper context window instead of the default 128k. We need a way for the user to specify the context window for models they input through openai compatible
-
-	// Handle special cases like DeepSeek
-	if (api instanceof OpenAiHandler && api.getModel().id.toLowerCase().includes("deepseek")) {
-		contextWindow = 64_000
-	}
 
 	let maxAllowedSize: number
 	switch (contextWindow) {
