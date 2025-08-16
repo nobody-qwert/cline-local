@@ -1,9 +1,9 @@
 import type { Anthropic } from "@anthropic-ai/sdk"
 import OpenAI from "openai"
 import { ApiHandler } from "../"
-import { ApiHandlerOptions, ModelInfo, openAiModelInfoSaneDefaults } from "@shared/api"
+import { ModelInfo, getLmStudioModelInfoForModelId } from "@shared/api"
 import { convertToOpenAiMessages } from "../transform/openai-format"
-import { ApiStream } from "../transform/stream"
+import { ApiStream, ApiStreamUsageChunk } from "../transform/stream"
 import { withRetry } from "../retry"
 
 interface LmStudioHandlerOptions {
@@ -14,6 +14,7 @@ interface LmStudioHandlerOptions {
 export class LmStudioHandler implements ApiHandler {
 	private options: LmStudioHandlerOptions
 	private client: OpenAI | undefined
+	private lastUsage: ApiStreamUsageChunk | undefined
 
 	constructor(options: LmStudioHandlerOptions) {
 		this.options = options
@@ -61,6 +62,18 @@ export class LmStudioHandler implements ApiHandler {
 						reasoning: (delta.reasoning_content as string | undefined) || "",
 					}
 				}
+				// Attempt to emit usage if LM Studio provides it on the final chunk (OpenAI-compatible behavior)
+				const anyChunk: any = chunk as any
+				const usage = anyChunk?.usage
+				if (usage && (usage.prompt_tokens != null || usage.completion_tokens != null)) {
+					const usageChunk: ApiStreamUsageChunk = {
+						type: "usage",
+						inputTokens: usage.prompt_tokens || 0,
+						outputTokens: usage.completion_tokens || 0,
+					}
+					this.lastUsage = usageChunk
+					yield usageChunk
+				}
 			}
 		} catch (error) {
 			// LM Studio doesn't return an error code/body for now
@@ -70,10 +83,14 @@ export class LmStudioHandler implements ApiHandler {
 		}
 	}
 
+	getApiStreamUsage = async (): Promise<ApiStreamUsageChunk | undefined> => {
+		return this.lastUsage
+	}
+
 	getModel(): { id: string; info: ModelInfo } {
 		return {
 			id: this.options.lmStudioModelId || "",
-			info: openAiModelInfoSaneDefaults,
+			info: getLmStudioModelInfoForModelId(this.options.lmStudioModelId || ""),
 		}
 	}
 }
