@@ -10,7 +10,7 @@ import os from "os"
 import * as path from "path"
 import CheckpointTracker from "@integrations/checkpoints/CheckpointTracker"
 import { HistoryItem } from "@/shared/HistoryItem"
-import Anthropic from "@anthropic-ai/sdk"
+import type Anthropic from "@anthropic-ai/sdk"
 import { TaskState } from "./TaskState"
 import { getCwd, getDesktopDir } from "@/utils/path"
 

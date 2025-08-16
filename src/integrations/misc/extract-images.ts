@@ -1,7 +1,7 @@
 import fs from "fs/promises"
 import * as path from "path"
 import sizeOf from "image-size"
-import { Anthropic } from "@anthropic-ai/sdk"
+import type { Anthropic } from "@anthropic-ai/sdk"
 import { getMimeType } from "./process-files"
 
 /**

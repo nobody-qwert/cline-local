@@ -1,7 +1,7 @@
 import * as path from "path"
 import * as vscode from "vscode"
 import fs from "fs/promises"
-import { Anthropic } from "@anthropic-ai/sdk"
+import type { Anthropic } from "@anthropic-ai/sdk"
 import { fileExistsAtPath } from "@utils/fs"
 import { ClineMessage } from "@shared/ExtensionMessage"
 import { TaskMetadata } from "@core/context/context-tracking/ContextTrackerTypes"

@@ -1,7 +1,7 @@
 import { HostProvider } from "@/hosts/host-provider"
 import { errorService } from "@/services/posthog/PostHogClientProvider"
 import { ShowMessageType } from "@/shared/proto/index.host"
-import { Anthropic } from "@anthropic-ai/sdk"
+import type { Anthropic } from "@anthropic-ai/sdk"
 import { ApiHandler, buildApiHandler } from "@api/index"
 import { ApiStream } from "@api/transform/stream"
 import { parseAssistantMessageV2, ToolUseName } from "@core/assistant-message"

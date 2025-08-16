@@ -1,4 +1,4 @@
-import { Anthropic } from "@anthropic-ai/sdk"
+import type { Anthropic } from "@anthropic-ai/sdk"
 import { AssistantMessageContent } from "@core/assistant-message"
 import { ClineAskResponse } from "@shared/WebviewMessage"
 

@@ -1,4 +1,4 @@
-import { Anthropic } from "@anthropic-ai/sdk"
+import type { Anthropic } from "@anthropic-ai/sdk"
 import { Message } from "ollama"
 
 export function convertToOllamaMessages(anthropicMessages: Anthropic.Messages.MessageParam[]): Message[] {

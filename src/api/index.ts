@@ -1,4 +1,4 @@
-import { Anthropic } from "@anthropic-ai/sdk"
+import type { Anthropic } from "@anthropic-ai/sdk"
 import { ApiConfiguration, ModelInfo } from "../shared/api"
 import { OllamaHandler } from "./providers/ollama"
 import { LmStudioHandler } from "./providers/lmstudio"

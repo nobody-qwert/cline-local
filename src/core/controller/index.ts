@@ -5,7 +5,7 @@ import { PostHogClientProvider, telemetryService } from "@/services/posthog/Post
 import { ShowMessageType } from "@/shared/proto/host/window"
 import { getLatestAnnouncementId } from "@/utils/announcements"
 import { getCwd, getDesktopDir } from "@/utils/path"
-import { Anthropic } from "@anthropic-ai/sdk"
+import type { Anthropic } from "@anthropic-ai/sdk"
 import { buildApiHandler } from "@api/index"
 import { cleanupLegacyCheckpoints } from "@integrations/checkpoints/CheckpointMigration"
 import { downloadTask } from "@integrations/misc/export-markdown"

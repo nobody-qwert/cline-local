@@ -1,14 +1,4 @@
-import { useFeatureFlagEnabled } from "posthog-js/react"
-
 /**
- * Hook to check feature flag status in the webview
- * Feature flags work independently of telemetry settings to ensure
- * proper extension functionality regardless of user privacy preferences
+ * Local-only build: feature flags disabled (no telemetry/posthog).
  */
-export const useHasFeatureFlag = (flagName: string): boolean => {
-	const flagEnabled = useFeatureFlagEnabled(flagName)
-	if (flagEnabled && typeof flagEnabled === "boolean") {
-		return flagEnabled
-	}
-	return false
-}
+export const useHasFeatureFlag = (_flagName: string): boolean => false
