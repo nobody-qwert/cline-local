@@ -47,6 +47,8 @@ export class LmStudioHandler implements ApiHandler {
 				model: this.getModel().id,
 				messages: openAiMessages,
 				stream: true,
+				// Request usage in streaming chunks (OpenAI-compatible)
+				stream_options: { include_usage: true },
 			})
 			for await (const chunk of stream) {
 				const delta = chunk.choices[0]?.delta
@@ -62,14 +64,16 @@ export class LmStudioHandler implements ApiHandler {
 						reasoning: (delta.reasoning_content as string | undefined) || "",
 					}
 				}
-				// Attempt to emit usage if LM Studio provides it on the final chunk (OpenAI-compatible behavior)
-				const anyChunk: any = chunk as any
-				const usage = anyChunk?.usage
+				// Emit usage if LM Studio provides it (OpenAI-compatible include_usage)
+				const usage = (chunk as any)?.usage
 				if (usage && (usage.prompt_tokens != null || usage.completion_tokens != null)) {
 					const usageChunk: ApiStreamUsageChunk = {
 						type: "usage",
 						inputTokens: usage.prompt_tokens || 0,
 						outputTokens: usage.completion_tokens || 0,
+						// Best-effort cache metrics if LM Studio provides them
+						cacheReadTokens: usage.prompt_tokens_details?.cached_tokens || 0,
+						cacheWriteTokens: usage.prompt_cache_miss_tokens || 0,
 					}
 					this.lastUsage = usageChunk
 					yield usageChunk
