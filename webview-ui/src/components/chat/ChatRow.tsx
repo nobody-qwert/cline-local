@@ -6,7 +6,6 @@ import { useSize } from "react-use"
 
 import { OptionsButtons } from "@/components/chat/OptionsButtons"
 import TaskFeedbackButtons from "@/components/chat/TaskFeedbackButtons"
-import { CheckmarkControl } from "@/components/common/CheckmarkControl"
 import CodeBlock, { CODE_BLOCK_BG_COLOR } from "@/components/common/CodeBlock"
 import MarkdownBlock from "@/components/common/MarkdownBlock"
 import SuccessButton from "@/components/common/SuccessButton"
@@ -30,7 +29,6 @@ import { COMMAND_OUTPUT_STRING, COMMAND_REQ_APP_STRING } from "@shared/combineCo
 import { Int64Request, StringRequest } from "@shared/proto/cline/common"
 
 import CodeAccordian, { cleanPathPrefix } from "../common/CodeAccordian"
-import { CheckpointControls } from "../common/CheckpointControls"
 import NewTaskPreview from "./NewTaskPreview"
 import ReportBugPreview from "./ReportBugPreview"
 import UserMessage from "./UserMessage"
@@ -46,10 +44,6 @@ const cancelledColor = "var(--vscode-descriptionForeground)"
 const ChatRowContainer = styled.div`
 	padding: 10px 6px 10px 15px;
 	position: relative;
-
-	&:hover ${CheckpointControls} {
-		opacity: 1;
-	}
 `
 
 interface ChatRowProps {
@@ -1072,7 +1066,6 @@ export const ChatRowContent = memo(
 								text={message.text}
 								images={message.images}
 								files={message.files}
-								messageTs={message.ts}
 								sendMessageFromChatRow={sendMessageFromChatRow}
 							/>
 						)
@@ -1098,15 +1091,6 @@ export const ChatRowContent = memo(
 						return <ErrorRow message={message} errorType="diff_error" />
 					case "clineignore_error":
 						return <ErrorRow message={message} errorType="clineignore_error" />
-					case "checkpoint_created":
-						return (
-							<>
-								<CheckmarkControl
-									messageTs={message.ts}
-									isCheckpointCheckedOut={message.isCheckpointCheckedOut}
-								/>
-							</>
-						)
 					case "load_mcp_documentation":
 						return (
 							<div

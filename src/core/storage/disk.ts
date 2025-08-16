@@ -1,7 +1,7 @@
 import * as path from "path"
 import * as vscode from "vscode"
 import fs from "fs/promises"
-import { Anthropic } from "@anthropic-ai/sdk"
+import type { AnthropicCompat as Anthropic } from "@/types/anthropic-compat"
 import { fileExistsAtPath } from "@utils/fs"
 import { ClineMessage } from "@shared/ExtensionMessage"
 import { TaskMetadata } from "@core/context/context-tracking/ContextTrackerTypes"
@@ -109,7 +109,7 @@ export async function ensureSettingsDirectoryExists(context: vscode.ExtensionCon
 export async function getSavedApiConversationHistory(
 	context: vscode.ExtensionContext,
 	taskId: string,
-): Promise<Anthropic.MessageParam[]> {
+): Promise<Anthropic.Messages.MessageParam[]> {
 	const filePath = path.join(await ensureTaskDirectoryExists(context, taskId), GlobalFileNames.apiConversationHistory)
 	const fileExists = await fileExistsAtPath(filePath)
 	if (fileExists) {
@@ -121,7 +121,7 @@ export async function getSavedApiConversationHistory(
 export async function saveApiConversationHistory(
 	context: vscode.ExtensionContext,
 	taskId: string,
-	apiConversationHistory: Anthropic.MessageParam[],
+	apiConversationHistory: Anthropic.Messages.MessageParam[],
 ) {
 	try {
 		const filePath = path.join(await ensureTaskDirectoryExists(context, taskId), GlobalFileNames.apiConversationHistory)

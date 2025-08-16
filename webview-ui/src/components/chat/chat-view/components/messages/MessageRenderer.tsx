@@ -19,7 +19,7 @@ interface MessageRendererProps {
 
 /**
  * Specialized component for rendering different message types
- * Handles browser sessions, regular messages, and checkpoint logic
+ * Handles browser sessions and regular messages
  */
 export const MessageRenderer: React.FC<MessageRendererProps> = ({
 	index,
@@ -50,10 +50,7 @@ export const MessageRenderer: React.FC<MessageRendererProps> = ({
 	}
 
 	// Determine if this is the last message for status display purposes
-	const nextMessage = index < groupedMessages.length - 1 && groupedMessages[index + 1]
-	const isNextCheckpoint = !Array.isArray(nextMessage) && nextMessage && nextMessage?.say === "checkpoint_created"
-	const isLastMessageGroup = isNextCheckpoint && index === groupedMessages.length - 2
-	const isLast = index === groupedMessages.length - 1 || isLastMessageGroup
+	const isLast = index === groupedMessages.length - 1
 
 	// Regular message
 	return (

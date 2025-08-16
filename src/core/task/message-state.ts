@@ -8,9 +8,8 @@ import { findLastIndex } from "@/shared/array"
 import getFolderSize from "get-folder-size"
 import os from "os"
 import * as path from "path"
-import CheckpointTracker from "@integrations/checkpoints/CheckpointTracker"
 import { HistoryItem } from "@/shared/HistoryItem"
-import Anthropic from "@anthropic-ai/sdk"
+import type { AnthropicCompat as Anthropic } from "@/types/anthropic-compat"
 import { TaskState } from "./TaskState"
 import { getCwd, getDesktopDir } from "@/utils/path"
 
@@ -21,15 +20,12 @@ interface MessageStateHandlerParams {
 	taskIsFavorited?: boolean
 	updateTaskHistory: (historyItem: HistoryItem) => Promise<HistoryItem[]>
 	taskState: TaskState
-	checkpointTrackerErrorMessage?: string
 }
 
 export class MessageStateHandler {
-	private apiConversationHistory: Anthropic.MessageParam[] = []
+	private apiConversationHistory: Anthropic.Messages.MessageParam[] = []
 	private clineMessages: ClineMessage[] = []
 	private taskIsFavorited: boolean
-	private checkpointTracker: CheckpointTracker | undefined
-	private checkpointTrackerErrorMessage: string | undefined
 	private updateTaskHistory: (historyItem: HistoryItem) => Promise<HistoryItem[]>
 	private context: vscode.ExtensionContext
 	private taskId: string
@@ -43,18 +39,13 @@ export class MessageStateHandler {
 		this.taskState = params.taskState
 		this.taskIsFavorited = params.taskIsFavorited ?? false
 		this.updateTaskHistory = params.updateTaskHistory
-		this.checkpointTrackerErrorMessage = this.taskState.checkpointTrackerErrorMessage
 	}
 
-	setCheckpointTracker(tracker: CheckpointTracker | undefined) {
-		this.checkpointTracker = tracker
-	}
-
-	getApiConversationHistory(): Anthropic.MessageParam[] {
+	getApiConversationHistory(): Anthropic.Messages.MessageParam[] {
 		return this.apiConversationHistory
 	}
 
-	setApiConversationHistory(newHistory: Anthropic.MessageParam[]): void {
+	setApiConversationHistory(newHistory: Anthropic.Messages.MessageParam[]): void {
 		this.apiConversationHistory = newHistory
 	}
 
@@ -101,23 +92,21 @@ export class MessageStateHandler {
 				cacheReads: apiMetrics.totalCacheReads,
 				totalCost: apiMetrics.totalCost,
 				size: taskDirSize,
-				shadowGitConfigWorkTree: await this.checkpointTracker?.getShadowGitConfigWorkTree(),
 				cwdOnTaskInitialization: cwd,
 				conversationHistoryDeletedRange: this.taskState.conversationHistoryDeletedRange,
 				isFavorited: this.taskIsFavorited,
-				checkpointTrackerErrorMessage: this.taskState.checkpointTrackerErrorMessage,
 			})
 		} catch (error) {
 			console.error("Failed to save cline messages:", error)
 		}
 	}
 
-	async addToApiConversationHistory(message: Anthropic.MessageParam) {
+	async addToApiConversationHistory(message: Anthropic.Messages.MessageParam) {
 		this.apiConversationHistory.push(message)
 		await saveApiConversationHistory(this.context, this.taskId, this.apiConversationHistory)
 	}
 
-	async overwriteApiConversationHistory(newHistory: Anthropic.MessageParam[]): Promise<void> {
+	async overwriteApiConversationHistory(newHistory: Anthropic.Messages.MessageParam[]): Promise<void> {
 		this.apiConversationHistory = newHistory
 		await saveApiConversationHistory(this.context, this.taskId, this.apiConversationHistory)
 	}

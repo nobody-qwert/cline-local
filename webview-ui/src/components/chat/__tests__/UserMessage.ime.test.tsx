@@ -24,7 +24,7 @@ describe("UserMessage – IME composition handling", () => {
 		const sendMessageFromChatRow = vi.fn()
 
 		const { getByText } = render(
-			<UserMessage text="変換テスト" images={[]} messageTs={Date.now()} sendMessageFromChatRow={sendMessageFromChatRow} />,
+			<UserMessage text="変換テスト" images={[]} sendMessageFromChatRow={sendMessageFromChatRow} />,
 		)
 
 		const editable = getByText("変換テスト") as HTMLElement

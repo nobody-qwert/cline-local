@@ -1,6 +1,6 @@
 import { HTMLAttributes } from "react"
 
-import { OPENROUTER_MODEL_PICKER_Z_INDEX } from "./OpenRouterModelPicker"
+const SECTION_HEADER_Z_INDEX_BASE = 1000
 
 type SectionHeaderProps = HTMLAttributes<HTMLDivElement> & {
 	children: React.ReactNode
@@ -12,7 +12,7 @@ export const SectionHeader = ({ description, children, className, ...props }: Se
 		<div
 			className={`sticky top-0 text-[var(--vscode-foreground)] bg-[var(--vscode-panel-background)] px-5 py-3 ${className || ""}`}
 			{...props}
-			style={{ zIndex: OPENROUTER_MODEL_PICKER_Z_INDEX + 20 }}>
+			style={{ zIndex: SECTION_HEADER_Z_INDEX_BASE + 20 }}>
 			<h4 className="m-0">{children}</h4>
 			{description && <p className="text-[var(--vscode-descriptionForeground)] text-sm mt-2 mb-0">{description}</p>}
 		</div>

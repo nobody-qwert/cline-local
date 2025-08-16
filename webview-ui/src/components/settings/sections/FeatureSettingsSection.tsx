@@ -13,7 +13,6 @@ interface FeatureSettingsSectionProps {
 
 const FeatureSettingsSection = ({ renderSectionHeader }: FeatureSettingsSectionProps) => {
 	const {
-		enableCheckpointsSetting,
 		mcpMarketplaceEnabled,
 		mcpDisplayMode,
 		mcpResponsesCollapsed,
@@ -33,20 +32,6 @@ const FeatureSettingsSection = ({ renderSectionHeader }: FeatureSettingsSectionP
 			<Section>
 				<div style={{ marginBottom: 20 }}>
 					<div>
-						<VSCodeCheckbox
-							checked={enableCheckpointsSetting}
-							onChange={(e: any) => {
-								const checked = e.target.checked === true
-								updateSetting("enableCheckpointsSetting", checked)
-							}}>
-							Enable Checkpoints
-						</VSCodeCheckbox>
-						<p className="text-xs text-[var(--vscode-descriptionForeground)]">
-							Enables extension to save checkpoints of workspace throughout the task. Uses git under the hood which
-							may not work well with large workspaces.
-						</p>
-					</div>
-					<div style={{ marginTop: 10 }}>
 						<VSCodeCheckbox
 							checked={mcpMarketplaceEnabled}
 							onChange={(e: any) => {

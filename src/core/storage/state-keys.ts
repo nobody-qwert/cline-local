@@ -1,5 +1,4 @@
 import { ApiProvider, BedrockModelId, ModelInfo } from "@shared/api"
-import { LanguageModelChatSelector } from "vscode"
 import { ClineRulesToggles } from "@/shared/cline-rules"
 import { McpDisplayMode } from "@/shared/McpDisplayMode"
 import { TelemetrySetting } from "@/shared/TelemetrySetting"
@@ -232,7 +231,7 @@ export interface GlobalState {
 	planModeApiModelId: string | undefined
 	planModeThinkingBudgetTokens: number | undefined
 	planModeReasoningEffort: string | undefined
-	planModeVsCodeLmModelSelector: LanguageModelChatSelector | undefined
+	planModeVsCodeLmModelSelector: any | undefined
 	planModeAwsBedrockCustomSelected: boolean | undefined
 	planModeAwsBedrockCustomModelBaseId: BedrockModelId | undefined
 	planModeOpenRouterModelId: string | undefined
@@ -261,7 +260,7 @@ export interface GlobalState {
 	actModeApiModelId: string | undefined
 	actModeThinkingBudgetTokens: number | undefined
 	actModeReasoningEffort: string | undefined
-	actModeVsCodeLmModelSelector: LanguageModelChatSelector | undefined
+	actModeVsCodeLmModelSelector: any | undefined
 	actModeAwsBedrockCustomSelected: boolean | undefined
 	actModeAwsBedrockCustomModelBaseId: BedrockModelId | undefined
 	actModeOpenRouterModelId: string | undefined

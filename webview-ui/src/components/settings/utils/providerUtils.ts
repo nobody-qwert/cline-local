@@ -52,6 +52,7 @@ import {
 	huaweiCloudMaasDefaultModelId,
 	basetenModels,
 	basetenDefaultModelId,
+	getLmStudioModelInfoForModelId,
 } from "@shared/api"
 import { Mode } from "@shared/storage/types"
 
@@ -72,7 +73,7 @@ export function normalizeApiConfiguration(
 	currentMode: Mode,
 ): NormalizedApiConfig {
 	const provider =
-		(currentMode === "plan" ? apiConfiguration?.planModeApiProvider : apiConfiguration?.actModeApiProvider) || "anthropic"
+		(currentMode === "plan" ? apiConfiguration?.planModeApiProvider : apiConfiguration?.actModeApiProvider) || "lmstudio"
 	const modelId = currentMode === "plan" ? apiConfiguration?.planModeApiModelId : apiConfiguration?.actModeApiModelId
 
 	const getProviderData = (models: Record<string, ModelInfo>, defaultId: string) => {
@@ -193,7 +194,8 @@ export function normalizeApiConfiguration(
 			return {
 				selectedProvider: provider,
 				selectedModelId: lmStudioModelId || "",
-				selectedModelInfo: openAiModelInfoSaneDefaults,
+				// Use LM Studio sane defaults with overrides (gpt-oss => 131k, unknown => 128k)
+				selectedModelInfo: getLmStudioModelInfoForModelId(lmStudioModelId || ""),
 			}
 		case "vscode-lm":
 			const vsCodeLmModelSelector =

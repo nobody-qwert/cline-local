@@ -6,7 +6,6 @@ import { parseSourceCodeForDefinitionsTopLevel } from "@/services/tree-sitter"
 import { findLast, findLastIndex, parsePartialArrayString } from "@/shared/array"
 import { createAndOpenGitHubIssue } from "@/utils/github-url-utils"
 import { getReadablePath, isLocatedInWorkspace } from "@/utils/path"
-import Anthropic from "@anthropic-ai/sdk"
 import { ApiHandler } from "@api/index"
 import { FileContextTracker } from "@core/context/context-tracking/FileContextTracker"
 import { ClineIgnoreController } from "@core/ignore/ClineIgnoreController"
@@ -335,8 +334,10 @@ export class ToolExecutor {
 			return
 		}
 
-		if (block.name !== "browser_action") {
-			await this.browserSession.closeBrowser()
+		// Disable browser and web fetch tools in local-only build
+		if ((block.name as any) === "browser_action" || (block.name as any) === "web_fetch") {
+			this.pushToolResult(formatResponse.toolError("Browser features are disabled in this build."), block)
+			return
 		}
 
 		switch (block.name) {
@@ -720,10 +721,6 @@ export class ToolExecutor {
 						await this.fileContextTracker.trackFileContext(relPath, "read_tool")
 
 						this.pushToolResult(result.text, block)
-
-						if (result.imageBlock) {
-							this.taskState.userMessageContent.push(result.imageBlock)
-						}
 
 						if (!block.partial && this.focusChainSettings.enabled) {
 							await this.updateFCListFromToolResponse(block.params.task_progress)
@@ -1430,7 +1427,7 @@ export class ToolExecutor {
 									.filter(Boolean)
 									.join("\n\n") || "(No response)"
 						// webview extracts images from the text response to display in the UI
-						const toolResultToDisplay = toolResultText + toolResultImages?.map((image) => `\n\n${image}`).join("")
+						const toolResultToDisplay = toolResultText
 						await this.say("mcp_server_response", toolResultToDisplay)
 
 						// MCP's might return images to display to the user, but the model may not support them
@@ -2348,7 +2345,7 @@ export class ToolExecutor {
 						await this.say("user_feedback", text ?? "", images, completionFiles)
 						await this.saveCheckpoint()
 
-						const toolResults: (Anthropic.TextBlockParam | Anthropic.ImageBlockParam)[] = []
+						const toolResults: any[] = []
 						if (commandResult) {
 							if (typeof commandResult === "string") {
 								toolResults.push({
@@ -2363,7 +2360,7 @@ export class ToolExecutor {
 							type: "text",
 							text: `The user has provided feedback on the results. Consider their input to continue the task, and then attempt completion again.\n<feedback>\n${text}\n</feedback>`,
 						})
-						toolResults.push(...formatResponse.imageBlocks(images))
+						// images disabled in local-only build
 						this.taskState.userMessageContent.push({
 							type: "text",
 							text: `${this.toolDescription(block)} Result:`,

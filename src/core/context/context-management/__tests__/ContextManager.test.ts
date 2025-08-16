@@ -1,5 +1,5 @@
 import { ContextManager } from "../ContextManager"
-import { Anthropic } from "@anthropic-ai/sdk"
+import { AnthropicCompat as Anthropic } from "../../../../types/anthropic-compat"
 import { expect } from "chai"
 
 describe("ContextManager", () => {

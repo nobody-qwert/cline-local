@@ -886,6 +886,36 @@ export const openAiModelInfoSaneDefaults: OpenAiCompatibleModelInfo = {
 	temperature: 0,
 }
 
+// LM Studio sane defaults (similar to OpenAI sane defaults)
+// - Default unknown model contextWindow: 128k
+// - gpt-oss* models: 131k contextWindow
+export const lmStudioModelInfoSaneDefaults: ModelInfo = {
+	maxTokens: -1,
+	contextWindow: 128_000,
+	supportsImages: false,
+	supportsPromptCache: false,
+	inputPrice: 0,
+	outputPrice: 0,
+}
+
+/**
+ * Returns LM Studio model info with sane defaults, applying overrides for known model patterns.
+ * Rules:
+ * - If model id matches /^gpt-oss/i or contains "/gpt-oss", use 131,072 context window
+ * - Otherwise, default to 128,000
+ */
+export function getLmStudioModelInfoForModelId(modelId?: string): ModelInfo {
+	const base = { ...lmStudioModelInfoSaneDefaults }
+	if (!modelId) {
+		return base
+	}
+	const id = modelId.toLowerCase()
+	if (id.startsWith("gpt-oss") || id.includes("/gpt-oss")) {
+		return { ...base, contextWindow: 131_072 }
+	}
+	return base
+}
+
 // Gemini
 // https://ai.google.dev/gemini-api/docs/models/gemini
 export type GeminiModelId = keyof typeof geminiModels

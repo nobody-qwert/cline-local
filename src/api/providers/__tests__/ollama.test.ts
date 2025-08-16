@@ -1,7 +1,7 @@
 import { describe, it, beforeEach, afterEach, before } from "mocha"
 import "should"
 import sinon from "sinon"
-import { Anthropic } from "@anthropic-ai/sdk"
+import type { AnthropicCompat as Anthropic } from "../../../types/anthropic-compat"
 import { OllamaHandler } from "../ollama"
 import { ApiHandlerOptions } from "@shared/api"
 import axios from "axios"

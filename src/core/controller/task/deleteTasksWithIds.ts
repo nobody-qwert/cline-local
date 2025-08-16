@@ -83,13 +83,9 @@ async function deleteTaskWithId(controller: Controller, id: string): Promise<voi
 		// If no tasks remain, clean up everything
 		if (updatedTaskHistory.length === 0) {
 			const taskDirPath = path.join(controller.context.globalStorageUri.fsPath, "tasks")
-			const checkpointsDirPath = path.join(controller.context.globalStorageUri.fsPath, "checkpoints")
 
 			if (await fileExistsAtPath(taskDirPath)) {
 				await fs.rm(taskDirPath, { recursive: true, force: true })
-			}
-			if (await fileExistsAtPath(checkpointsDirPath)) {
-				await fs.rm(checkpointsDirPath, { recursive: true, force: true })
 			}
 		}
 	} catch (error) {

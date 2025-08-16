@@ -1,9 +1,9 @@
-import { Anthropic } from "@anthropic-ai/sdk"
+import type { AnthropicCompat as Anthropic } from "../../types/anthropic-compat"
 import OpenAI from "openai"
 import { ApiHandler } from "../"
-import { ApiHandlerOptions, ModelInfo, openAiModelInfoSaneDefaults } from "@shared/api"
+import { ModelInfo, getLmStudioModelInfoForModelId } from "@shared/api"
 import { convertToOpenAiMessages } from "../transform/openai-format"
-import { ApiStream } from "../transform/stream"
+import { ApiStream, ApiStreamUsageChunk } from "../transform/stream"
 import { withRetry } from "../retry"
 
 interface LmStudioHandlerOptions {
@@ -14,6 +14,7 @@ interface LmStudioHandlerOptions {
 export class LmStudioHandler implements ApiHandler {
 	private options: LmStudioHandlerOptions
 	private client: OpenAI | undefined
+	private lastUsage: ApiStreamUsageChunk | undefined
 
 	constructor(options: LmStudioHandlerOptions) {
 		this.options = options
@@ -46,6 +47,8 @@ export class LmStudioHandler implements ApiHandler {
 				model: this.getModel().id,
 				messages: openAiMessages,
 				stream: true,
+				// Request usage in streaming chunks (OpenAI-compatible)
+				stream_options: { include_usage: true },
 			})
 			for await (const chunk of stream) {
 				const delta = chunk.choices[0]?.delta
@@ -61,6 +64,20 @@ export class LmStudioHandler implements ApiHandler {
 						reasoning: (delta.reasoning_content as string | undefined) || "",
 					}
 				}
+				// Emit usage if LM Studio provides it (OpenAI-compatible include_usage)
+				const usage = (chunk as any)?.usage
+				if (usage && (usage.prompt_tokens !== null || usage.completion_tokens !== null)) {
+					const usageChunk: ApiStreamUsageChunk = {
+						type: "usage",
+						inputTokens: usage.prompt_tokens || 0,
+						outputTokens: usage.completion_tokens || 0,
+						// Best-effort cache metrics if LM Studio provides them
+						cacheReadTokens: usage.prompt_tokens_details?.cached_tokens || 0,
+						cacheWriteTokens: usage.prompt_cache_miss_tokens || 0,
+					}
+					this.lastUsage = usageChunk
+					yield usageChunk
+				}
 			}
 		} catch (error) {
 			// LM Studio doesn't return an error code/body for now
@@ -70,10 +87,14 @@ export class LmStudioHandler implements ApiHandler {
 		}
 	}
 
+	getApiStreamUsage = async (): Promise<ApiStreamUsageChunk | undefined> => {
+		return this.lastUsage
+	}
+
 	getModel(): { id: string; info: ModelInfo } {
 		return {
 			id: this.options.lmStudioModelId || "",
-			info: openAiModelInfoSaneDefaults,
+			info: getLmStudioModelInfoForModelId(this.options.lmStudioModelId || ""),
 		}
 	}
 }

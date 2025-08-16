@@ -4,8 +4,8 @@ import { useExtensionState } from "@/context/ExtensionStateContext"
 import { validateApiConfiguration } from "@/utils/validate"
 import ApiOptions from "@/components/settings/ApiOptions"
 import ClineLogoWhite from "@/assets/ClineLogoWhite"
-import { AccountServiceClient, StateServiceClient } from "@/services/grpc-client"
-import { EmptyRequest, BooleanRequest } from "@shared/proto/cline/common"
+import { StateServiceClient } from "@/services/grpc-client"
+import { BooleanRequest } from "@shared/proto/cline/common"
 
 const WelcomeView = memo(() => {
 	const { apiConfiguration, mode } = useExtensionState()
@@ -13,12 +13,6 @@ const WelcomeView = memo(() => {
 	const [showApiOptions, setShowApiOptions] = useState(false)
 
 	const disableLetsGoButton = apiErrorMessage != null
-
-	const handleLogin = () => {
-		AccountServiceClient.accountLoginClicked(EmptyRequest.create()).catch((err) =>
-			console.error("Failed to get login URL:", err),
-		)
-	}
 
 	const handleSubmit = async () => {
 		try {
@@ -48,15 +42,6 @@ const WelcomeView = memo(() => {
 					a browser, and execute terminal commands <i>(with your permission, of course)</i>. I can even use MCP to
 					create new tools and extend my own capabilities.
 				</p>
-
-				<p className="text-[var(--vscode-descriptionForeground)]">
-					Sign up for an account to get started for free, or use an API key that provides access to models like Claude
-					3.7 Sonnet.
-				</p>
-
-				<VSCodeButton appearance="primary" onClick={handleLogin} className="w-full mt-1">
-					Get Started for Free
-				</VSCodeButton>
 
 				{!showApiOptions && (
 					<VSCodeButton

@@ -1,6 +1,5 @@
 import { ExtensionContext } from "vscode"
 import { ApiProvider, BedrockModelId, ModelInfo } from "@shared/api"
-import { LanguageModelChatSelector } from "vscode"
 import { ClineRulesToggles } from "@/shared/cline-rules"
 import { DEFAULT_MCP_DISPLAY_MODE, McpDisplayMode } from "@/shared/McpDisplayMode"
 import { TelemetrySetting } from "@/shared/TelemetrySetting"
@@ -149,9 +148,7 @@ export async function readStateFromDisk(context: ExtensionContext) {
 	const planModeApiModelId = context.globalState.get("planModeApiModelId") as string | undefined
 	const planModeThinkingBudgetTokens = context.globalState.get("planModeThinkingBudgetTokens") as number | undefined
 	const planModeReasoningEffort = context.globalState.get("planModeReasoningEffort") as string | undefined
-	const planModeVsCodeLmModelSelector = context.globalState.get("planModeVsCodeLmModelSelector") as
-		| LanguageModelChatSelector
-		| undefined
+	const planModeVsCodeLmModelSelector = context.globalState.get("planModeVsCodeLmModelSelector") as any | undefined
 	const planModeAwsBedrockCustomSelected = context.globalState.get("planModeAwsBedrockCustomSelected") as boolean | undefined
 	const planModeAwsBedrockCustomModelBaseId = context.globalState.get("planModeAwsBedrockCustomModelBaseId") as
 		| BedrockModelId
@@ -182,9 +179,7 @@ export async function readStateFromDisk(context: ExtensionContext) {
 	const actModeApiModelId = context.globalState.get("actModeApiModelId") as string | undefined
 	const actModeThinkingBudgetTokens = context.globalState.get("actModeThinkingBudgetTokens") as number | undefined
 	const actModeReasoningEffort = context.globalState.get("actModeReasoningEffort") as string | undefined
-	const actModeVsCodeLmModelSelector = context.globalState.get("actModeVsCodeLmModelSelector") as
-		| LanguageModelChatSelector
-		| undefined
+	const actModeVsCodeLmModelSelector = context.globalState.get("actModeVsCodeLmModelSelector") as any | undefined
 	const actModeAwsBedrockCustomSelected = context.globalState.get("actModeAwsBedrockCustomSelected") as boolean | undefined
 	const actModeAwsBedrockCustomModelBaseId = context.globalState.get("actModeAwsBedrockCustomModelBaseId") as
 		| BedrockModelId
