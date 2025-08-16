@@ -3,7 +3,6 @@ import { useState, useCallback, useEffect } from "react"
 import { useInterval } from "react-use"
 import { DebouncedTextField } from "../common/DebouncedTextField"
 import { ModelsServiceClient } from "@/services/grpc-client"
-import { StringRequest } from "@shared/proto/cline/common"
 import { BaseUrlField } from "../common/BaseUrlField"
 import { useApiConfigurationHandlers } from "../utils/useApiConfigurationHandlers"
 import { useExtensionState } from "@/context/ExtensionStateContext"
@@ -32,11 +31,9 @@ export const LMStudioProvider = ({ showModelOptions, isPopup, currentMode }: LMS
 	// Poll LM Studio models
 	const requestLmStudioModels = useCallback(async () => {
 		try {
-			const response = await ModelsServiceClient.getLmStudioModels(
-				StringRequest.create({
-					value: apiConfiguration?.lmStudioBaseUrl || "",
-				}),
-			)
+			const response = await ModelsServiceClient.getLmStudioModels({
+				value: apiConfiguration?.lmStudioBaseUrl || "",
+			} as any)
 			if (response && response.values) {
 				setLmStudioModels(response.values)
 			}
