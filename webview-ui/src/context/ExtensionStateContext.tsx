@@ -185,7 +185,6 @@ export const ExtensionStateContextProvider: React.FC<{
 		telemetrySetting: "unset",
 		distinctId: "",
 		planActSeparateModelsSetting: true,
-		enableCheckpointsSetting: true,
 		mcpDisplayMode: DEFAULT_MCP_DISPLAY_MODE,
 		globalClineRulesToggles: {},
 		localClineRulesToggles: {},
@@ -622,7 +621,6 @@ export const ExtensionStateContextProvider: React.FC<{
 		localWindsurfRulesToggles: state.localWindsurfRulesToggles || {},
 		localWorkflowToggles: state.localWorkflowToggles || {},
 		globalWorkflowToggles: state.globalWorkflowToggles || {},
-		enableCheckpointsSetting: state.enableCheckpointsSetting,
 		currentFocusChainChecklist: state.currentFocusChainChecklist,
 
 		// Navigation functions

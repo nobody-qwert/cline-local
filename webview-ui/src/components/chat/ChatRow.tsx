@@ -1066,7 +1066,6 @@ export const ChatRowContent = memo(
 								text={message.text}
 								images={message.images}
 								files={message.files}
-								messageTs={message.ts}
 								sendMessageFromChatRow={sendMessageFromChatRow}
 							/>
 						)
