@@ -1,4 +1,4 @@
-import type { Anthropic } from "@anthropic-ai/sdk"
+import type { AnthropicCompat as Anthropic } from "../../types/anthropic-compat"
 
 type InitMessage = {
 	type: "system"

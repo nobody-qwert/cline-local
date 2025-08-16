@@ -7,7 +7,7 @@ import fs from "fs/promises"
 import cloneDeep from "clone-deep"
 import { ClineApiReqInfo, ClineMessage } from "@shared/ExtensionMessage"
 import { ApiHandler } from "@api/index"
-import type { Anthropic } from "@anthropic-ai/sdk"
+import type { AnthropicCompat as Anthropic } from "../../../types/anthropic-compat"
 
 enum EditType {
 	UNDEFINED = 0,

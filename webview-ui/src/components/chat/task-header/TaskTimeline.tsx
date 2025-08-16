@@ -38,7 +38,6 @@ const TaskTimeline: React.FC<TaskTimelineProps> = ({ messages, onBlockClick }) =
 					msg.say === "api_req_finished" ||
 					msg.say === "api_req_retried" ||
 					msg.say === "deleted_api_reqs" ||
-					msg.say === "checkpoint_created" ||
 					msg.say === "task_progress" ||
 					(msg.say === "text" && (!msg.text || msg.text.trim() === "")))
 			) {

@@ -20,7 +20,7 @@ import { Controller } from "@/core/controller"
 This class is responsible for tracking file operations.
 If the full contents of a file are passed to Cline via a tool, mention, or edit, the file is marked as active.
 If a file is modified outside of Cline, we detect and track this change to prevent stale context.
-This is used when restoring a task (non-git "checkpoint" restore), and mid-task.
+This is used when resuming a task and mid-task.
 */
 export class FileContextTracker {
 	private controller: Controller
@@ -194,7 +194,7 @@ export class FileContextTracker {
 
 	/**
 	 * Detects files that were edited by Cline or users after a specific message timestamp
-	 * This is used when restoring checkpoints to warn about potential file content mismatches
+	 * This is used when resuming tasks to warn about potential file content mismatches
 	 */
 	async detectFilesEditedAfterMessage(messageTs: number, deletedMessages: ClineMessage[]): Promise<string[]> {
 		const editedFiles: string[] = []

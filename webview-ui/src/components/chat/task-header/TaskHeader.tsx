@@ -79,8 +79,7 @@ const TaskHeader: React.FC<TaskHeaderProps> = ({
 	onClose,
 	onScrollToMessage,
 }) => {
-	const { apiConfiguration, currentTaskItem, checkpointTrackerErrorMessage, clineMessages, navigateToSettings, mode } =
-		useExtensionState()
+	const { apiConfiguration, currentTaskItem, clineMessages, navigateToSettings, mode } = useExtensionState()
 	const [isTaskExpanded, setIsTaskExpanded] = useState(true)
 	const [isTextExpanded, setIsTextExpanded] = useState(false)
 	const [showSeeMore, setShowSeeMore] = useState(false)
@@ -90,15 +89,6 @@ const TaskHeader: React.FC<TaskHeaderProps> = ({
 
 	const { selectedModelInfo } = useMemo(() => normalizeApiConfiguration(apiConfiguration, mode), [apiConfiguration, mode])
 	const contextWindow = selectedModelInfo?.contextWindow
-
-	// Open task header when checkpoint tracker error message is set
-	const prevErrorMessageRef = useRef(checkpointTrackerErrorMessage)
-	useEffect(() => {
-		if (checkpointTrackerErrorMessage !== prevErrorMessageRef.current) {
-			setIsTaskExpanded(true)
-			prevErrorMessageRef.current = checkpointTrackerErrorMessage
-		}
-	}, [checkpointTrackerErrorMessage])
 
 	// Reset isTextExpanded when task is collapsed
 	useEffect(() => {
@@ -727,58 +717,6 @@ const TaskHeader: React.FC<TaskHeaderProps> = ({
 												}}></span>
 										</VSCodeButton>
 									)}
-								</div>
-							)}
-
-							{checkpointTrackerErrorMessage && (
-								<div
-									style={{
-										display: "flex",
-										alignItems: "center",
-										gap: "8px",
-										color: "var(--vscode-editorWarning-foreground)",
-										fontSize: "11px",
-									}}>
-									<i className="codicon codicon-warning" />
-									<span>
-										{checkpointTrackerErrorMessage.replace(/disabling checkpoints\.$/, "")}
-										{checkpointTrackerErrorMessage.endsWith("disabling checkpoints.") && (
-											<>
-												<button
-													onClick={() => {
-														// First open the settings panel using direct navigation
-														navigateToSettings()
-
-														// After a short delay, send a message to scroll to settings
-														setTimeout(async () => {
-															try {
-																await UiServiceClient.scrollToSettings(
-																	StringRequest.create({ value: "features" }),
-																)
-															} catch (error) {
-																console.error("Error scrolling to checkpoint settings:", error)
-															}
-														}, 300)
-													}}
-													className="underline cursor-pointer bg-transparent border-0 p-0 text-inherit font-inherit">
-													disabling checkpoints.
-												</button>
-											</>
-										)}
-										{checkpointTrackerErrorMessage.includes("Git must be installed to use checkpoints.") && (
-											<>
-												{" "}
-												<a
-													href="https://github.com/cline/cline/wiki/Installing-Git-for-Checkpoints"
-													style={{
-														color: "inherit",
-														textDecoration: "underline",
-													}}>
-													See here for instructions.
-												</a>
-											</>
-										)}
-									</span>
 								</div>
 							)}
 						</div>

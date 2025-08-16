@@ -1,4 +1,4 @@
-import type { Anthropic } from "@anthropic-ai/sdk"
+import type { AnthropicCompat as Anthropic } from "@/types/anthropic-compat"
 import * as diff from "diff"
 import * as path from "path"
 import { ClineIgnoreController, LOCK_TEXT_SYMBOL } from "../ignore/ClineIgnoreController"

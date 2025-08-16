@@ -1,4 +1,4 @@
-import type { Anthropic } from "@anthropic-ai/sdk"
+import type { AnthropicCompat as Anthropic } from "../../types/anthropic-compat"
 import OpenAI from "openai"
 import { ApiHandler } from "../"
 import { ModelInfo, getLmStudioModelInfoForModelId } from "@shared/api"
@@ -66,7 +66,7 @@ export class LmStudioHandler implements ApiHandler {
 				}
 				// Emit usage if LM Studio provides it (OpenAI-compatible include_usage)
 				const usage = (chunk as any)?.usage
-				if (usage && (usage.prompt_tokens != null || usage.completion_tokens != null)) {
+				if (usage && (usage.prompt_tokens !== null || usage.completion_tokens !== null)) {
 					const usageChunk: ApiStreamUsageChunk = {
 						type: "usage",
 						inputTokens: usage.prompt_tokens || 0,

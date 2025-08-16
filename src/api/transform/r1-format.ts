@@ -1,4 +1,4 @@
-import type { Anthropic } from "@anthropic-ai/sdk"
+import type { AnthropicCompat as Anthropic } from "../../types/anthropic-compat"
 import type OpenAI from "openai"
 
 /**
@@ -20,17 +20,19 @@ export function convertToR1Format(messages: Anthropic.Messages.MessageParam[]): 
 			const textParts: string[] = []
 			const imageParts: OpenAI.Chat.ChatCompletionContentPartImage[] = []
 
-			message.content.forEach((part) => {
+			message.content.forEach((part: Anthropic.ContentBlockParam) => {
 				if (part.type === "text") {
-					textParts.push(part.text)
+					textParts.push((part as Anthropic.TextBlockParam).text)
 				}
 				if (part.type === "image") {
 					hasImages = true
+					const imagePart = part as Anthropic.ImageBlockParam
 					imageParts.push({
 						type: "image_url",
-						image_url: { url: `data:${part.source.media_type};base64,${part.source.data}` },
+						image_url: { url: `data:${imagePart.source.media_type};base64,${imagePart.source.data}` },
 					})
 				}
+				// Skip tool_use and tool_result blocks as they're not supported in OpenAI format for R1
 			})
 
 			if (hasImages) {

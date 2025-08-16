@@ -19,7 +19,9 @@ export class ClineAccountService {
 	private static instance: ClineAccountService | undefined
 
 	static getInstance(): ClineAccountService {
-		if (!this.instance) this.instance = new ClineAccountService()
+		if (!this.instance) {
+			this.instance = new ClineAccountService()
+		}
 		return this.instance
 	}
 

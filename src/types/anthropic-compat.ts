@@ -12,7 +12,7 @@ export namespace AnthropicCompat {
 	// Image block (kept for compile-time compatibility; ignored in local build)
 	export interface ImageBlockParam {
 		type: "image"
-		source: { media_type: string; data: string }
+		source: { type: "base64"; media_type: string; data: string }
 	}
 
 	// Tool use block (assistant requests a tool)
@@ -29,9 +29,18 @@ export namespace AnthropicCompat {
 		tool_use_id: string
 		// Can be a string or an array of text/image parts
 		content?: string | Array<{ type: "text"; text: string } | ImageBlockParam>
+		is_error?: boolean
 	}
 
 	export type ContentBlockParam = TextBlockParam | ImageBlockParam | ToolUseBlockParam | ToolResultBlockParam
+
+	// Tool use block for response messages
+	export interface ToolUseBlock {
+		type: "tool_use"
+		id: string
+		name: string
+		input: any
+	}
 
 	export namespace Messages {
 		// Generic shapes used in our transforms/handlers

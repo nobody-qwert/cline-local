@@ -1,6 +1,6 @@
 import * as path from "path"
 import fs from "fs/promises"
-import type { Anthropic } from "@anthropic-ai/sdk"
+import type { AnthropicCompat as Anthropic } from "@/types/anthropic-compat"
 import { callTextExtractionFunctions } from "./extract-text"
 import { extractImageContent } from "./extract-images"
 

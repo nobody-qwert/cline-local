@@ -5,9 +5,8 @@ import { PostHogClientProvider, telemetryService } from "@/services/posthog/Post
 import { ShowMessageType } from "@/shared/proto/host/window"
 import { getLatestAnnouncementId } from "@/utils/announcements"
 import { getCwd, getDesktopDir } from "@/utils/path"
-import type { Anthropic } from "@anthropic-ai/sdk"
+import type { AnthropicCompat as Anthropic } from "../../types/anthropic-compat"
 import { buildApiHandler } from "@api/index"
-import { cleanupLegacyCheckpoints } from "@integrations/checkpoints/CheckpointMigration"
 import { downloadTask } from "@integrations/misc/export-markdown"
 import { ClineAccountService } from "@services/account/ClineAccountService"
 import { McpHub } from "@services/mcp/McpHub"
@@ -92,11 +91,6 @@ export class Controller {
 			() => ensureSettingsDirectoryExists(this.context),
 			this.context.extension?.packageJSON?.version ?? "1.0.0",
 		)
-
-		// Clean up legacy checkpoints
-		cleanupLegacyCheckpoints(this.context.globalStorageUri.fsPath).catch((error) => {
-			console.error("Failed to cleanup legacy checkpoints:", error)
-		})
 	}
 
 	async getCurrentMode(): Promise<Mode> {
@@ -169,7 +163,6 @@ export class Controller {
 		const terminalReuseEnabled = this.cacheService.getGlobalStateKey("terminalReuseEnabled")
 		const terminalOutputLineLimit = this.cacheService.getGlobalStateKey("terminalOutputLineLimit")
 		const defaultTerminalProfile = this.cacheService.getGlobalStateKey("defaultTerminalProfile")
-		const enableCheckpointsSetting = this.cacheService.getGlobalStateKey("enableCheckpointsSetting")
 		const isNewUser = this.cacheService.getGlobalStateKey("isNewUser")
 		const taskHistory = this.cacheService.getGlobalStateKey("taskHistory")
 		const strictPlanModeEnabled = this.cacheService.getGlobalStateKey("strictPlanModeEnabled")
@@ -214,7 +207,6 @@ export class Controller {
 			terminalReuseEnabled ?? true,
 			terminalOutputLineLimit ?? 500,
 			defaultTerminalProfile ?? "default",
-			enableCheckpointsSetting ?? true,
 			await getCwd(getDesktopDir()),
 			this.cacheService,
 			task,
@@ -518,7 +510,7 @@ export class Controller {
 		uiMessagesFilePath: string
 		contextHistoryFilePath: string
 		taskMetadataFilePath: string
-		apiConversationHistory: Anthropic.MessageParam[]
+		apiConversationHistory: Anthropic.Messages.MessageParam[]
 	}> {
 		const history = this.cacheService.getGlobalStateKey("taskHistory")
 		const historyItem = history.find((item) => item.id === id)
@@ -588,7 +580,6 @@ export class Controller {
 		const mcpDisplayMode = this.cacheService.getGlobalStateKey("mcpDisplayMode")
 		const telemetrySetting = this.cacheService.getGlobalStateKey("telemetrySetting")
 		const planActSeparateModelsSetting = this.cacheService.getGlobalStateKey("planActSeparateModelsSetting")
-		const enableCheckpointsSetting = this.cacheService.getGlobalStateKey("enableCheckpointsSetting")
 		const globalClineRulesToggles = this.cacheService.getGlobalStateKey("globalClineRulesToggles")
 		const globalWorkflowToggles = this.cacheService.getGlobalStateKey("globalWorkflowToggles")
 		const shellIntegrationTimeout = this.cacheService.getGlobalStateKey("shellIntegrationTimeout")
@@ -606,7 +597,6 @@ export class Controller {
 		const workflowToggles = this.cacheService.getWorkspaceStateKey("workflowToggles")
 
 		const currentTaskItem = this.task?.taskId ? (taskHistory || []).find((item) => item.id === this.task?.taskId) : undefined
-		const checkpointTrackerErrorMessage = this.task?.taskState.checkpointTrackerErrorMessage
 		const clineMessages = this.task?.messageStateHandler.getClineMessages() || []
 
 		const processedTaskHistory = (taskHistory || [])
@@ -626,7 +616,6 @@ export class Controller {
 			apiConfiguration,
 			uriScheme,
 			currentTaskItem,
-			checkpointTrackerErrorMessage,
 			clineMessages,
 			currentFocusChainChecklist: this.task?.taskState.currentFocusChainChecklist || null,
 			taskHistory: processedTaskHistory,
@@ -645,7 +634,6 @@ export class Controller {
 			mcpDisplayMode,
 			telemetrySetting,
 			planActSeparateModelsSetting,
-			enableCheckpointsSetting: enableCheckpointsSetting ?? true,
 			distinctId,
 			globalClineRulesToggles: globalClineRulesToggles || {},
 			localClineRulesToggles: localClineRulesToggles || {},

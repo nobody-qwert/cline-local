@@ -1,4 +1,4 @@
-import type { Anthropic } from "@anthropic-ai/sdk"
+import type { AnthropicCompat as Anthropic } from "../../types/anthropic-compat"
 
 /**
  * Filters out image blocks from messages since Claude Code doesn't support images.
@@ -12,7 +12,7 @@ export function filterMessagesForClaudeCode(messages: Anthropic.Messages.Message
 		}
 
 		// Handle complex message structures
-		const filteredContent = message.content.map((block) => {
+		const filteredContent = message.content.map((block: Anthropic.ContentBlockParam) => {
 			if (block.type === "image") {
 				// Replace image blocks with text placeholders
 				const sourceType = block.source?.type || "unknown"

@@ -906,7 +906,9 @@ export const lmStudioModelInfoSaneDefaults: ModelInfo = {
  */
 export function getLmStudioModelInfoForModelId(modelId?: string): ModelInfo {
 	const base = { ...lmStudioModelInfoSaneDefaults }
-	if (!modelId) return base
+	if (!modelId) {
+		return base
+	}
 	const id = modelId.toLowerCase()
 	if (id.startsWith("gpt-oss") || id.includes("/gpt-oss")) {
 		return { ...base, contextWindow: 131_072 }

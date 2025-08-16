@@ -1,4 +1,4 @@
-import type { Anthropic } from "@anthropic-ai/sdk"
+import type { AnthropicCompat as Anthropic } from "@/types/anthropic-compat"
 import { Message } from "ollama"
 
 export function convertToOllamaMessages(anthropicMessages: Anthropic.Messages.MessageParam[]): Message[] {
@@ -16,7 +16,13 @@ export function convertToOllamaMessages(anthropicMessages: Anthropic.Messages.Me
 					nonToolMessages: (Anthropic.TextBlockParam | Anthropic.ImageBlockParam)[]
 					toolMessages: Anthropic.ToolResultBlockParam[]
 				}>(
-					(acc, part) => {
+					(
+						acc: {
+							nonToolMessages: (Anthropic.TextBlockParam | Anthropic.ImageBlockParam)[]
+							toolMessages: Anthropic.ToolResultBlockParam[]
+						},
+						part: Anthropic.ContentBlockParam,
+					) => {
 						if (part.type === "tool_result") {
 							acc.toolMessages.push(part)
 						} else if (part.type === "text" || part.type === "image") {
@@ -29,7 +35,7 @@ export function convertToOllamaMessages(anthropicMessages: Anthropic.Messages.Me
 
 				// Process tool result messages FIRST since they must follow the tool use messages
 				const toolResultImages: string[] = []
-				toolMessages.forEach((toolMessage) => {
+				toolMessages.forEach((toolMessage: Anthropic.ToolResultBlockParam) => {
 					// The Anthropic SDK allows tool results to be a string or an array of text and image blocks, enabling rich and structured content. In contrast, the Ollama SDK only supports tool results as a single string, so we map the Anthropic tool result parts into one concatenated string to maintain compatibility.
 					let content: string
 
@@ -38,7 +44,7 @@ export function convertToOllamaMessages(anthropicMessages: Anthropic.Messages.Me
 					} else {
 						content =
 							toolMessage.content
-								?.map((part) => {
+								?.map((part: { type: "text"; text: string } | Anthropic.ImageBlockParam) => {
 									if (part.type === "image") {
 										toolResultImages.push(`data:${part.source.media_type};base64,${part.source.data}`)
 										return "(see following user message for image)"
@@ -59,7 +65,7 @@ export function convertToOllamaMessages(anthropicMessages: Anthropic.Messages.Me
 					ollamaMessages.push({
 						role: "user",
 						content: nonToolMessages
-							.map((part) => {
+							.map((part: Anthropic.TextBlockParam | Anthropic.ImageBlockParam) => {
 								if (part.type === "image") {
 									return `data:${part.source.media_type};base64,${part.source.data}`
 								}
@@ -73,7 +79,13 @@ export function convertToOllamaMessages(anthropicMessages: Anthropic.Messages.Me
 					nonToolMessages: (Anthropic.TextBlockParam | Anthropic.ImageBlockParam)[]
 					toolMessages: Anthropic.ToolUseBlockParam[]
 				}>(
-					(acc, part) => {
+					(
+						acc: {
+							nonToolMessages: (Anthropic.TextBlockParam | Anthropic.ImageBlockParam)[]
+							toolMessages: Anthropic.ToolUseBlockParam[]
+						},
+						part: Anthropic.ContentBlockParam,
+					) => {
 						if (part.type === "tool_use") {
 							acc.toolMessages.push(part)
 						} else if (part.type === "text" || part.type === "image") {
@@ -88,7 +100,7 @@ export function convertToOllamaMessages(anthropicMessages: Anthropic.Messages.Me
 				let content: string = ""
 				if (nonToolMessages.length > 0) {
 					content = nonToolMessages
-						.map((part) => {
+						.map((part: Anthropic.TextBlockParam | Anthropic.ImageBlockParam) => {
 							if (part.type === "image") {
 								return "" // impossible as the assistant cannot send images
 							}

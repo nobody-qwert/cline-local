@@ -1,9 +1,5 @@
 import Thumbnails from "@/components/common/Thumbnails"
-import { useExtensionState } from "@/context/ExtensionStateContext"
-import { CheckpointsServiceClient } from "@/services/grpc-client"
-import { ClineCheckpointRestore } from "@shared/WebviewMessage"
-import { CheckpointRestoreRequest } from "@shared/proto/cline/checkpoints"
-import React, { forwardRef, useRef, useState } from "react"
+import React, { useRef, useState } from "react"
 import DynamicTextArea from "react-textarea-autosize"
 import { highlightText } from "./task-header/TaskHeader"
 
@@ -11,19 +7,13 @@ interface UserMessageProps {
 	text?: string
 	files?: string[]
 	images?: string[]
-	messageTs?: number // Timestamp for the message, needed for checkpoint restore
 	sendMessageFromChatRow?: (text: string, images: string[], files: string[]) => void
 }
 
-const UserMessage: React.FC<UserMessageProps> = ({ text, images, files, messageTs, sendMessageFromChatRow }) => {
+const UserMessage: React.FC<UserMessageProps> = ({ text, images, files, sendMessageFromChatRow }) => {
 	const [isEditing, setIsEditing] = useState(false)
 	const [editedText, setEditedText] = useState(text || "")
 	const textAreaRef = useRef<HTMLTextAreaElement>(null)
-	const { checkpointTrackerErrorMessage } = useExtensionState()
-
-	// Create refs for the buttons to check in the blur handler
-	const restoreAllButtonRef = useRef<HTMLButtonElement>(null)
-	const restoreChatButtonRef = useRef<HTMLButtonElement>(null)
 
 	const handleClick = () => {
 		if (!isEditing) {
@@ -38,50 +28,26 @@ const UserMessage: React.FC<UserMessageProps> = ({ text, images, files, messageT
 		}
 	}, [isEditing])
 
-	const handleRestoreWorkspace = async (type: ClineCheckpointRestore) => {
-		const delay = type === "task" ? 500 : 1000 // Delay for task and workspace restore
+	const handleSendMessage = () => {
 		setIsEditing(false)
 
 		if (text === editedText) {
 			return
 		}
 
-		try {
-			await CheckpointsServiceClient.checkpointRestore(
-				CheckpointRestoreRequest.create({
-					number: messageTs,
-					restoreType: type,
-					offset: 1,
-				}),
-			)
-
-			setTimeout(() => {
-				sendMessageFromChatRow?.(editedText, images || [], files || [])
-			}, delay)
-		} catch (err) {
-			console.error("Checkpoint restore error:", err)
-		}
+		sendMessageFromChatRow?.(editedText, images || [], files || [])
 	}
 
-	const handleBlur = (e: React.FocusEvent<HTMLTextAreaElement>) => {
-		// Check if focus is moving to one of our button elements
-		if (e.relatedTarget === restoreAllButtonRef.current || e.relatedTarget === restoreChatButtonRef.current) {
-			// Don't close edit mode if focus is moving to one of our buttons
-			return
-		}
-
-		// Otherwise, close edit mode
+	const handleBlur = () => {
 		setIsEditing(false)
 	}
 
 	const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
 		if (e.key === "Escape") {
 			setIsEditing(false)
-		} else if (e.key === "Enter" && e.metaKey && !checkpointTrackerErrorMessage) {
-			handleRestoreWorkspace("taskAndWorkspace")
 		} else if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing && e.keyCode !== 229) {
 			e.preventDefault()
-			handleRestoreWorkspace("task")
+			handleSendMessage()
 		}
 	}
 
@@ -102,7 +68,7 @@ const UserMessage: React.FC<UserMessageProps> = ({ text, images, files, messageT
 						ref={textAreaRef}
 						value={editedText}
 						onChange={(e) => setEditedText(e.target.value)}
-						onBlur={(e) => handleBlur(e)}
+						onBlur={handleBlur}
 						onKeyDown={handleKeyDown}
 						autoFocus
 						style={{
@@ -124,24 +90,22 @@ const UserMessage: React.FC<UserMessageProps> = ({ text, images, files, messageT
 						}}
 					/>
 					<div style={{ display: "flex", gap: "8px", marginTop: "8px", justifyContent: "flex-end" }}>
-						{!checkpointTrackerErrorMessage && (
-							<RestoreButton
-								ref={restoreAllButtonRef}
-								type="taskAndWorkspace"
-								label="Restore All"
-								isPrimary={false}
-								onClick={handleRestoreWorkspace}
-								title="Restore both the chat and workspace files to this checkpoint and send your edited message"
-							/>
-						)}
-						<RestoreButton
-							ref={restoreChatButtonRef}
-							type="task"
-							label="Restore Chat"
-							isPrimary={true}
-							onClick={handleRestoreWorkspace}
-							title="Restore just the chat to this checkpoint and send your edited message"
-						/>
+						<button
+							onClick={(e) => {
+								e.stopPropagation()
+								handleSendMessage()
+							}}
+							style={{
+								backgroundColor: "var(--vscode-button-background)",
+								color: "var(--vscode-button-foreground)",
+								border: "none",
+								padding: "4px 8px",
+								borderRadius: "2px",
+								fontSize: "9px",
+								cursor: "pointer",
+							}}>
+							Send Edited Message
+						</button>
 					</div>
 				</>
 			) : (
@@ -155,43 +119,5 @@ const UserMessage: React.FC<UserMessageProps> = ({ text, images, files, messageT
 		</div>
 	)
 }
-
-// Reusable button component for restore actions
-interface RestoreButtonProps {
-	type: ClineCheckpointRestore
-	label: string
-	isPrimary: boolean
-	onClick: (type: ClineCheckpointRestore) => void
-	title?: string
-}
-
-const RestoreButton = forwardRef<HTMLButtonElement, RestoreButtonProps>(({ type, label, isPrimary, onClick, title }, ref) => {
-	const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-		e.stopPropagation()
-		onClick(type)
-	}
-
-	return (
-		<button
-			ref={ref}
-			onClick={handleClick}
-			title={title}
-			style={{
-				backgroundColor: isPrimary
-					? "var(--vscode-button-background)"
-					: "var(--vscode-button-secondaryBackground, var(--vscode-descriptionForeground))",
-				color: isPrimary
-					? "var(--vscode-button-foreground)"
-					: "var(--vscode-button-secondaryForeground, var(--vscode-foreground))",
-				border: "none",
-				padding: "4px 8px",
-				borderRadius: "2px",
-				fontSize: "9px",
-				cursor: "pointer",
-			}}>
-			{label}
-		</button>
-	)
-})
 
 export default UserMessage

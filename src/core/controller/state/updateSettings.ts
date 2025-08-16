@@ -43,11 +43,6 @@ export async function updateSettings(controller: Controller, request: UpdateSett
 			controller.cacheService.setGlobalState("planActSeparateModelsSetting", request.planActSeparateModelsSetting)
 		}
 
-		// Update checkpoints setting
-		if (request.enableCheckpointsSetting !== undefined) {
-			controller.cacheService.setGlobalState("enableCheckpointsSetting", request.enableCheckpointsSetting)
-		}
-
 		// Update MCP marketplace setting
 		if (request.mcpMarketplaceEnabled !== undefined) {
 			controller.cacheService.setGlobalState("mcpMarketplaceEnabled", request.mcpMarketplaceEnabled)

@@ -54,8 +54,6 @@ const TaskTimelineTooltip = ({ message, children }: TaskTimelineTooltipProps) =>
 					return "Browser Result"
 				case "completion_result":
 					return "Task Completed"
-				case "checkpoint_created":
-					return "Checkpoint Created"
 				default:
 					return message.say || "Unknown"
 			}
