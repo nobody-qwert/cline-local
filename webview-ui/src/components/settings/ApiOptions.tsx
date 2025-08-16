@@ -1,7 +1,5 @@
 import { useExtensionState } from "@/context/ExtensionStateContext"
 import { ModelsServiceClient } from "@/services/grpc-client"
-import { StringRequest } from "@shared/proto/cline/common"
-import { VSCodeDropdown, VSCodeOption } from "@vscode/webview-ui-toolkit/react"
 import { useCallback, useEffect, useState } from "react"
 import { useInterval } from "react-use"
 import styled from "styled-components"
@@ -49,11 +47,9 @@ const ApiOptions = ({ showModelOptions, apiErrorMessage, modelIdErrorMessage, is
 	const requestLocalModels = useCallback(async () => {
 		if (selectedProvider === "ollama") {
 			try {
-				const response = await ModelsServiceClient.getOllamaModels(
-					StringRequest.create({
-						value: apiConfiguration?.ollamaBaseUrl || "",
-					}),
-				)
+				const response = await ModelsServiceClient.getOllamaModels({
+					value: apiConfiguration?.ollamaBaseUrl || "",
+				} as any)
 				if (response && response.values) {
 					setOllamaModels(response.values)
 				}
@@ -85,7 +81,7 @@ const ApiOptions = ({ showModelOptions, apiErrorMessage, modelIdErrorMessage, is
 				<label htmlFor="api-provider">
 					<span style={{ fontWeight: 500 }}>API Provider</span>
 				</label>
-				<VSCodeDropdown
+				<select
 					id="api-provider"
 					value={selectedProvider}
 					onChange={(e: any) => {
@@ -99,9 +95,9 @@ const ApiOptions = ({ showModelOptions, apiErrorMessage, modelIdErrorMessage, is
 						minWidth: 130,
 						position: "relative",
 					}}>
-					<VSCodeOption value="lmstudio">LM Studio</VSCodeOption>
-					<VSCodeOption value="ollama">Ollama</VSCodeOption>
-				</VSCodeDropdown>
+					<option value="lmstudio">LM Studio</option>
+					<option value="ollama">Ollama</option>
+				</select>
 			</DropdownContainer>
 
 			{apiConfiguration && selectedProvider === "lmstudio" && (
