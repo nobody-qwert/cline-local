@@ -11,7 +11,7 @@ import { Empty } from "@shared/proto/cline/common"
  */
 export async function openWalkthrough(controller: Controller, request: EmptyRequest): Promise<Empty> {
 	try {
-		await vscode.commands.executeCommand("workbench.action.openWalkthrough", "saoudrizwan.claude-dev#ClineWalkthrough")
+		await vscode.commands.executeCommand("workbench.action.openWalkthrough", "nobody-qwert.cline-local#ClineWalkthrough")
 		return Empty.create({})
 	} catch (error) {
 		console.error(`Failed to open walkthrough: ${error}`)

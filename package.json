@@ -103,13 +103,13 @@
 		"viewsContainers": {
 			"activitybar": [
 				{
-					"id": "claude-dev-ActivityBar",
+					"id": "cline-local-ActivityBar",
 					"title": "Cline (⌘+')",
 					"icon": "assets/icons/icon.svg",
 					"when": "isMac"
 				},
 				{
-					"id": "claude-dev-ActivityBar",
+					"id": "cline-local-ActivityBar",
 					"title": "Cline (Ctrl+')",
 					"icon": "assets/icons/icon.svg",
 					"when": "!isMac"
@@ -117,10 +117,10 @@
 			]
 		},
 		"views": {
-			"claude-dev-ActivityBar": [
+			"cline-local-ActivityBar": [
 				{
 					"type": "webview",
-					"id": "claude-dev.SidebarProvider",
+					"id": "cline-local.SidebarProvider",
 					"name": "",
 					"icon": "assets/icons/icon.svg"
 				}
@@ -233,54 +233,54 @@
 				{
 					"command": "cline.plusButtonClicked",
 					"group": "navigation@1",
-					"when": "view == claude-dev.SidebarProvider"
+					"when": "view == cline-local.SidebarProvider"
 				},
 				{
 					"command": "cline.mcpButtonClicked",
 					"group": "navigation@2",
-					"when": "view == claude-dev.SidebarProvider"
+					"when": "view == cline-local.SidebarProvider"
 				},
 				{
 					"command": "cline.historyButtonClicked",
 					"group": "navigation@3",
-					"when": "view == claude-dev.SidebarProvider"
+					"when": "view == cline-local.SidebarProvider"
 				},
 				{
 					"command": "cline.popoutButtonClicked",
 					"group": "navigation@4",
-					"when": "view == claude-dev.SidebarProvider"
+					"when": "view == cline-local.SidebarProvider"
 				},
 				{
 					"command": "cline.settingsButtonClicked",
 					"group": "navigation@6",
-					"when": "view == claude-dev.SidebarProvider"
+					"when": "view == cline-local.SidebarProvider"
 				}
 			],
 			"editor/title": [
 				{
 					"command": "cline.plusButtonClicked",
 					"group": "navigation@1",
-					"when": "activeWebviewPanelId == claude-dev.TabPanelProvider"
+					"when": "activeWebviewPanelId == cline-local.TabPanelProvider"
 				},
 				{
 					"command": "cline.mcpButtonClicked",
 					"group": "navigation@2",
-					"when": "activeWebviewPanelId == claude-dev.TabPanelProvider"
+					"when": "activeWebviewPanelId == cline-local.TabPanelProvider"
 				},
 				{
 					"command": "cline.historyButtonClicked",
 					"group": "navigation@3",
-					"when": "activeWebviewPanelId == claude-dev.TabPanelProvider"
+					"when": "activeWebviewPanelId == cline-local.TabPanelProvider"
 				},
 				{
 					"command": "cline.popoutButtonClicked",
 					"group": "navigation@4",
-					"when": "activeWebviewPanelId == claude-dev.TabPanelProvider"
+					"when": "activeWebviewPanelId == cline-local.TabPanelProvider"
 				},
 				{
 					"command": "cline.settingsButtonClicked",
 					"group": "navigation@6",
-					"when": "activeWebviewPanelId == claude-dev.TabPanelProvider"
+					"when": "activeWebviewPanelId == cline-local.TabPanelProvider"
 				}
 			],
 			"editor/context": [
