@@ -355,10 +355,23 @@ export class Task {
 	}
 
 	public updateMode(mode: Mode): void {
+		const prevMode = this.mode
 		this.mode = mode
 		this.toolExecutor.updateMode(mode)
 		if (this.FocusChainManager) {
 			this.FocusChainManager.updateMode(mode)
+		}
+
+		// If switching from PLAN to ACT, clear any existing focus chain list to avoid showing stale plan checklist.
+		if (prevMode === "plan" && mode === "act" && this.focusChainSettings.enabled) {
+			this.taskState.currentFocusChainChecklist = null
+			this.taskState.todoListWasUpdatedByUser = false
+			this.taskState.apiRequestsSinceLastTodoUpdate = 0
+			// Signal to prompt generator that a fresh ACT-mode list should be created on the next API request
+			this.taskState.didRespondToPlanAskBySwitchingMode = true
+
+			// Push state to webview so the header hides the old list immediately
+			void this.postStateToWebview()
 		}
 	}
 
