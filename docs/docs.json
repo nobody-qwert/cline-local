@@ -70,7 +70,6 @@
 				"group": "Features",
 				"pages": [
 					"features/auto-approve",
-					"features/checkpoints",
 					"features/cline-rules",
 					"features/drag-and-drop",
 					"features/plan-and-act",
