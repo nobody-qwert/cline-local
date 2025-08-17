@@ -8,7 +8,6 @@ option java_multiple_files = true;
 service WebService {
   rpc checkIsImageUrl(StringRequest) returns (IsImageUrl);
   rpc fetchOpenGraphData(StringRequest) returns (OpenGraphData);
-  rpc openInBrowser(StringRequest) returns (Empty);
 }
 
 message IsImageUrl {

@@ -1,5 +1,5 @@
 import { ClineMessage } from "@shared/ExtensionMessage"
-import { COLOR_WHITE, COLOR_GRAY, COLOR_DARK_GRAY, COLOR_BEIGE, COLOR_BLUE, COLOR_PURPLE, COLOR_GREEN } from "../colors"
+import { COLOR_WHITE, COLOR_GRAY, COLOR_DARK_GRAY, COLOR_BEIGE, COLOR_BLUE, COLOR_RED, COLOR_GREEN } from "../colors"
 
 /**
  *
@@ -32,7 +32,7 @@ export const getColor = (message: ClineMessage): string => {
 						} else if (toolData.tool === "editedExistingFile" || toolData.tool === "newFileCreated") {
 							return COLOR_BLUE // Blue for file edit/create operations
 						} else if (toolData.tool === "webFetch") {
-							return COLOR_PURPLE // Purple for web fetch operations
+							return COLOR_BLUE // Blue for web fetch operations
 						}
 					} catch (e) {
 						// JSON parse error here
@@ -41,10 +41,7 @@ export const getColor = (message: ClineMessage): string => {
 				return COLOR_BEIGE // Default beige for tool use
 			case "command":
 			case "command_output":
-				return COLOR_PURPLE // Red for terminal commands
-			case "browser_action":
-			case "browser_action_result":
-				return COLOR_PURPLE // Purple for browser actions
+				return COLOR_RED // Red for terminal commands
 			case "completion_result":
 				return COLOR_GREEN // Green for task success
 			default:
@@ -72,7 +69,7 @@ export const getColor = (message: ClineMessage): string => {
 						} else if (toolData.tool === "editedExistingFile" || toolData.tool === "newFileCreated") {
 							return COLOR_BLUE // Blue for file edit/create operations
 						} else if (toolData.tool === "webFetch") {
-							return COLOR_PURPLE // Purple for web fetch operations
+							return COLOR_BLUE // Blue for web fetch operations
 						}
 					} catch (e) {
 						// JSON parse error here
@@ -80,9 +77,7 @@ export const getColor = (message: ClineMessage): string => {
 				}
 				return COLOR_BEIGE // Default beige for tool approvals
 			case "command":
-				return COLOR_PURPLE // Red for command approvals (same as terminal commands)
-			case "browser_action_launch":
-				return COLOR_PURPLE // Purple for browser launch approvals (same as browser actions)
+				return COLOR_RED // Red for command approvals (same as terminal commands)
 			default:
 				return COLOR_DARK_GRAY // Dark gray for unknown
 		}

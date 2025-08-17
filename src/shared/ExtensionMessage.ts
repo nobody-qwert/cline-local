@@ -1,7 +1,6 @@
 // type that represents json data that is sent from extension to webview, called ExtensionMessage and has 'type' enum which can be 'plusButtonClicked' or 'settingsButtonClicked' or 'hello'
 import { ApiConfiguration } from "./api"
 import { AutoApprovalSettings } from "./AutoApprovalSettings"
-import { BrowserSettings } from "./BrowserSettings"
 import { FocusChainSettings } from "./FocusChainSettings"
 import { Mode, OpenaiReasoningEffort } from "./storage/types"
 import { HistoryItem } from "./HistoryItem"
@@ -32,8 +31,6 @@ export interface ExtensionState {
 	welcomeViewCompleted: boolean
 	apiConfiguration?: ApiConfiguration
 	autoApprovalSettings: AutoApprovalSettings
-	browserSettings: BrowserSettings
-	remoteBrowserHost?: string
 	preferredLanguage?: string
 	openaiReasoningEffort?: OpenaiReasoningEffort
 	mode: Mode
@@ -93,7 +90,6 @@ export type ClineAsk =
 	| "resume_completed_task"
 	| "mistake_limit_reached"
 	| "auto_approval_max_req_reached"
-	| "browser_action_launch"
 	| "use_mcp_server"
 	| "new_task"
 	| "condense"
@@ -115,9 +111,6 @@ export type ClineSay =
 	| "command_output"
 	| "tool"
 	| "shell_integration_warning"
-	| "browser_action_launch"
-	| "browser_action"
-	| "browser_action_result"
 	| "mcp_server_request_started"
 	| "mcp_server_response"
 	| "mcp_notification"
@@ -149,21 +142,6 @@ export interface ClineSayTool {
 }
 
 // must keep in sync with system prompt
-export const browserActions = ["launch", "click", "type", "scroll_down", "scroll_up", "close"] as const
-export type BrowserAction = (typeof browserActions)[number]
-
-export interface ClineSayBrowserAction {
-	action: BrowserAction
-	coordinate?: string
-	text?: string
-}
-
-export type BrowserActionResult = {
-	screenshot?: string
-	logs?: string
-	currentUrl?: string
-	currentMousePosition?: string
-}
 
 export interface ClineAskUseMcpServer {
 	serverName: string

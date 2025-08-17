@@ -61,7 +61,6 @@ async function updateAutoApprovalSettings(context: vscode.ExtensionContext, cont
 				editFilesExternally: true,
 				executeSafeCommands: true,
 				executeAllCommands: true,
-				useBrowser: false, // Keep browser disabled for tests
 				useMcp: false, // Keep MCP disabled for tests
 			},
 			maxRequests: 10000, // Increase max requests for tests

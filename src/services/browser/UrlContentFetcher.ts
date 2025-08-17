@@ -1,96 +1,61 @@
 import * as vscode from "vscode"
-import * as fs from "fs/promises"
-import * as path from "path"
-import { Browser, Page, launch } from "puppeteer-core"
+import axios from "axios"
 import * as cheerio from "cheerio"
 import TurndownService from "turndown"
-// @ts-ignore
-import PCR from "puppeteer-chromium-resolver"
-import { fileExistsAtPath } from "@utils/fs"
-import { BrowserSettings, DEFAULT_BROWSER_SETTINGS } from "@shared/BrowserSettings" // Import the interface and defaults
 
-interface PCRStats {
-	puppeteer: { launch: typeof launch }
-	executablePath: string
-}
-
+// Local-only build: HTTP-based web fetching without browser automation
 export class UrlContentFetcher {
-	private context: vscode.ExtensionContext
-	private browser?: Browser
-	private page?: Page
-
-	constructor(context: vscode.ExtensionContext) {
-		this.context = context
-	}
-
-	private async ensureChromiumExists(): Promise<PCRStats> {
-		const globalStoragePath = this.context?.globalStorageUri?.fsPath
-		if (!globalStoragePath) {
-			throw new Error("Global storage uri is invalid")
-		}
-		const puppeteerDir = path.join(globalStoragePath, "puppeteer")
-		const dirExists = await fileExistsAtPath(puppeteerDir)
-		if (!dirExists) {
-			await fs.mkdir(puppeteerDir, { recursive: true })
-		}
-		// if chromium doesn't exist, this will download it to path.join(puppeteerDir, ".chromium-browser-snapshots")
-		// if it does exist it will return the path to existing chromium
-		const stats: PCRStats = await PCR({
-			downloadPath: puppeteerDir,
-		})
-		return stats
-	}
+	constructor(private context: vscode.ExtensionContext) {}
 
 	async launchBrowser(): Promise<void> {
-		if (this.browser) {
-			return
-		}
-		const stats = await this.ensureChromiumExists()
-		// Read browser settings from globalState for custom args only
-		const browserSettings = this.context.globalState.get<BrowserSettings>("browserSettings", DEFAULT_BROWSER_SETTINGS)
-		const customArgsStr = browserSettings.customArgs || ""
-		const customArgs = customArgsStr.trim() ? customArgsStr.split(/\s+/) : []
-		this.browser = await stats.puppeteer.launch({
-			args: [
-				"--user-agent=Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
-				...customArgs, // Append user-provided custom arguments
-			],
-			executablePath: stats.executablePath,
-		})
-		// (latest version of puppeteer does not add headless to user agent)
-		this.page = await this.browser?.newPage()
+		// No-op for HTTP-based fetching
 	}
 
 	async closeBrowser(): Promise<void> {
-		await this.browser?.close()
-		this.browser = undefined
-		this.page = undefined
+		// No-op for HTTP-based fetching
 	}
 
-	// must make sure to call launchBrowser before and closeBrowser after using this
 	async urlToMarkdown(url: string): Promise<string> {
-		if (!this.browser || !this.page) {
-			throw new Error("Browser not initialized")
+		try {
+			// Upgrade HTTP to HTTPS
+			const fetchUrl = url.startsWith("http://") ? url.replace("http://", "https://") : url
+
+			// Fetch the HTML content
+			const response = await axios.get(fetchUrl, {
+				timeout: 10_000,
+				headers: {
+					"User-Agent":
+						"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36",
+					Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+					"Accept-Language": "en-US,en;q=0.5",
+					"Accept-Encoding": "gzip, deflate, br",
+					Connection: "keep-alive",
+					"Upgrade-Insecure-Requests": "1",
+				},
+				maxRedirects: 5,
+				validateStatus: (status) => status >= 200 && status < 400,
+			})
+
+			// Use cheerio to parse and clean up the HTML
+			const $ = cheerio.load(response.data)
+			$("script, style, nav, footer, header").remove()
+
+			// Convert cleaned HTML to markdown
+			const turndownService = new TurndownService()
+			const markdown = turndownService.turndown($.html())
+
+			return markdown
+		} catch (error) {
+			if (axios.isAxiosError(error)) {
+				if (error.response) {
+					throw new Error(`HTTP error ${error.response.status}: ${error.response.statusText}`)
+				} else if (error.request) {
+					throw new Error(`Network error: Unable to reach ${url}`)
+				} else {
+					throw new Error(`Request error: ${error.message}`)
+				}
+			}
+			throw new Error(`Failed to fetch URL content: ${error instanceof Error ? error.message : String(error)}`)
 		}
-		/*
-		- networkidle2 is equivalent to playwright's networkidle where it waits until there are no more than 2 network connections for at least 500 ms.
-		- domcontentloaded is when the basic DOM is loaded
-		this should be sufficient for most doc sites
-		*/
-		await this.page.goto(url, {
-			timeout: 10_000,
-			waitUntil: ["domcontentloaded", "networkidle2"],
-		})
-		const content = await this.page.content()
-
-		// use cheerio to parse and clean up the HTML
-		const $ = cheerio.load(content)
-		$("script, style, nav, footer, header").remove()
-
-		// convert cleaned HTML to markdown
-		const turndownService = new TurndownService()
-		const markdown = turndownService.turndown($.html())
-
-		return markdown
 	}
 }

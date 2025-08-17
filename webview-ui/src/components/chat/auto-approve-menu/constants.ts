@@ -62,13 +62,6 @@ export const ACTION_METADATA: ActionMetadata[] = [
 		},
 	},
 	{
-		id: "useBrowser",
-		label: "Use the browser",
-		shortName: "Browser",
-		description: "Allows Cline to launch and interact with any website in a browser.",
-		icon: "codicon-globe",
-	},
-	{
 		id: "useMcp",
 		label: "Use MCP servers",
 		shortName: "MCP",

@@ -11,22 +11,15 @@ import { FileContextTracker } from "@core/context/context-tracking/FileContextTr
 import { ClineIgnoreController } from "@core/ignore/ClineIgnoreController"
 import { DiffViewProvider } from "@integrations/editor/DiffViewProvider"
 import { processFilesIntoText } from "@integrations/misc/extract-text"
-import { BrowserSession } from "@services/browser/BrowserSession"
-import { UrlContentFetcher } from "@services/browser/UrlContentFetcher"
 import { McpHub } from "@services/mcp/McpHub"
 import { AutoApprovalSettings } from "@shared/AutoApprovalSettings"
-import { BrowserSettings } from "@shared/BrowserSettings"
 import { FocusChainSettings } from "@shared/FocusChainSettings"
 import {
-	BrowserAction,
-	BrowserActionResult,
-	browserActions,
 	ClineAsk,
 	ClineAskQuestion,
 	ClineAskUseMcpServer,
 	ClinePlanModeResponse,
 	ClineSay,
-	ClineSayBrowserAction,
 	ClineSayTool,
 	COMPLETION_RESULT_CHANGES_FLAG,
 } from "@shared/ExtensionMessage"
@@ -55,6 +48,7 @@ import { AutoApprove } from "./tools/autoApprove"
 import { showNotificationForApprovalIfAutoApprovalEnabled } from "./utils"
 import { Mode } from "@shared/storage/types"
 import { continuationPrompt } from "../prompts/contextManagement"
+import { UrlContentFetcher } from "@services/browser/UrlContentFetcher"
 
 export class ToolExecutor {
 	private autoApprover: AutoApprove
@@ -77,8 +71,6 @@ export class ToolExecutor {
 		private taskState: TaskState,
 		private messageStateHandler: MessageStateHandler,
 		private api: ApiHandler,
-		private urlContentFetcher: UrlContentFetcher,
-		private browserSession: BrowserSession,
 		private diffViewProvider: DiffViewProvider,
 		private mcpHub: McpHub,
 		private fileContextTracker: FileContextTracker,
@@ -88,7 +80,6 @@ export class ToolExecutor {
 
 		// Configuration & Settings
 		private autoApprovalSettings: AutoApprovalSettings,
-		private browserSettings: BrowserSettings,
 		private focusChainSettings: FocusChainSettings,
 		private cwd: string,
 		private taskId: string,
@@ -184,8 +175,6 @@ export class ToolExecutor {
 				return `[${block.name} for '${block.params.path}']`
 			case "list_code_definition_names":
 				return `[${block.name} for '${block.params.path}']`
-			case "browser_action":
-				return `[${block.name} for '${block.params.action}']`
 			case "use_mcp_tool":
 				return `[${block.name} for '${block.params.server_name}']`
 			case "access_mcp_resource":
@@ -210,6 +199,8 @@ export class ToolExecutor {
 				return `[${block.name} for '${block.params.path}']`
 			case "web_fetch":
 				return `[${block.name} for '${block.params.url}']`
+			default:
+				return `[${block.name}]`
 		}
 	}
 
@@ -334,9 +325,9 @@ export class ToolExecutor {
 			return
 		}
 
-		// Disable browser and web fetch tools in local-only build
-		if ((block.name as any) === "browser_action" || (block.name as any) === "web_fetch") {
-			this.pushToolResult(formatResponse.toolError("Browser features are disabled in this build."), block)
+		// Disable browser automation in local-only build
+		if ((block.name as any) === "browser_action") {
+			this.pushToolResult(formatResponse.toolError("Browser automation is disabled in this build."), block)
 			return
 		}
 
@@ -979,199 +970,6 @@ export class ToolExecutor {
 					}
 				} catch (error) {
 					await this.handleError("searching files", error, block)
-					await this.saveCheckpoint()
-					break
-				}
-			}
-			case "browser_action": {
-				const action: BrowserAction | undefined = block.params.action as BrowserAction
-				const url: string | undefined = block.params.url
-				const coordinate: string | undefined = block.params.coordinate
-				const text: string | undefined = block.params.text
-				if (!action || !browserActions.includes(action)) {
-					// checking for action to ensure it is complete and valid
-					if (!block.partial) {
-						// if the block is complete and we don't have a valid action this is a mistake
-						this.taskState.consecutiveMistakeCount++
-						this.pushToolResult(await this.sayAndCreateMissingParamError("browser_action", "action"), block)
-						await this.browserSession.closeBrowser()
-						await this.saveCheckpoint()
-					}
-					break
-				}
-
-				try {
-					if (block.partial) {
-						if (action === "launch") {
-							if (this.shouldAutoApproveTool(block.name)) {
-								this.removeLastPartialMessageIfExistsWithType("ask", "browser_action_launch")
-								await this.say(
-									"browser_action_launch",
-									this.removeClosingTag(block, "url", url),
-									undefined,
-									undefined,
-									block.partial,
-								)
-							} else {
-								this.removeLastPartialMessageIfExistsWithType("say", "browser_action_launch")
-								await this.ask(
-									"browser_action_launch",
-									this.removeClosingTag(block, "url", url),
-									block.partial,
-								).catch(() => {})
-							}
-						} else {
-							await this.say(
-								"browser_action",
-								JSON.stringify({
-									action: action as BrowserAction,
-									coordinate: this.removeClosingTag(block, "coordinate", coordinate),
-									text: this.removeClosingTag(block, "text", text),
-								} satisfies ClineSayBrowserAction),
-								undefined,
-								undefined,
-								block.partial,
-							)
-						}
-						break
-					} else {
-						let browserActionResult: BrowserActionResult
-						if (action === "launch") {
-							if (!url) {
-								this.taskState.consecutiveMistakeCount++
-								this.pushToolResult(await this.sayAndCreateMissingParamError("browser_action", "url"), block)
-								await this.browserSession.closeBrowser()
-								await this.saveCheckpoint()
-								break
-							}
-							this.taskState.consecutiveMistakeCount = 0
-
-							if (this.shouldAutoApproveTool(block.name)) {
-								this.removeLastPartialMessageIfExistsWithType("ask", "browser_action_launch")
-								await this.say("browser_action_launch", url, undefined, undefined, false)
-								this.taskState.consecutiveAutoApprovedRequestsCount++
-							} else {
-								showNotificationForApprovalIfAutoApprovalEnabled(
-									`Cline wants to use a browser and launch ${url}`,
-									this.autoApprovalSettings.enabled,
-									this.autoApprovalSettings.enableNotifications,
-								)
-								this.removeLastPartialMessageIfExistsWithType("say", "browser_action_launch")
-								const didApprove = await this.askApproval("browser_action_launch", block, url)
-								if (!didApprove) {
-									await this.saveCheckpoint()
-									break
-								}
-							}
-
-							// NOTE: it's okay that we call this message since the partial inspect_site is finished streaming. The only scenario we have to avoid is sending messages WHILE a partial message exists at the end of the messages array. For example the api_req_finished message would interfere with the partial message, so we needed to remove that.
-							// await this.say("inspect_site_result", "") // no result, starts the loading spinner waiting for result
-							await this.say("browser_action_result", "") // starts loading spinner
-
-							// Re-make browserSession to make sure latest settings apply
-							if (this.context) {
-								await this.browserSession.dispose()
-
-								const apiHandlerModel = this.api.getModel()
-								const useWebp = this.api ? !modelDoesntSupportWebp(apiHandlerModel) : true
-								this.browserSession = new BrowserSession(this.context, this.browserSettings, useWebp)
-							} else {
-								console.warn("no controller context available for browserSession")
-							}
-							await this.browserSession.launchBrowser()
-							browserActionResult = await this.browserSession.navigateToUrl(url)
-						} else {
-							if (action === "click") {
-								if (!coordinate) {
-									this.taskState.consecutiveMistakeCount++
-									this.pushToolResult(
-										await this.sayAndCreateMissingParamError("browser_action", "coordinate"),
-										block,
-									)
-									await this.browserSession.closeBrowser()
-									await this.saveCheckpoint()
-									break // can't be within an inner switch
-								}
-							}
-							if (action === "type") {
-								if (!text) {
-									this.taskState.consecutiveMistakeCount++
-									this.pushToolResult(await this.sayAndCreateMissingParamError("browser_action", "text"), block)
-									await this.browserSession.closeBrowser()
-									await this.saveCheckpoint()
-									break
-								}
-							}
-							this.taskState.consecutiveMistakeCount = 0
-							await this.say(
-								"browser_action",
-								JSON.stringify({
-									action: action as BrowserAction,
-									coordinate,
-									text,
-								} satisfies ClineSayBrowserAction),
-								undefined,
-								undefined,
-								false,
-							)
-							switch (action) {
-								case "click":
-									browserActionResult = await this.browserSession.click(coordinate!)
-									break
-								case "type":
-									browserActionResult = await this.browserSession.type(text!)
-									break
-								case "scroll_down":
-									browserActionResult = await this.browserSession.scrollDown()
-									break
-								case "scroll_up":
-									browserActionResult = await this.browserSession.scrollUp()
-									break
-								case "close":
-									browserActionResult = await this.browserSession.closeBrowser()
-									break
-							}
-						}
-
-						switch (action) {
-							case "launch":
-							case "click":
-							case "type":
-							case "scroll_down":
-							case "scroll_up":
-								await this.say("browser_action_result", JSON.stringify(browserActionResult))
-								this.pushToolResult(
-									formatResponse.toolResult(
-										`The browser action has been executed. The console logs and screenshot have been captured for your analysis.\n\nConsole logs:\n${
-											browserActionResult.logs || "(No new logs)"
-										}\n\n(REMEMBER: if you need to proceed to using non-\`browser_action\` tools or launch a new browser, you MUST first close this browser. For example, if after analyzing the logs and screenshot you need to edit a file, you must first close the browser before you can use the write_to_file tool.)`,
-										browserActionResult.screenshot ? [browserActionResult.screenshot] : [],
-									),
-									block,
-								)
-
-								if (!block.partial) {
-									await this.updateFCListFromToolResponse(block.params.task_progress)
-								}
-
-								await this.saveCheckpoint()
-								break
-							case "close":
-								this.pushToolResult(
-									formatResponse.toolResult(
-										`The browser has been closed. You may now proceed to using other tools.`,
-									),
-									block,
-								)
-								await this.saveCheckpoint()
-								break
-						}
-
-						break
-					}
-				} catch (error) {
-					await this.browserSession.closeBrowser() // if any error occurs, the browser session is terminated
-					await this.handleError("executing browser action", error, block)
 					await this.saveCheckpoint()
 					break
 				}
@@ -1968,108 +1766,6 @@ export class ToolExecutor {
 					break
 				}
 			}
-			case "web_fetch": {
-				const url: string | undefined = block.params.url
-				// TODO: Implement caching for web_fetch
-				const sharedMessageProps: ClineSayTool = {
-					tool: "webFetch",
-					path: this.removeClosingTag(block, "url", url),
-					content: `Fetching URL: ${this.removeClosingTag(block, "url", url)}`,
-				}
-
-				try {
-					if (block.partial) {
-						const partialMessage = JSON.stringify({
-							...sharedMessageProps,
-							operationIsLocatedInWorkspace: false, // web_fetch is always external
-						} satisfies ClineSayTool)
-
-						// WebFetch is a read-only operation, generally safe.
-						// Let's assume it follows similar auto-approval logic to read_file for now.
-						// We might need a dedicated auto-approval setting for it later.
-						if (this.shouldAutoApproveTool("web_fetch" as ToolUseName)) {
-							this.removeLastPartialMessageIfExistsWithType("ask", "tool")
-							await this.say("tool", partialMessage, undefined, undefined, block.partial)
-						} else {
-							this.removeLastPartialMessageIfExistsWithType("say", "tool")
-							await this.ask("tool", partialMessage, block.partial).catch(() => {})
-						}
-						break
-					} else {
-						if (!url) {
-							this.taskState.consecutiveMistakeCount++
-							this.pushToolResult(await this.sayAndCreateMissingParamError("web_fetch", "url"), block)
-							await this.saveCheckpoint()
-							break
-						}
-
-						this.taskState.consecutiveMistakeCount = 0
-						const completeMessage = JSON.stringify({
-							...sharedMessageProps,
-							operationIsLocatedInWorkspace: false,
-						} satisfies ClineSayTool)
-
-						if (this.shouldAutoApproveTool("web_fetch" as ToolUseName)) {
-							this.removeLastPartialMessageIfExistsWithType("ask", "tool")
-							await this.say("tool", completeMessage, undefined, undefined, false)
-							this.taskState.consecutiveAutoApprovedRequestsCount++
-							telemetryService.captureToolUsage(
-								this.ulid,
-								"web_fetch" as ToolUseName,
-								this.api.getModel().id,
-								true,
-								true,
-							)
-						} else {
-							showNotificationForApprovalIfAutoApprovalEnabled(
-								`Cline wants to fetch content from ${url}`,
-								this.autoApprovalSettings.enabled,
-								this.autoApprovalSettings.enableNotifications,
-							)
-							this.removeLastPartialMessageIfExistsWithType("say", "tool")
-							const didApprove = await this.askApproval("tool", block, completeMessage)
-							if (!didApprove) {
-								telemetryService.captureToolUsage(
-									this.ulid,
-									"web_fetch" as ToolUseName,
-									this.api.getModel().id,
-									false,
-									false,
-								)
-								await this.saveCheckpoint()
-								break
-							}
-							telemetryService.captureToolUsage(
-								this.ulid,
-								"web_fetch" as ToolUseName,
-								this.api.getModel().id,
-								false,
-								true,
-							)
-						}
-
-						// Fetch Markdown contentcc
-						await this.urlContentFetcher.launchBrowser()
-						const markdownContent = await this.urlContentFetcher.urlToMarkdown(url)
-						await this.urlContentFetcher.closeBrowser()
-
-						// TODO: Implement secondary AI call to process markdownContent with prompt
-						// For now, returning markdown directly.
-						// This will be a significant sub-task.
-						// Placeholder for processed summary:
-						const processedSummary = `Fetched Markdown for ${url}:\n\n${markdownContent}`
-
-						this.pushToolResult(formatResponse.toolResult(processedSummary), block)
-						await this.saveCheckpoint()
-						break
-					}
-				} catch (error) {
-					await this.urlContentFetcher.closeBrowser() // Ensure browser is closed on error
-					await this.handleError("fetching web content", error, block)
-					await this.saveCheckpoint()
-					break
-				}
-			}
 			case "plan_mode_respond": {
 				const response: string | undefined = block.params.response
 				const optionsRaw: string | undefined = block.params.options
@@ -2187,6 +1883,74 @@ export class ToolExecutor {
 				} catch (error) {
 					await this.handleError("responding to inquiry", error, block)
 					//
+					break
+				}
+			}
+			case "web_fetch": {
+				const url: string | undefined = block.params.url
+				try {
+					if (block.partial) {
+						const partialMessage = JSON.stringify({
+							tool: "webFetch",
+							content: this.removeClosingTag(block, "url", url),
+						} satisfies ClineSayTool)
+						if (this.shouldAutoApproveTool(block.name)) {
+							this.removeLastPartialMessageIfExistsWithType("ask", "tool")
+							await this.say("tool", partialMessage, undefined, undefined, block.partial)
+						} else {
+							this.removeLastPartialMessageIfExistsWithType("say", "tool")
+							await this.ask("tool", partialMessage, block.partial).catch(() => {})
+						}
+						break
+					} else {
+						if (!url) {
+							this.taskState.consecutiveMistakeCount++
+							this.pushToolResult(await this.sayAndCreateMissingParamError("web_fetch", "url"), block)
+							await this.saveCheckpoint()
+							break
+						}
+						this.taskState.consecutiveMistakeCount = 0
+
+						const completeMessage = JSON.stringify({
+							tool: "webFetch",
+							content: url,
+						} satisfies ClineSayTool)
+						if (this.shouldAutoApproveTool(block.name)) {
+							this.removeLastPartialMessageIfExistsWithType("ask", "tool")
+							await this.say("tool", completeMessage, undefined, undefined, false)
+							this.taskState.consecutiveAutoApprovedRequestsCount++
+							telemetryService.captureToolUsage(this.ulid, block.name, this.api.getModel().id, true, true)
+						} else {
+							showNotificationForApprovalIfAutoApprovalEnabled(
+								`Cline wants to fetch content from ${url}`,
+								this.autoApprovalSettings.enabled,
+								this.autoApprovalSettings.enableNotifications,
+							)
+							this.removeLastPartialMessageIfExistsWithType("say", "tool")
+							const didApprove = await this.askApproval("tool", block, completeMessage)
+							if (!didApprove) {
+								await this.saveCheckpoint()
+								telemetryService.captureToolUsage(this.ulid, block.name, this.api.getModel().id, false, false)
+								break
+							}
+							telemetryService.captureToolUsage(this.ulid, block.name, this.api.getModel().id, false, true)
+						}
+
+						// Execute web fetch
+						const urlContentFetcher = new UrlContentFetcher(this.context)
+						const markdownContent = await urlContentFetcher.urlToMarkdown(url)
+						this.pushToolResult(markdownContent, block)
+
+						if (!block.partial && this.focusChainSettings.enabled) {
+							await this.updateFCListFromToolResponse(block.params.task_progress)
+						}
+
+						await this.saveCheckpoint()
+						break
+					}
+				} catch (error) {
+					await this.handleError("fetching web content", error, block)
+					await this.saveCheckpoint()
 					break
 				}
 			}

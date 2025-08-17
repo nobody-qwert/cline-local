@@ -37,9 +37,9 @@ export class AutoApprove {
 						this.autoApprovalSettings.actions.executeAllCommands ?? false,
 					]
 				case "browser_action":
-					return this.autoApprovalSettings.actions.useBrowser
+					return false
 				case "web_fetch":
-					return this.autoApprovalSettings.actions.useBrowser
+					return false
 				case "access_mcp_resource":
 				case "use_mcp_tool":
 					return this.autoApprovalSettings.actions.useMcp

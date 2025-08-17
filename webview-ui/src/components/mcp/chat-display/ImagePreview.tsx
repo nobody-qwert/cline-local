@@ -1,6 +1,4 @@
 import ChatErrorBoundary from "@/components/chat/ChatErrorBoundary"
-import { WebServiceClient } from "@/services/grpc-client"
-import { StringRequest } from "@shared/proto/cline/common"
 import DOMPurify from "dompurify"
 import React from "react"
 import { checkIfImageUrl, formatUrlForOpening, getSafeHostname } from "./utils/mcpRichUtil"
@@ -233,13 +231,9 @@ class ImagePreview extends React.Component<
 						borderRadius: "4px",
 						color: "var(--vscode-errorForeground)",
 					}}
-					onClick={async () => {
+					onClick={() => {
 						try {
-							await WebServiceClient.openInBrowser(
-								StringRequest.create({
-									value: DOMPurify.sanitize(url),
-								}),
-							)
+							window.open(DOMPurify.sanitize(url), "_blank")
 						} catch (err) {
 							console.error("Error opening URL in browser:", err)
 						}
@@ -262,13 +256,9 @@ class ImagePreview extends React.Component<
 					maxWidth: "100%",
 					cursor: "pointer",
 				}}
-				onClick={async () => {
+				onClick={() => {
 					try {
-						await WebServiceClient.openInBrowser(
-							StringRequest.create({
-								value: DOMPurify.sanitize(formatUrlForOpening(url)),
-							}),
-						)
+						window.open(DOMPurify.sanitize(formatUrlForOpening(url)), "_blank")
 					} catch (err) {
 						console.error("Error opening URL in browser:", err)
 					}

@@ -36,7 +36,6 @@ enum ClineAsk {
   RESUME_COMPLETED_TASK = 8;
   MISTAKE_LIMIT_REACHED = 9;
   AUTO_APPROVAL_MAX_REQ_REACHED = 10;
-  BROWSER_ACTION_LAUNCH = 11;
   USE_MCP_SERVER = 12;
   NEW_TASK = 13;
   CONDENSE = 14;
@@ -60,9 +59,6 @@ enum ClineSay {
   COMMAND_OUTPUT_SAY = 11;
   TOOL_SAY = 12;
   SHELL_INTEGRATION_WARNING = 13;
-  BROWSER_ACTION_LAUNCH_SAY = 14;
-  BROWSER_ACTION = 15;
-  BROWSER_ACTION_RESULT = 16;
   MCP_SERVER_REQUEST_STARTED = 17;
   MCP_SERVER_RESPONSE = 18;
   MCP_NOTIFICATION = 19;
@@ -87,15 +83,6 @@ enum ClineSayToolType {
   WEB_FETCH = 7;
 }
 
-// Enum for browser actions
-enum BrowserAction {
-  LAUNCH = 0;
-  CLICK = 1;
-  TYPE = 2;
-  SCROLL_DOWN = 3;
-  SCROLL_UP = 4;
-  CLOSE = 5;
-}
 
 // Enum for MCP server request types
 enum McpServerRequestType {
@@ -127,20 +114,6 @@ message ClineSayTool {
   bool operation_is_located_in_workspace = 7;
 }
 
-// Message for ClineSayBrowserAction
-message ClineSayBrowserAction {
-  BrowserAction action = 1;
-  string coordinate = 2;
-  string text = 3;
-}
-
-// Message for BrowserActionResult
-message BrowserActionResult {
-  string screenshot = 1;
-  string logs = 2;
-  string current_url = 3;
-  string current_mouse_position = 4;
-}
 
 // Message for ClineAskUseMcpServer
 message ClineAskUseMcpServer {
@@ -208,8 +181,6 @@ message ClineMessage {
   
   // Additional fields for specific ask/say types
   ClineSayTool say_tool = 13;
-  ClineSayBrowserAction say_browser_action = 14;
-  BrowserActionResult browser_action_result = 15;
   ClineAskUseMcpServer ask_use_mcp_server = 16;
   ClinePlanModeResponse plan_mode_response = 17;
   ClineAskQuestion ask_question = 18;

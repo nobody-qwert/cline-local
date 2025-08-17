@@ -11,7 +11,6 @@ export interface AutoApprovalSettings {
 		editFilesExternally?: boolean // Edit files outside of the working directory
 		executeSafeCommands?: boolean // Execute safe commands
 		executeAllCommands?: boolean // Execute all commands
-		useBrowser: boolean // Use browser
 		useMcp: boolean // Use MCP servers
 	}
 	// Global settings
@@ -30,7 +29,6 @@ export const DEFAULT_AUTO_APPROVAL_SETTINGS: AutoApprovalSettings = {
 		editFilesExternally: false,
 		executeSafeCommands: true,
 		executeAllCommands: false,
-		useBrowser: false,
 		useMcp: false,
 	},
 	maxRequests: 20,

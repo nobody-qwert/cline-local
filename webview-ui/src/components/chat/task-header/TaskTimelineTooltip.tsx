@@ -48,10 +48,6 @@ const TaskTimelineTooltip = ({ message, children }: TaskTimelineTooltipProps) =>
 					return "Terminal Command"
 				case "command_output":
 					return "Terminal Output"
-				case "browser_action":
-					return "Browser Action"
-				case "browser_action_result":
-					return "Browser Result"
 				case "completion_result":
 					return "Task Completed"
 				default:
@@ -90,8 +86,6 @@ const TaskTimelineTooltip = ({ message, children }: TaskTimelineTooltipProps) =>
 					return "Tool Approval"
 				case "command":
 					return "Terminal Command Approval"
-				case "browser_action_launch":
-					return "Browser Action Approval"
 				default:
 					return message.ask || "Unknown"
 			}

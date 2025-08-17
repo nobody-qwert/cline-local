@@ -97,7 +97,6 @@ describe("getButtonConfig", () => {
 	describe("Other Ask States", () => {
 		const stateConfigs = [
 			{ ask: "followup", expectedConfig: "followup" },
-			{ ask: "browser_action_launch", expectedConfig: "browser_action_launch" },
 			{ ask: "use_mcp_server", expectedConfig: "use_mcp_server" },
 			{ ask: "plan_mode_respond", expectedConfig: "plan_mode_respond" },
 			{ ask: "completion_result", expectedConfig: "completion_result" },

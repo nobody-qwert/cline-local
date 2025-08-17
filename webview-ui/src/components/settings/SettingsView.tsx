@@ -13,7 +13,6 @@ import SectionHeader from "./SectionHeader"
 import TerminalSettingsSection from "./sections/TerminalSettingsSection"
 import ApiConfigurationSection from "./sections/ApiConfigurationSection"
 import GeneralSettingsSection from "./sections/GeneralSettingsSection"
-import BrowserSettingsSection from "./sections/BrowserSettingsSection"
 import DebugSection from "./sections/DebugSection"
 import AboutSection from "./sections/AboutSection"
 
@@ -58,13 +57,6 @@ export const SETTINGS_TABS: SettingsTab[] = [
 		tooltipText: "Feature Settings",
 		headerText: "Feature Settings",
 		icon: CheckCheck,
-	},
-	{
-		id: "browser",
-		name: "Browser",
-		tooltipText: "Browser Settings",
-		headerText: "Browser Settings",
-		icon: SquareMousePointer,
 	},
 	{
 		id: "terminal",
@@ -291,9 +283,6 @@ const SettingsView = ({ onDone, targetSection }: SettingsViewProps) => {
 
 							{/* Feature Settings Tab */}
 							{activeTab === "features" && <FeatureSettingsSection renderSectionHeader={renderSectionHeader} />}
-
-							{/* Browser Settings Tab */}
-							{activeTab === "browser" && <BrowserSettingsSection renderSectionHeader={renderSectionHeader} />}
 
 							{/* Terminal Settings Tab */}
 							{activeTab === "terminal" && <TerminalSettingsSection renderSectionHeader={renderSectionHeader} />}

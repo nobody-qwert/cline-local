@@ -240,13 +240,9 @@ class LinkPreview extends React.Component<LinkPreviewProps, LinkPreviewState> {
 						maxWidth: "512px",
 						overflow: "auto",
 					}}
-					onClick={async () => {
+					onClick={() => {
 						try {
-							await WebServiceClient.openInBrowser(
-								StringRequest.create({
-									value: DOMPurify.sanitize(url),
-								}),
-							)
+							window.open(DOMPurify.sanitize(url), "_blank")
 						} catch (err) {
 							console.error("Error opening URL in browser:", err)
 						}
@@ -282,13 +278,9 @@ class LinkPreview extends React.Component<LinkPreviewProps, LinkPreviewState> {
 					height: "128px",
 					maxWidth: "512px",
 				}}
-				onClick={async () => {
+				onClick={() => {
 					try {
-						await WebServiceClient.openInBrowser(
-							StringRequest.create({
-								value: DOMPurify.sanitize(url),
-							}),
-						)
+						window.open(DOMPurify.sanitize(url), "_blank")
 					} catch (err) {
 						console.error("Error opening URL in browser:", err)
 					}

@@ -731,7 +731,6 @@ export class CacheService {
 			welcomeViewCompleted: state.welcomeViewCompleted,
 			autoApprovalSettings: state.autoApprovalSettings || DEFAULT_AUTO_APPROVAL_SETTINGS,
 			globalClineRulesToggles: state.globalClineRulesToggles,
-			browserSettings: state.browserSettings,
 			focusChainSettings: state.focusChainSettings || DEFAULT_FOCUS_CHAIN_SETTINGS,
 			focusChainFeatureFlagEnabled: state.focusChainFeatureFlagEnabled,
 			preferredLanguage: state.preferredLanguage,

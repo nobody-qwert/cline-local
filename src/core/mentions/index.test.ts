@@ -3,7 +3,6 @@ import { setVscodeHostProviderMock } from "@/test/host-provider-test-utils"
 import { FileContextTracker } from "@core/context/context-tracking/FileContextTracker"
 import * as extractTextModule from "@integrations/misc/extract-text"
 import * as terminalModule from "@integrations/terminal/get-latest-output"
-import { UrlContentFetcher } from "@services/browser/UrlContentFetcher"
 import * as gitModule from "@utils/git"
 import { expect } from "chai"
 import * as fs from "fs"
@@ -14,7 +13,6 @@ import { parseMentions } from "."
 
 describe("parseMentions", () => {
 	let sandbox: sinon.SinonSandbox
-	let urlContentFetcherStub: sinon.SinonStubbedInstance<UrlContentFetcher>
 	let fileContextTrackerStub: sinon.SinonStubbedInstance<FileContextTracker>
 	let fsStatStub: sinon.SinonStub
 	let fsReaddirStub: sinon.SinonStub
@@ -31,12 +29,6 @@ describe("parseMentions", () => {
 		sandbox = sinon.createSandbox()
 		setVscodeHostProviderMock()
 		// Create stubs for dependencies
-		urlContentFetcherStub = {
-			launchBrowser: sandbox.stub().resolves(),
-			closeBrowser: sandbox.stub().resolves(),
-			urlToMarkdown: sandbox.stub().resolves("# Example Website\n\nContent here"),
-		} as any
-
 		fileContextTrackerStub = {
 			trackFileContext: sandbox.stub().resolves(),
 		} as any
@@ -66,7 +58,7 @@ describe("parseMentions", () => {
 			isBinaryFileStub.resolves(false)
 			extractTextStub.resolves("console.log('Hello World');")
 
-			const result = await parseMentions(text, cwd, urlContentFetcherStub, fileContextTrackerStub)
+			const result = await parseMentions(text, cwd, fileContextTrackerStub)
 
 			const expectedOutput = `Check 'src/index.ts' (see below for file content) for details
 
@@ -85,7 +77,7 @@ console.log('Hello World');
 			isBinaryFileStub.resolves(false)
 			extractTextStub.resolves("console.log('Hello World');")
 
-			const result = await parseMentions(text, cwd, urlContentFetcherStub)
+			const result = await parseMentions(text, cwd)
 
 			const expectedOutput = `Open 'path with spaces/file.txt' (see below for file content)
 
@@ -102,7 +94,7 @@ console.log('Hello World');
 			fsStatStub.resolves({ isFile: () => true, isDirectory: () => false })
 			isBinaryFileStub.resolves(true)
 
-			const result = await parseMentions(text, cwd, urlContentFetcherStub)
+			const result = await parseMentions(text, cwd)
 
 			const expectedOutput = `Check 'image.png' (see below for file content)
 
@@ -118,7 +110,7 @@ console.log('Hello World');
 
 			fsStatStub.rejects(new Error("ENOENT: no such file or directory"))
 
-			const result = await parseMentions(text, cwd, urlContentFetcherStub)
+			const result = await parseMentions(text, cwd)
 
 			const expectedOutput = `Check 'missing.txt' (see below for file content)
 
@@ -146,7 +138,7 @@ Error fetching content: Failed to access path "missing.txt": ENOENT: no such fil
 			extractTextStub.withArgs(path.resolve(cwd, "src/index.ts")).resolves("export const main = () => {};")
 			extractTextStub.withArgs(path.resolve(cwd, "src/README.md")).resolves("# Source Code")
 
-			const result = await parseMentions(text, cwd, urlContentFetcherStub)
+			const result = await parseMentions(text, cwd)
 
 			const expectedOutput = `Look in 'src/' (see below for folder content) folder
 
@@ -172,54 +164,43 @@ export const main = () => {};
 		it("should handle URL mention", async () => {
 			const text = "Visit @https://example.com for info"
 
-			const result = await parseMentions(text, cwd, urlContentFetcherStub)
+			const result = await parseMentions(text, cwd)
 
 			const expectedOutput = `Visit 'https://example.com' (see below for site content) for info
 
 <url_content url="https://example.com">
-# Example Website
-
-Content here
+URL fetching disabled in local-only build
 </url_content>`
 
 			expect(result).to.equal(expectedOutput)
-			expect(urlContentFetcherStub.launchBrowser.called).to.be.true
-			expect(urlContentFetcherStub.urlToMarkdown.calledWith("https://example.com")).to.be.true
-			expect(urlContentFetcherStub.closeBrowser.called).to.be.true
 		})
 
 		it("should handle browser launch errors", async () => {
 			const text = "Visit @https://example.com"
 
-			urlContentFetcherStub.launchBrowser.rejects(new Error("Browser launch failed"))
-
-			const result = await parseMentions(text, cwd, urlContentFetcherStub)
+			const result = await parseMentions(text, cwd)
 
 			const expectedOutput = `Visit 'https://example.com' (see below for site content)
 
 <url_content url="https://example.com">
-Error fetching content: Browser launch failed
+URL fetching disabled in local-only build
 </url_content>`
 
 			expect(result).to.equal(expectedOutput)
-			expect(showMessageStub.called).to.be.true
 		})
 
 		it("should handle URL fetch errors", async () => {
 			const text = "Visit @https://example.com"
 
-			urlContentFetcherStub.urlToMarkdown.rejects(new Error("Network error"))
-
-			const result = await parseMentions(text, cwd, urlContentFetcherStub)
+			const result = await parseMentions(text, cwd)
 
 			const expectedOutput = `Visit 'https://example.com' (see below for site content)
 
 <url_content url="https://example.com">
-Error fetching content: Network error
+URL fetching disabled in local-only build
 </url_content>`
 
 			expect(result).to.equal(expectedOutput)
-			expect(showMessageStub.called).to.be.true
 		})
 	})
 
@@ -229,7 +210,7 @@ Error fetching content: Network error
 
 			getLatestTerminalOutputStub.resolves("$ npm test\nAll tests passed!")
 
-			const result = await parseMentions(text, cwd, urlContentFetcherStub)
+			const result = await parseMentions(text, cwd)
 
 			const expectedOutput = `See Terminal Output (see below for output) output
 
@@ -246,7 +227,7 @@ All tests passed!
 
 			getWorkingStateStub.resolves("M  src/index.ts\nA  src/new-file.ts")
 
-			const result = await parseMentions(text, cwd, urlContentFetcherStub)
+			const result = await parseMentions(text, cwd)
 
 			const expectedOutput = `Review Working directory changes (see below for details)
 
@@ -263,7 +244,7 @@ A  src/new-file.ts
 
 			getCommitInfoStub.resolves("commit abcdef1234567890\nAuthor: Test\nDate: 2024-01-01\n\nInitial commit")
 
-			const result = await parseMentions(text, cwd, urlContentFetcherStub)
+			const result = await parseMentions(text, cwd)
 
 			const expectedOutput = `See commit Git commit 'abcdef1234567890' (see below for commit info)
 
@@ -288,7 +269,7 @@ Initial commit
 			extractTextStub.withArgs(path.resolve(cwd, "file1.txt")).resolves("Content 1")
 			extractTextStub.withArgs(path.resolve(cwd, "file2.txt")).resolves("Content 2")
 
-			const result = await parseMentions(text, cwd, urlContentFetcherStub)
+			const result = await parseMentions(text, cwd)
 
 			const expectedOutput = `Check 'file1.txt' (see below for file content) and 'file2.txt' (see below for file content)
 
@@ -310,7 +291,7 @@ Content 2
 			isBinaryFileStub.resolves(false)
 			extractTextStub.resolves("Content")
 
-			const result = await parseMentions(text, cwd, urlContentFetcherStub)
+			const result = await parseMentions(text, cwd)
 
 			const expectedOutput = `Check 'file.txt' (see below for file content) and again 'file.txt' (see below for file content)
 
@@ -328,7 +309,7 @@ Content
 			isBinaryFileStub.resolves(false)
 			extractTextStub.resolves("File content")
 
-			const result = await parseMentions(text, cwd, urlContentFetcherStub)
+			const result = await parseMentions(text, cwd)
 
 			const expectedOutput = `Check 'file.txt' (see below for file content), and 'https://example.com' (see below for site content)
 
@@ -337,9 +318,7 @@ File content
 </file_content>
 
 <url_content url="https://example.com">
-# Example Website
-
-Content here
+URL fetching disabled in local-only build
 </url_content>`
 
 			expect(result).to.equal(expectedOutput)
@@ -355,7 +334,7 @@ Content here
 			getWorkingStateStub.rejects(new Error("Git state error"))
 			getCommitInfoStub.rejects(new Error("Commit error"))
 
-			const result = await parseMentions(text, cwd, urlContentFetcherStub)
+			const result = await parseMentions(text, cwd)
 
 			const expectedOutput = `'error.txt' (see below for file content) Terminal Output (see below for output) Working directory changes (see below for details) Git commit 'abc1234567' (see below for commit info)
 
@@ -383,13 +362,13 @@ Error fetching commit info: Commit error
 		it("should handle text with no mentions", async () => {
 			const text = "This is plain text without any mentions"
 
-			const result = await parseMentions(text, cwd, urlContentFetcherStub)
+			const result = await parseMentions(text, cwd)
 
 			expect(result).to.equal(text)
 		})
 
 		it("should handle empty text", async () => {
-			const result = await parseMentions("", cwd, urlContentFetcherStub)
+			const result = await parseMentions("", cwd)
 
 			expect(result).to.equal("")
 		})
@@ -401,7 +380,7 @@ Error fetching commit info: Commit error
 			isBinaryFileStub.resolves(false)
 			extractTextStub.resolves("Content")
 
-			const result = await parseMentions(text, cwd, urlContentFetcherStub)
+			const result = await parseMentions(text, cwd)
 
 			const expectedOutput = `Check 'file.txt' (see below for file content)!
 

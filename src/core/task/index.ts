@@ -39,8 +39,6 @@ import { formatContentBlockToMarkdown } from "@integrations/misc/export-markdown
 import { processFilesIntoText } from "@integrations/misc/extract-text"
 import { showSystemNotification } from "@integrations/notifications"
 import { TerminalManager } from "@integrations/terminal/TerminalManager"
-import { BrowserSession } from "@services/browser/BrowserSession"
-import { UrlContentFetcher } from "@services/browser/UrlContentFetcher"
 import { listFiles } from "@services/glob/list-files"
 import { Logger } from "@services/logging/Logger"
 import { McpHub } from "@services/mcp/McpHub"
@@ -48,7 +46,6 @@ import { telemetryService } from "@services/posthog/PostHogClientProvider"
 import { ApiConfiguration } from "@shared/api"
 import { findLast, findLastIndex } from "@shared/array"
 import { AutoApprovalSettings } from "@shared/AutoApprovalSettings"
-import { BrowserSettings } from "@shared/BrowserSettings"
 import { FocusChainSettings } from "@shared/FocusChainSettings"
 import { combineApiRequests } from "@shared/combineApiRequests"
 import { combineCommandSequences } from "@shared/combineCommandSequences"
@@ -101,8 +98,6 @@ export class Task {
 	// Service handlers
 	api: ApiHandler
 	terminalManager: TerminalManager
-	private urlContentFetcher: UrlContentFetcher
-	browserSession: BrowserSession
 	contextManager: ContextManager
 	private diffViewProvider: DiffViewProvider
 	private clineIgnoreController: ClineIgnoreController
@@ -126,7 +121,6 @@ export class Task {
 
 	// User chat state
 	autoApprovalSettings: AutoApprovalSettings
-	browserSettings: BrowserSettings
 	focusChainSettings: FocusChainSettings
 	preferredLanguage: string
 	openaiReasoningEffort: OpenaiReasoningEffort
@@ -143,7 +137,6 @@ export class Task {
 		cancelTask: () => Promise<void>,
 		apiConfiguration: ApiConfiguration,
 		autoApprovalSettings: AutoApprovalSettings,
-		browserSettings: BrowserSettings,
 		focusChainSettings: FocusChainSettings,
 		preferredLanguage: string,
 		openaiReasoningEffort: OpenaiReasoningEffort,
@@ -186,12 +179,9 @@ export class Task {
 		this.terminalManager.setTerminalOutputLineLimit(terminalOutputLineLimit)
 		this.terminalManager.setDefaultTerminalProfile(defaultTerminalProfile)
 
-		this.urlContentFetcher = new UrlContentFetcher(controller.context)
-		this.browserSession = new BrowserSession(controller.context, browserSettings)
 		this.contextManager = new ContextManager()
 		this.diffViewProvider = HostProvider.get().createDiffViewProvider()
 		this.autoApprovalSettings = autoApprovalSettings
-		this.browserSettings = browserSettings
 		this.focusChainSettings = focusChainSettings
 		this.preferredLanguage = preferredLanguage
 		this.openaiReasoningEffort = openaiReasoningEffort
@@ -296,9 +286,6 @@ export class Task {
 		// Now that ulid is initialized, we can build the API handler
 		this.api = buildApiHandler(effectiveApiConfiguration, this.mode)
 
-		// Set ulid on browserSession for telemetry tracking
-		this.browserSession.setUlid(this.ulid)
-
 		// Continue with task initialization
 		if (historyItem) {
 			this.resumeTaskFromHistory()
@@ -327,8 +314,6 @@ export class Task {
 			this.taskState,
 			this.messageStateHandler,
 			this.api,
-			this.urlContentFetcher,
-			this.browserSession,
 			this.diffViewProvider,
 			this.mcpHub,
 			this.fileContextTracker,
@@ -336,7 +321,6 @@ export class Task {
 			this.contextManager,
 			this.cacheService,
 			this.autoApprovalSettings,
-			this.browserSettings,
 			this.focusChainSettings,
 			cwd,
 			this.taskId,
@@ -925,8 +909,7 @@ export class Task {
 
 		this.taskState.abort = true // will stop any autonomously running promises
 		this.terminalManager.disposeAll()
-		this.urlContentFetcher.closeBrowser()
-		await this.browserSession.dispose()
+		// Browser functionality removed - no browser cleanup needed
 		this.clineIgnoreController.dispose()
 		this.fileContextTracker.dispose()
 		// need to await for when we want to make sure directories/files are reverted before
@@ -1170,20 +1153,6 @@ export class Task {
 		}
 	}
 
-	/**
-	 * Migrates the disableBrowserTool setting from VSCode configuration to browserSettings
-	 */
-	private async migrateDisableBrowserToolSetting(): Promise<void> {
-		const config = vscode.workspace.getConfiguration("cline")
-		const disableBrowserTool = config.get<boolean>("disableBrowserTool")
-
-		if (disableBrowserTool !== undefined) {
-			this.browserSettings.disableToolUse = disableBrowserTool
-			// Remove from VSCode configuration
-			await config.update("disableBrowserTool", undefined, true)
-		}
-	}
-
 	private async getCurrentProviderInfo(): Promise<{
 		modelId: string
 		providerId: string
@@ -1217,19 +1186,10 @@ export class Task {
 			console.error("MCP servers failed to connect in time")
 		})
 
-		await this.migrateDisableBrowserToolSetting()
-		const disableBrowserTool = this.browserSettings.disableToolUse ?? false
-		const modelInfo = this.api.getModel()
-		// cline browser tool uses image recognition for navigation (requires model image support).
-		const modelSupportsBrowserUse = modelInfo.info.supportsImages ?? false
-
-		const supportsBrowserUse = modelSupportsBrowserUse && !disableBrowserTool // only enable browser use if the model supports it and the user hasn't disabled it
-
 		let systemPrompt = await buildSystemPrompt(
 			this.cwd,
-			supportsBrowserUse,
+			false, // browser support disabled
 			this.mcpHub,
-			this.browserSettings,
 			this.api.getModel(),
 			this.focusChainSettings,
 		)
@@ -2045,12 +2005,7 @@ export class Task {
 							block.text.includes("<task>") ||
 							block.text.includes("<user_message>")
 						) {
-							const parsedText = await parseMentions(
-								block.text,
-								this.cwd,
-								this.urlContentFetcher,
-								this.fileContextTracker,
-							)
+							const parsedText = await parseMentions(block.text, this.cwd, this.fileContextTracker)
 
 							// when parsing slash commands, we still want to allow the user to provide their desired context
 							const { processedText, needsClinerulesFileCheck: needsCheck } = await parseSlashCommands(

@@ -3,7 +3,6 @@ import { ApiProvider, BedrockModelId, ModelInfo } from "@shared/api"
 import { ClineRulesToggles } from "@/shared/cline-rules"
 import { DEFAULT_MCP_DISPLAY_MODE, McpDisplayMode } from "@/shared/McpDisplayMode"
 import { TelemetrySetting } from "@/shared/TelemetrySetting"
-import { BrowserSettings, DEFAULT_BROWSER_SETTINGS } from "@/shared/BrowserSettings"
 import { HistoryItem } from "@/shared/HistoryItem"
 import { AutoApprovalSettings, DEFAULT_AUTO_APPROVAL_SETTINGS } from "@/shared/AutoApprovalSettings"
 import { Mode, OpenaiReasoningEffort } from "@/shared/storage/types"
@@ -37,7 +36,6 @@ export async function readStateFromDisk(context: ExtensionContext) {
 	const lastShownAnnouncementId = context.globalState.get("lastShownAnnouncementId") as string | undefined
 	const taskHistory = context.globalState.get("taskHistory") as HistoryItem[] | undefined
 	const autoApprovalSettings = context.globalState.get("autoApprovalSettings") as AutoApprovalSettings | undefined
-	const browserSettings = context.globalState.get("browserSettings") as BrowserSettings | undefined
 	const liteLlmBaseUrl = context.globalState.get("liteLlmBaseUrl") as string | undefined
 	const liteLlmUsePromptCache = context.globalState.get("liteLlmUsePromptCache") as boolean | undefined
 	const fireworksModelMaxCompletionTokens = context.globalState.get("fireworksModelMaxCompletionTokens") as number | undefined
@@ -366,7 +364,6 @@ export async function readStateFromDisk(context: ExtensionContext) {
 		taskHistory: taskHistory || [],
 		autoApprovalSettings: autoApprovalSettings || DEFAULT_AUTO_APPROVAL_SETTINGS, // default value can be 0 or empty string
 		globalClineRulesToggles: globalClineRulesToggles || {},
-		browserSettings: { ...DEFAULT_BROWSER_SETTINGS, ...browserSettings }, // this will ensure that older versions of browserSettings (e.g. before remoteBrowserEnabled was added) are merged with the default values (false for remoteBrowserEnabled)
 		preferredLanguage: preferredLanguage || "English",
 		openaiReasoningEffort: (openaiReasoningEffort as OpenaiReasoningEffort) || "medium",
 		mode: mode || "act",

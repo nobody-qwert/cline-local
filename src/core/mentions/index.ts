@@ -1,7 +1,6 @@
 import * as vscode from "vscode"
 import * as path from "path"
 import { openFile } from "@integrations/misc/open-file"
-import { UrlContentFetcher } from "@services/browser/UrlContentFetcher"
 import { mentionRegexGlobal } from "@shared/context-mentions"
 import fs from "fs/promises"
 import { extractTextFromFile } from "@integrations/misc/extract-text"
@@ -53,12 +52,7 @@ export async function getFileMentionFromPath(filePath: string) {
 	return "@/" + relativePath
 }
 
-export async function parseMentions(
-	text: string,
-	cwd: string,
-	urlContentFetcher: UrlContentFetcher,
-	fileContextTracker?: FileContextTracker,
-): Promise<string> {
+export async function parseMentions(text: string, cwd: string, fileContextTracker?: FileContextTracker): Promise<string> {
 	const mentions: Set<string> = new Set()
 	let parsedText = text.replace(mentionRegexGlobal, (match, mention) => {
 		mentions.add(mention)
@@ -81,20 +75,6 @@ export async function parseMentions(
 		return match
 	})
 
-	const urlMention = Array.from(mentions).find((mention) => mention.startsWith("http"))
-	let launchBrowserError: Error | undefined
-	if (urlMention) {
-		try {
-			await urlContentFetcher.launchBrowser()
-		} catch (error) {
-			launchBrowserError = error
-			HostProvider.window.showMessage({
-				type: ShowMessageType.ERROR,
-				message: `Error fetching content for ${urlMention}: ${error.message}`,
-			})
-		}
-	}
-
 	// Filter out duplicate mentions while preserving order
 	const uniqueMentions = Array.from(new Set(mentions))
 
@@ -108,22 +88,8 @@ export async function parseMentions(
 		}
 
 		if (mention.startsWith("http")) {
-			let result: string
-			if (launchBrowserError) {
-				result = `Error fetching content: ${launchBrowserError.message}`
-			} else {
-				try {
-					const markdown = await urlContentFetcher.urlToMarkdown(mention)
-					result = markdown
-				} catch (error) {
-					HostProvider.window.showMessage({
-						type: ShowMessageType.ERROR,
-						message: `Error fetching content for ${mention}: ${error.message}`,
-					})
-					result = `Error fetching content: ${error.message}`
-				}
-			}
-			parsedText += `\n\n<url_content url="${mention}">\n${result}\n</url_content>`
+			// URL fetching disabled in local-only build
+			parsedText += `\n\n<url_content url="${mention}">\nURL fetching disabled in local-only build\n</url_content>`
 		} else if (isFileMention(mention)) {
 			const mentionPath = getFilePathFromMention(mention)
 			try {
@@ -172,14 +138,6 @@ export async function parseMentions(
 			} catch (error) {
 				parsedText += `\n\n<git_commit hash="${mention}">\nError fetching commit info: ${error.message}\n</git_commit>`
 			}
-		}
-	}
-
-	if (urlMention) {
-		try {
-			await urlContentFetcher.closeBrowser()
-		} catch (error) {
-			console.error(`Error closing browser: ${error.message}`)
 		}
 	}
 

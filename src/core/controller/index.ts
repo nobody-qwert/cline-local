@@ -111,7 +111,6 @@ export class Controller {
 
 		const apiConfiguration = this.cacheService.getApiConfiguration()
 		const autoApprovalSettings = this.cacheService.getGlobalStateKey("autoApprovalSettings")
-		const browserSettings = this.cacheService.getGlobalStateKey("browserSettings")
 		const focusChainSettings = this.cacheService.getGlobalStateKey("focusChainSettings")
 		const focusChainFeatureFlagEnabled = this.cacheService.getGlobalStateKey("focusChainFeatureFlagEnabled")
 		const preferredLanguage = this.cacheService.getGlobalStateKey("preferredLanguage")
@@ -156,7 +155,6 @@ export class Controller {
 			() => this.cancelTask(),
 			apiConfiguration,
 			autoApprovalSettings,
-			browserSettings,
 			effectiveFocusChainSettings,
 			preferredLanguage,
 			openaiReasoningEffort,
@@ -476,7 +474,6 @@ export class Controller {
 		const lastShownAnnouncementId = this.cacheService.getGlobalStateKey("lastShownAnnouncementId")
 		const taskHistory = this.cacheService.getGlobalStateKey("taskHistory")
 		const autoApprovalSettings = this.cacheService.getGlobalStateKey("autoApprovalSettings")
-		const browserSettings = this.cacheService.getGlobalStateKey("browserSettings")
 		const focusChainSettings = this.cacheService.getGlobalStateKey("focusChainSettings")
 		const focusChainFeatureFlagEnabled = this.cacheService.getGlobalStateKey("focusChainFeatureFlagEnabled")
 		const preferredLanguage = this.cacheService.getGlobalStateKey("preferredLanguage")
@@ -527,7 +524,6 @@ export class Controller {
 			shouldShowAnnouncement,
 			platform,
 			autoApprovalSettings,
-			browserSettings,
 			focusChainSettings,
 			focusChainFeatureFlagEnabled,
 			preferredLanguage,

@@ -1,6 +1,5 @@
-import { StateServiceClient, BrowserServiceClient } from "@/services/grpc-client"
+import { StateServiceClient } from "@/services/grpc-client"
 import { UpdateSettingsRequest, OpenaiReasoningEffort, McpDisplayMode } from "@shared/proto/cline/state"
-import { UpdateBrowserSettingsRequest } from "@shared/proto/cline/browser"
 
 /**
  * Converts values to their corresponding proto format
@@ -54,18 +53,6 @@ export const updateSetting = (field: keyof UpdateSettingsRequest, value: any) =>
 }
 
 /**
- * Updates a single browser setting field.
- *
- * @param field - The field key to update
- * @param value - The new value for the field
+ * Browser settings are disabled in the local-only build.
+ * This function is intentionally removed.
  */
-export const updateBrowserSetting = (field: keyof UpdateBrowserSettingsRequest, value: any) => {
-	const updateRequest: Partial<UpdateBrowserSettingsRequest> = {
-		metadata: {},
-		[field]: value,
-	}
-
-	BrowserServiceClient.updateBrowserSettings(UpdateBrowserSettingsRequest.create(updateRequest)).catch((error) => {
-		console.error(`Failed to update browser setting ${field}:`, error)
-	})
-}

@@ -1,5 +1,4 @@
 import React, { useCallback } from "react"
-import BrowserSessionRow from "@/components/chat/BrowserSessionRow"
 import ChatRow from "@/components/chat/ChatRow"
 import { ClineMessage } from "@shared/ExtensionMessage"
 import { MessageHandlers } from "../../types/chatTypes"
@@ -18,8 +17,8 @@ interface MessageRendererProps {
 }
 
 /**
- * Specialized component for rendering different message types
- * Handles browser sessions and regular messages
+ * Specialized component for rendering messages
+ * Handles regular chat messages only
  */
 export const MessageRenderer: React.FC<MessageRendererProps> = ({
 	index,
@@ -33,21 +32,8 @@ export const MessageRenderer: React.FC<MessageRendererProps> = ({
 	inputValue,
 	messageHandlers,
 }) => {
-	// Browser session group
-	if (Array.isArray(messageOrGroup)) {
-		return (
-			<BrowserSessionRow
-				key={messageOrGroup[0]?.ts}
-				messages={messageOrGroup}
-				isLast={index === groupedMessages.length - 1}
-				lastModifiedMessage={modifiedMessages.at(-1)}
-				onHeightChange={onHeightChange}
-				expandedRows={expandedRows}
-				onToggleExpand={onToggleExpand}
-				onSetQuote={onSetQuote}
-			/>
-		)
-	}
+	// Handle only single messages (arrays/browser sessions no longer supported)
+	const message = Array.isArray(messageOrGroup) ? messageOrGroup[0] : messageOrGroup
 
 	// Determine if this is the last message for status display purposes
 	const isLast = index === groupedMessages.length - 1
@@ -55,9 +41,9 @@ export const MessageRenderer: React.FC<MessageRendererProps> = ({
 	// Regular message
 	return (
 		<ChatRow
-			key={messageOrGroup.ts}
-			message={messageOrGroup}
-			isExpanded={expandedRows[messageOrGroup.ts] || false}
+			key={message.ts}
+			message={message}
+			isExpanded={expandedRows[message.ts] || false}
 			onToggleExpand={onToggleExpand}
 			lastModifiedMessage={modifiedMessages.at(-1)}
 			isLast={isLast}
