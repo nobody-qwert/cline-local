@@ -7,7 +7,6 @@ import { Mode } from "../../../shared/storage/types"
 import { ClineSay } from "../../../shared/ExtensionMessage"
 import { HostProvider } from "../../../hosts/host-provider"
 import { SubscribeToFileRequest, FileChangeEvent_ChangeType } from "../../../shared/proto/host/watch"
-import { telemetryService, featureFlagsService } from "@services/posthog/PostHogClientProvider"
 import { parseFocusChainListCounts } from "./utils"
 import {
 	getFocusChainFilePath,
@@ -38,7 +37,6 @@ export class FocusChainManager {
 	private postStateToWebview: () => Promise<void>
 	private say: (type: ClineSay, text?: string, images?: string[], files?: string[], partial?: boolean) => Promise<undefined>
 	private focusChainFileWatcherCancel?: () => void
-	private hasTrackedFirstProgress = false
 	private focusChainSettings: FocusChainSettings
 	private fileUpdateDebounceTimer?: NodeJS.Timeout
 
@@ -58,18 +56,19 @@ export class FocusChainManager {
 	}
 
 	/**
-	 * Fetches and caches PostHog remote feature flag for focus chain.
-	 * Updates global state with the current feature flag value and refreshes the webview.
+	 * Initializes focus chain feature flag to enabled state.
+	 * Updates global state with the feature flag value and refreshes the webview.
 	 * This method is called during FocusChainManager initialization.
 	 * @returns Promise<void> - Resolves when feature flag is updated, logs errors on failure
 	 */
 	private async initializeRemoteFeatureFlags(): Promise<void> {
 		try {
-			const enabled = await featureFlagsService.getFocusChainEnabled()
+			// Focus chain is always enabled in local version
+			const enabled = true
 			this.cacheService.setGlobalState("focusChainFeatureFlagEnabled", enabled)
 			await this.postStateToWebview()
 		} catch (error) {
-			console.error("Error initializing focus chain remote feature flags:", error)
+			console.error("Error initializing focus chain feature flags:", error)
 		}
 	}
 
@@ -150,7 +149,6 @@ export class FocusChainManager {
 						this.taskState.todoListWasUpdatedByUser = true
 
 						await this.postStateToWebview()
-						telemetryService.captureFocusChainListWritten(this.taskId)
 					} else {
 						console.log(
 							`[Task ${this.taskId}] Focus Chain List: File watcher triggered but content unchanged, skipping update`,
@@ -382,7 +380,7 @@ ${listInstrunctionsReminder}\n`
 	 * Handles telemetry tracking for progress updates and falls back to reading existing files if no update provided.
 	 * Also manages the apiRequestsSinceLastTodoUpdate counter and includes comprehensive error handling.
 	 * @param taskProgress - Optional focus chain list string from AI model's task_progress parameter
-	 * @requires this.taskState, this.say method, and telemetryService to be available
+	 * @requires this.taskState, this.say method
 	 * @returns Promise<void> - Updates taskState.currentFocusChainChecklist and sends UI messages
 	 */
 	public async updateFCListFromToolResponse(taskProgress: string | undefined) {
@@ -399,19 +397,6 @@ ${listInstrunctionsReminder}\n`
 				console.debug(
 					`[Task ${this.taskId}] focus chain list: LLM provided focus chain list update via task_progress parameter. Length ${previousList?.length || 0} > ${this.taskState.currentFocusChainChecklist.length}`,
 				)
-
-				// Parse focus chain list counts for telemetry
-				const { totalItems, completedItems } = parseFocusChainListCounts(taskProgress.trim())
-
-				// Track first progress creation
-				if (!this.hasTrackedFirstProgress && totalItems > 0) {
-					telemetryService.captureFocusChainProgressFirst(this.taskId, totalItems)
-					this.hasTrackedFirstProgress = true
-				}
-				// Track progress updates (only if not the first, and has items)
-				else if (this.hasTrackedFirstProgress && totalItems > 0) {
-					telemetryService.captureFocusChainProgressUpdate(this.taskId, totalItems, completedItems)
-				}
 
 				// Write the model's update to the markdown file
 				try {
@@ -478,18 +463,19 @@ ${listInstrunctionsReminder}\n`
 
 	/**
 	 * Analyzes the current focus chain list for incomplete items when a task is marked as complete.
-	 * Captures telemetry data about unfinished progress items to help improve the focus chain system.
 	 * @requires this.focusChainSettings.enabled and this.taskState.currentFocusChainChecklist to exist
-	 * @returns void - Sends telemetry data if incomplete items found, no return value
+	 * @returns void - No return value
 	 */
 	public checkIncompleteProgressOnCompletion() {
 		if (this.focusChainSettings.enabled && this.taskState.currentFocusChainChecklist) {
 			const { totalItems, completedItems } = parseFocusChainListCounts(this.taskState.currentFocusChainChecklist)
 
-			// Only track if there are items and not all are marked as completed
+			// Only log if there are items and not all are marked as completed
 			if (totalItems > 0 && completedItems < totalItems) {
 				const incompleteItems = totalItems - completedItems
-				telemetryService.captureFocusChainIncompleteOnCompletion(this.taskId, totalItems, completedItems, incompleteItems)
+				console.log(
+					`[Task ${this.taskId}] Focus chain completed with ${incompleteItems} of ${totalItems} items incomplete`,
+				)
 			}
 		}
 	}

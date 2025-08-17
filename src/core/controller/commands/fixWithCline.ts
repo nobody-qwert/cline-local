@@ -1,6 +1,5 @@
 import { Controller } from "../index"
 import { CommandContext, Empty } from "@/shared/proto/index.cline"
-import { telemetryService } from "@/services/posthog/PostHogClientProvider"
 import { getFileMentionFromPath } from "@/core/mentions"
 import { singleFileDiagnosticsToProblemsString } from "@/integrations/diagnostics"
 
@@ -15,6 +14,5 @@ export async function fixWithCline(controller: Controller, request: CommandConte
 	)
 	console.log("fixWithCline", request.selectedText, request.filePath, request.language, problemsString)
 
-	telemetryService.captureButtonClick("codeAction_fixWithCline", controller.task?.ulid)
 	return {}
 }

@@ -1,6 +1,5 @@
 import { Controller } from "../index"
 import { CommandContext, Empty } from "@/shared/proto/index.cline"
-import { telemetryService } from "@/services/posthog/PostHogClientProvider"
 import { getFileMentionFromPath } from "@/core/mentions"
 import { singleFileDiagnosticsToProblemsString } from "@/integrations/diagnostics"
 import { WebviewProvider } from "@/core/webview"
@@ -28,7 +27,6 @@ export async function addToCline(controller: Controller, request: CommandContext
 	}
 
 	console.log("addToCline", request.selectedText, filePath, request.language)
-	telemetryService.captureButtonClick("codeAction_addToChat", controller.task?.ulid)
 
 	return {}
 }

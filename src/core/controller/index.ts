@@ -1,6 +1,5 @@
 import { clineEnvConfig } from "@/config"
 import { HostProvider } from "@/hosts/host-provider"
-import { PostHogClientProvider, telemetryService } from "@/services/posthog/PostHogClientProvider"
 import { ShowMessageType } from "@/shared/proto/host/window"
 import { getLatestAnnouncementId } from "@/utils/announcements"
 import { getCwd, getDesktopDir } from "@/utils/path"
@@ -183,7 +182,6 @@ export class Controller {
 	async updateTelemetrySetting(telemetrySetting: TelemetrySetting) {
 		this.cacheService.setGlobalState("telemetrySetting", telemetrySetting)
 		const isOptedIn = telemetrySetting !== "disabled"
-		telemetryService.updateTelemetryState(isOptedIn)
 		await this.postStateToWebview()
 	}
 
@@ -192,9 +190,6 @@ export class Controller {
 
 		// Store mode to global state
 		this.cacheService.setGlobalState("mode", modeToSwitchTo)
-
-		// Capture mode switch telemetry | Capture regardless of if we know the taskId
-		telemetryService.captureModeSwitch(this.task?.ulid ?? "0", modeToSwitchTo)
 
 		// Update API handler with new mode (buildApiHandler now selects provider based on mode)
 		if (this.task) {
@@ -509,7 +504,7 @@ export class Controller {
 		const latestAnnouncementId = getLatestAnnouncementId(this.context)
 		const shouldShowAnnouncement = lastShownAnnouncementId !== latestAnnouncementId
 		const platform = process.platform as Platform
-		const distinctId = PostHogClientProvider.getInstance().distinctId
+		const distinctId = "local-user"
 		const version = this.context.extension?.packageJSON?.version ?? ""
 		const uriScheme = vscode.env.uriScheme
 

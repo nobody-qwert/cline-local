@@ -1,6 +1,5 @@
 import { Controller } from ".."
 import { Empty, StringRequest } from "@shared/proto/cline/common"
-import { telemetryService } from "@services/posthog/PostHogClientProvider"
 
 /**
  * Handles task feedback submission (thumbs up/down)
@@ -16,7 +15,7 @@ export async function taskFeedback(controller: Controller, request: StringReques
 
 	try {
 		if (controller.task?.ulid) {
-			telemetryService.captureTaskFeedback(controller.task.ulid, request.value as any)
+			console.log(`Task feedback received: ${request.value} for task ${controller.task.ulid}`)
 		} else {
 			console.warn("taskFeedback: No active task to receive feedback")
 		}

@@ -1,4 +1,3 @@
-import { telemetryService } from "@services/posthog/PostHogClientProvider"
 import { Controller } from ".."
 import { Empty, StringRequest } from "@shared/proto/cline/common"
 
@@ -30,10 +29,6 @@ export async function toggleFavoriteModel(controller: Controller, request: Strin
 			favoritedModelIds: updatedFavorites,
 		}
 		controller.cacheService.setApiConfiguration(updatedApiConfiguration)
-
-		// Capture telemetry for model favorite toggle
-		const isFavorited = !favoritedModelIds.includes(modelId)
-		telemetryService.captureModelFavoritesUsage(modelId, isFavorited)
 
 		// Post state to webview without changing any other configuration
 		await controller.postStateToWebview()

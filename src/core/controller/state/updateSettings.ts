@@ -11,7 +11,6 @@ import { convertProtoApiConfigurationToApiConfiguration } from "../../../shared/
 import { TelemetrySetting } from "@/shared/TelemetrySetting"
 import { OpenaiReasoningEffort } from "@/shared/storage/types"
 import { McpDisplayMode } from "@/shared/McpDisplayMode"
-import { telemetryService } from "../../../services/posthog/PostHogClientProvider"
 import { FocusChainSettings } from "@shared/FocusChainSettings"
 
 /**
@@ -146,11 +145,6 @@ export async function updateSettings(controller: Controller, request: UpdateSett
 				remindClineInterval: request.focusChainSettings.remindClineInterval,
 			}
 			controller.cacheService.setGlobalState("focusChainSettings", focusChainSettings)
-
-			// Capture telemetry when setting changes
-			if (wasEnabled !== isEnabled) {
-				telemetryService.captureFocusChainToggle(isEnabled)
-			}
 		}
 
 		// Post updated state to webview

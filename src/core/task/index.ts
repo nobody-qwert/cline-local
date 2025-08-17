@@ -1,5 +1,4 @@
 import { HostProvider } from "@/hosts/host-provider"
-import { errorService } from "@/services/posthog/PostHogClientProvider"
 import { ShowMessageType } from "@/shared/proto/index.host"
 import type { AnthropicCompat as Anthropic } from "@/types/anthropic-compat"
 import { ApiHandler, buildApiHandler } from "@api/index"
@@ -42,7 +41,6 @@ import { TerminalManager } from "@integrations/terminal/TerminalManager"
 import { listFiles } from "@services/glob/list-files"
 import { Logger } from "@services/logging/Logger"
 import { McpHub } from "@services/mcp/McpHub"
-import { telemetryService } from "@services/posthog/PostHogClientProvider"
 import { ApiConfiguration } from "@shared/api"
 import { findLast, findLastIndex } from "@shared/array"
 import { AutoApprovalSettings } from "@shared/AutoApprovalSettings"
@@ -78,6 +76,7 @@ import { updateApiReqMsg } from "./utils"
 import { FocusChainManager } from "./focus-chain"
 import { summarizeTask } from "@core/prompts/contextManagement"
 import { addUserInstructions } from "../prompts/system-prompt/user-instructions/addUserInstructions"
+import { ClineError } from "@services/error/ClineError"
 
 export type ToolResponse = string | Array<Anthropic.TextBlockParam | Anthropic.ImageBlockParam>
 type UserContent = Array<Anthropic.ContentBlockParam>
@@ -298,15 +297,6 @@ export class Task {
 			this.FocusChainManager.setupFocusChainFileWatcher().catch((error) => {
 				console.error(`[Task ${this.taskId}] Failed to setup focus chain file watcher:`, error)
 			})
-		}
-
-		// initialize telemetry
-		if (historyItem) {
-			// Open task from history
-			telemetryService.captureTaskRestarted(this.ulid, currentProvider)
-		} else {
-			// New task started
-			telemetryService.captureTaskCreated(this.ulid, currentProvider)
 		}
 
 		this.toolExecutor = new ToolExecutor(
@@ -1268,12 +1258,7 @@ export class Task {
 		} catch (error) {
 			const isContextWindowExceededError = checkContextWindowExceededError(error)
 			const { modelId, providerId } = await this.getCurrentProviderInfo()
-			const clineError = errorService.toClineError(error, modelId, providerId)
-
-			// Capture provider failure telemetry using clineError
-			// TODO: Move into errorService
-			errorService.logMessage(clineError.message)
-			errorService.logException(clineError)
+			const clineError = new ClineError(error, modelId, providerId)
 
 			if (isContextWindowExceededError && !this.taskState.didAutomaticallyRetryFailedApiRequest) {
 				await this.handleContextWindowExceededError()
@@ -1674,8 +1659,6 @@ export class Task {
 			content: userContent,
 		})
 
-		telemetryService.captureConversationTurnEvent(this.ulid, providerId, modelId, "user")
-
 		// since we sent off a placeholder api_req_started message to update the webview while waiting to actually start the API request (to load potential details for example), we need to update the text of that message
 		const lastApiReqIndex = findLastIndex(this.messageStateHandler.getClineMessages(), (m) => m.say === "api_req_started")
 		await this.messageStateHandler.updateClineMessage(lastApiReqIndex, {
@@ -1738,14 +1721,6 @@ export class Task {
 					streamingFailedMessage,
 				})
 				await this.messageStateHandler.saveClineMessagesAndUpdateHistory()
-
-				telemetryService.captureConversationTurnEvent(this.ulid, providerId, this.api.getModel().id, "assistant", {
-					tokensIn: inputTokens,
-					tokensOut: outputTokens,
-					cacheWriteTokens,
-					cacheReadTokens,
-					totalCost,
-				})
 
 				// signals to provider that it can retrieve the saved messages from disk, as abortTask can not be awaited on in nature
 				this.taskState.didFinishAbortingStream = true
@@ -1839,7 +1814,7 @@ export class Task {
 				// abandoned happens when extension is no longer waiting for the cline instance to finish aborting (error is thrown here when any function in the for loop throws due to this.abort)
 				if (!this.taskState.abandoned) {
 					this.abortTask() // if the stream failed, there's various states the task could be in (i.e. could have streamed some tools the user may have executed), so we just resort to replicating a cancel task
-					const clineError = errorService.toClineError(error, this.api.getModel().id)
+					const clineError = new ClineError(error, this.api.getModel().id)
 					const errorMessage = clineError.serialize()
 
 					await abortStream("streaming_failed", errorMessage)
@@ -1910,14 +1885,6 @@ export class Task {
 			// need to save assistant responses to file before proceeding to tool use since user can exit at any moment and we wouldn't be able to save the assistant's response
 			let didEndLoop = false
 			if (assistantMessage.length > 0) {
-				telemetryService.captureConversationTurnEvent(this.ulid, providerId, modelId, "assistant", {
-					tokensIn: inputTokens,
-					tokensOut: outputTokens,
-					cacheWriteTokens,
-					cacheReadTokens,
-					totalCost,
-				})
-
 				await this.messageStateHandler.addToApiConversationHistory({
 					role: "assistant",
 					content: [{ type: "text", text: assistantMessage }],
