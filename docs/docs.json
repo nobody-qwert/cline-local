@@ -1,8 +1,8 @@
 {
 	"$schema": "https://mintlify.com/docs.json",
 	"theme": "linden",
-	"name": "Cline",
-	"description": "AI-powered coding assistant for VSCode",
+	"name": "Cline Local",
+	"description": "Privacy-focused, local-only AI coding assistant for VSCode",
 	"colors": {
 		"primary": "#9D4EDD",
 		"light": "#F0E6FF",
@@ -39,17 +39,13 @@
 		"links": [
 			{
 				"label": "GitHub",
-				"href": "https://github.com/cline/cline"
-			},
-			{
-				"label": "Discord",
-				"href": "https://discord.gg/cline"
+				"href": "https://github.com/nobody-qwert/cline-local"
 			}
 		],
 		"primary": {
 			"type": "button",
-			"label": "Install Cline",
-			"href": "https://cline.bot/install?utm_source=website&utm_medium=header"
+			"label": "Install Extension",
+			"href": "https://github.com/nobody-qwert/cline-local#installation"
 		}
 	},
 	"navigation": {
@@ -116,20 +112,10 @@
 				]
 			},
 			{
-				"group": "Exploring Cline's Tools",
+				"group": "Cline Local Tools",
 				"pages": [
 					"exploring-clines-tools/cline-tools-guide",
-					"exploring-clines-tools/new-task-tool",
-					"exploring-clines-tools/remote-browser-support"
-				]
-			},
-			{
-				"group": "Enterprise Solutions",
-				"pages": [
-					"enterprise-solutions/cloud-provider-integration",
-					"enterprise-solutions/custom-instructions",
-					"enterprise-solutions/mcp-servers",
-					"enterprise-solutions/security-concerns"
+					"exploring-clines-tools/new-task-tool"
 				]
 			},
 			{
@@ -145,30 +131,11 @@
 				]
 			},
 			{
-				"group": "Provider Configuration",
+				"group": "Local Provider Configuration",
 				"pages": [
-					"provider-config/anthropic",
-					"provider-config/claude-code",
-					{
-						"group": "AWS Bedrock",
-						"pages": [
-							"provider-config/aws-bedrock/api-key",
-							"provider-config/aws-bedrock/iam-credentials",
-							"provider-config/aws-bedrock/cli-profile"
-						]
-					},
-					"provider-config/gcp-vertex-ai",
-					"provider-config/litellm-and-cline-using-codestral",
 					"provider-config/vscode-language-model-api",
-					"provider-config/xai-grok",
-					"provider-config/mistral-ai",
-					"provider-config/deepseek",
 					"provider-config/ollama",
-					"provider-config/openai",
-					"provider-config/openai-compatible",
-					"provider-config/openrouter",
-					"provider-config/requesty",
-					"provider-config/sap-aicore"
+					"provider-config/openai-compatible"
 				]
 			},
 			{
@@ -182,22 +149,16 @@
 			{
 				"group": "Troubleshooting",
 				"pages": ["troubleshooting/terminal-quick-fixes", "troubleshooting/terminal-integration-guide"]
-			},
-			{
-				"group": "More Info",
-				"pages": ["more-info/telemetry"]
 			}
 		]
 	},
 	"footer": {
 		"socials": {
-			"x": "https://x.com/cline",
-			"github": "https://github.com/cline/cline",
-			"discord": "https://discord.gg/cline"
+			"github": "https://github.com/nobody-qwert/cline-local"
 		}
 	},
 	"search": {
-		"prompt": "Search Cline documentation..."
+		"prompt": "Search Cline Local documentation..."
 	},
 	"contextual": {
 		"options": ["copy"]
