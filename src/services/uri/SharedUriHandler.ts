@@ -38,16 +38,7 @@ export class SharedUriHandler {
 					return false
 				}
 				case "/auth": {
-					console.log("SharedUriHandler: Auth callback received:", { path: uri.path, provider: query.get("provider") })
-
-					const token = query.get("idToken")
-					const provider = query.get("provider")
-
-					if (token) {
-						await visibleWebview.controller.handleAuthCallback(token, provider)
-						return true
-					}
-					console.warn("SharedUriHandler: Missing idToken parameter for auth callback")
+					console.warn("SharedUriHandler: Auth callback route is disabled in local-only build")
 					return false
 				}
 				default:

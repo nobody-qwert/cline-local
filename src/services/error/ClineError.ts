@@ -1,4 +1,3 @@
-import { CLINE_ACCOUNT_AUTH_ERROR_MESSAGE } from "../../shared/ClineAccount"
 import { serializeError } from "serialize-error"
 
 export enum ClineErrorType {
@@ -140,9 +139,6 @@ export class ClineError extends Error {
 
 		// Check for auth message (only if message exists)
 		const message = err.message
-		if (message?.includes(CLINE_ACCOUNT_AUTH_ERROR_MESSAGE)) {
-			return ClineErrorType.Auth
-		}
 
 		// Check rate limit patterns
 		if (message) {

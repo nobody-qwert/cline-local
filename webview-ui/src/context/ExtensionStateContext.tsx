@@ -7,9 +7,8 @@ import { DEFAULT_BROWSER_SETTINGS } from "@shared/BrowserSettings"
 import { DEFAULT_FOCUS_CHAIN_SETTINGS } from "@shared/FocusChainSettings"
 import { DEFAULT_PLATFORM, type ExtensionState } from "@shared/ExtensionMessage"
 import { DEFAULT_MCP_DISPLAY_MODE } from "@shared/McpDisplayMode"
-import type { UserInfo } from "@shared/proto/cline/account"
 import { EmptyRequest, StringRequest } from "@shared/proto/cline/common"
-import { type TerminalProfile, UpdateSettingsRequest } from "@shared/proto/cline/state"
+import { type TerminalProfile } from "@shared/proto/cline/state"
 import { WebviewProviderType as WebviewProviderTypeEnum, WebviewProviderTypeRequest } from "@shared/proto/cline/ui"
 import { convertProtoToClineMessage } from "@shared/proto-conversions/cline-message"
 import { convertProtoMcpServersToMcpServers } from "@shared/proto-conversions/mcp/mcp-server-conversion"
@@ -54,7 +53,6 @@ interface ExtensionStateContextType extends ExtensionState {
 	mcpTab?: McpViewTab
 	showSettings: boolean
 	showHistory: boolean
-	showAccount: boolean
 	showAnnouncement: boolean
 
 	// Setters
@@ -75,7 +73,6 @@ interface ExtensionStateContextType extends ExtensionState {
 	setTotalTasksSize: (value: number | null) => void
 
 	// Refresh functions
-	setUserInfo: (userInfo?: UserInfo) => void
 
 	// Navigation state setters
 	setShowMcp: (value: boolean) => void
@@ -85,13 +82,11 @@ interface ExtensionStateContextType extends ExtensionState {
 	navigateToMcp: (tab?: McpViewTab) => void
 	navigateToSettings: () => void
 	navigateToHistory: () => void
-	navigateToAccount: () => void
 	navigateToChat: () => void
 
 	// Hide functions
 	hideSettings: () => void
 	hideHistory: () => void
-	hideAccount: () => void
 	hideAnnouncement: () => void
 	closeMcpView: () => void
 
@@ -112,7 +107,6 @@ export const ExtensionStateContextProvider: React.FC<{
 	const [mcpTab, setMcpTab] = useState<McpViewTab | undefined>(undefined)
 	const [showSettings, setShowSettings] = useState(false)
 	const [showHistory, setShowHistory] = useState(false)
-	const [showAccount, setShowAccount] = useState(false)
 	const [showAnnouncement, setShowAnnouncement] = useState(false)
 
 	// Helper for MCP view
@@ -124,7 +118,6 @@ export const ExtensionStateContextProvider: React.FC<{
 	// Hide functions
 	const hideSettings = useCallback(() => setShowSettings(false), [setShowSettings])
 	const hideHistory = useCallback(() => setShowHistory(false), [setShowHistory])
-	const hideAccount = useCallback(() => setShowAccount(false), [setShowAccount])
 	const hideAnnouncement = useCallback(() => setShowAnnouncement(false), [setShowAnnouncement])
 
 	// Navigation functions
@@ -132,42 +125,31 @@ export const ExtensionStateContextProvider: React.FC<{
 		(tab?: McpViewTab) => {
 			setShowSettings(false)
 			setShowHistory(false)
-			setShowAccount(false)
 			if (tab) {
 				setMcpTab(tab)
 			}
 			setShowMcp(true)
 		},
-		[setShowMcp, setMcpTab, setShowSettings, setShowHistory, setShowAccount],
+		[setShowMcp, setMcpTab, setShowSettings, setShowHistory],
 	)
 
 	const navigateToSettings = useCallback(() => {
 		setShowHistory(false)
 		closeMcpView()
-		setShowAccount(false)
 		setShowSettings(true)
-	}, [setShowSettings, setShowHistory, closeMcpView, setShowAccount])
+	}, [setShowSettings, setShowHistory, closeMcpView])
 
 	const navigateToHistory = useCallback(() => {
 		setShowSettings(false)
 		closeMcpView()
-		setShowAccount(false)
 		setShowHistory(true)
-	}, [setShowSettings, closeMcpView, setShowAccount, setShowHistory])
-
-	const navigateToAccount = useCallback(() => {
-		setShowSettings(false)
-		closeMcpView()
-		setShowHistory(false)
-		setShowAccount(true)
-	}, [setShowSettings, closeMcpView, setShowHistory, setShowAccount])
+	}, [setShowSettings, closeMcpView, setShowHistory])
 
 	const navigateToChat = useCallback(() => {
 		setShowSettings(false)
 		closeMcpView()
 		setShowHistory(false)
-		setShowAccount(false)
-	}, [setShowSettings, closeMcpView, setShowHistory, setShowAccount])
+	}, [setShowSettings, closeMcpView, setShowHistory])
 
 	const [state, setState] = useState<ExtensionState>({
 		version: "",
@@ -232,7 +214,6 @@ export const ExtensionStateContextProvider: React.FC<{
 	const mcpButtonUnsubscribeRef = useRef<(() => void) | null>(null)
 	const historyButtonClickedSubscriptionRef = useRef<(() => void) | null>(null)
 	const chatButtonUnsubscribeRef = useRef<(() => void) | null>(null)
-	const accountButtonClickedSubscriptionRef = useRef<(() => void) | null>(null)
 	const settingsButtonClickedSubscriptionRef = useRef<(() => void) | null>(null)
 	const partialMessageUnsubscribeRef = useRef<(() => void) | null>(null)
 	const mcpMarketplaceUnsubscribeRef = useRef<(() => void) | null>(null)
@@ -478,21 +459,6 @@ export const ExtensionStateContextProvider: React.FC<{
 				console.error("Failed to initialize webview via gRPC:", error)
 			})
 
-		// Set up account button clicked subscription
-		accountButtonClickedSubscriptionRef.current = UiServiceClient.subscribeToAccountButtonClicked(EmptyRequest.create(), {
-			onResponse: () => {
-				// When account button is clicked, navigate to account view
-				console.log("[DEBUG] Received account button clicked event from gRPC stream")
-				navigateToAccount()
-			},
-			onError: (error) => {
-				console.error("Error in account button clicked subscription:", error)
-			},
-			onComplete: () => {
-				console.log("Account button clicked subscription completed")
-			},
-		})
-
 		// Fetch available terminal profiles on launch
 		StateServiceClient.getAvailableTerminalProfiles(EmptyRequest.create({}))
 			.then((response) => {
@@ -549,10 +515,6 @@ export const ExtensionStateContextProvider: React.FC<{
 			if (chatButtonUnsubscribeRef.current) {
 				chatButtonUnsubscribeRef.current()
 				chatButtonUnsubscribeRef.current = null
-			}
-			if (accountButtonClickedSubscriptionRef.current) {
-				accountButtonClickedSubscriptionRef.current()
-				accountButtonClickedSubscriptionRef.current = null
 			}
 			if (settingsButtonClickedSubscriptionRef.current) {
 				settingsButtonClickedSubscriptionRef.current()
@@ -613,7 +575,6 @@ export const ExtensionStateContextProvider: React.FC<{
 		mcpTab,
 		showSettings,
 		showHistory,
-		showAccount,
 		showAnnouncement,
 		globalClineRulesToggles: state.globalClineRulesToggles || {},
 		localClineRulesToggles: state.localClineRulesToggles || {},
@@ -627,13 +588,11 @@ export const ExtensionStateContextProvider: React.FC<{
 		navigateToMcp,
 		navigateToSettings,
 		navigateToHistory,
-		navigateToAccount,
 		navigateToChat,
 
 		// Hide functions
 		hideSettings,
 		hideHistory,
-		hideAccount,
 		hideAnnouncement,
 		setShowAnnouncement,
 		setShouldShowAnnouncement: (value) =>
@@ -682,7 +641,6 @@ export const ExtensionStateContextProvider: React.FC<{
 		setMcpTab,
 		setTotalTasksSize,
 		onRelinquishControl,
-		setUserInfo: (userInfo?: UserInfo) => setState((prevState) => ({ ...prevState, userInfo })),
 	}
 
 	return <ExtensionStateContext.Provider value={contextValue}>{children}</ExtensionStateContext.Provider>

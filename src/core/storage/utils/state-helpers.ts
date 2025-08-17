@@ -3,7 +3,6 @@ import { ApiProvider, BedrockModelId, ModelInfo } from "@shared/api"
 import { ClineRulesToggles } from "@/shared/cline-rules"
 import { DEFAULT_MCP_DISPLAY_MODE, McpDisplayMode } from "@/shared/McpDisplayMode"
 import { TelemetrySetting } from "@/shared/TelemetrySetting"
-import { UserInfo } from "@/shared/UserInfo"
 import { BrowserSettings, DEFAULT_BROWSER_SETTINGS } from "@/shared/BrowserSettings"
 import { HistoryItem } from "@/shared/HistoryItem"
 import { AutoApprovalSettings, DEFAULT_AUTO_APPROVAL_SETTINGS } from "@/shared/AutoApprovalSettings"
@@ -43,7 +42,6 @@ export async function readStateFromDisk(context: ExtensionContext) {
 	const liteLlmUsePromptCache = context.globalState.get("liteLlmUsePromptCache") as boolean | undefined
 	const fireworksModelMaxCompletionTokens = context.globalState.get("fireworksModelMaxCompletionTokens") as number | undefined
 	const fireworksModelMaxTokens = context.globalState.get("fireworksModelMaxTokens") as number | undefined
-	const userInfo = context.globalState.get("userInfo") as UserInfo | undefined
 	const qwenApiLine = context.globalState.get("qwenApiLine") as string | undefined
 	const moonshotApiLine = context.globalState.get("moonshotApiLine") as string | undefined
 	const telemetrySetting = context.globalState.get("telemetrySetting") as TelemetrySetting | undefined
@@ -372,7 +370,6 @@ export async function readStateFromDisk(context: ExtensionContext) {
 		preferredLanguage: preferredLanguage || "English",
 		openaiReasoningEffort: (openaiReasoningEffort as OpenaiReasoningEffort) || "medium",
 		mode: mode || "act",
-		userInfo,
 		mcpMarketplaceEnabled: mcpMarketplaceEnabledRaw ?? true,
 		mcpDisplayMode: mcpDisplayMode ?? DEFAULT_MCP_DISPLAY_MODE,
 		mcpResponsesCollapsed: mcpResponsesCollapsed,

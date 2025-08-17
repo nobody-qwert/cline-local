@@ -1,6 +1,5 @@
 import { clineEnvConfig } from "@/config"
 import { HostProvider } from "@/hosts/host-provider"
-import { AuthService } from "@/services/auth/AuthService"
 import { PostHogClientProvider, telemetryService } from "@/services/posthog/PostHogClientProvider"
 import { ShowMessageType } from "@/shared/proto/host/window"
 import { getLatestAnnouncementId } from "@/utils/announcements"
@@ -8,7 +7,6 @@ import { getCwd, getDesktopDir } from "@/utils/path"
 import type { AnthropicCompat as Anthropic } from "../../types/anthropic-compat"
 import { buildApiHandler } from "@api/index"
 import { downloadTask } from "@integrations/misc/export-markdown"
-import { ClineAccountService } from "@services/account/ClineAccountService"
 import { McpHub } from "@services/mcp/McpHub"
 import { ApiProvider, ModelInfo } from "@shared/api"
 import { ChatContent } from "@shared/ChatContent"
@@ -17,7 +15,6 @@ import { HistoryItem } from "@shared/HistoryItem"
 import { McpMarketplaceCatalog } from "@shared/mcp"
 import { Mode } from "@shared/storage/types"
 import { TelemetrySetting } from "@shared/TelemetrySetting"
-import { UserInfo } from "@shared/UserInfo"
 import { fileExistsAtPath } from "@utils/fs"
 import axios from "axios"
 import fs from "fs/promises"
@@ -42,8 +39,6 @@ export class Controller {
 	task?: Task
 
 	mcpHub: McpHub
-	accountService: ClineAccountService
-	authService: AuthService
 	readonly cacheService: CacheService
 
 	constructor(
@@ -53,16 +48,12 @@ export class Controller {
 		this.id = id
 
 		HostProvider.get().logToChannel("ClineProvider instantiated")
-		this.accountService = ClineAccountService.getInstance()
 		this.cacheService = new CacheService(context)
-		this.authService = AuthService.getInstance(this)
 
 		// Initialize cache service asynchronously - critical for extension functionality
 		this.cacheService
 			.initialize()
-			.then(() => {
-				this.authService.restoreRefreshTokenAndRetrieveAuthInfo()
-			})
+			.then(() => {})
 			.catch((error) => {
 				console.error("CRITICAL: Failed to initialize CacheService - extension may not function properly:", error)
 			})
@@ -113,39 +104,6 @@ export class Controller {
 		this.mcpHub.dispose()
 
 		console.error("Controller disposed")
-	}
-
-	// Auth methods
-	async handleSignOut() {
-		try {
-			// TODO: update to clineAccountId and then move clineApiKey to a clear function.
-			this.cacheService.setSecret("clineAccountId", undefined)
-			this.cacheService.setGlobalState("userInfo", undefined)
-
-			// Update API providers through cache service
-			const apiConfiguration = this.cacheService.getApiConfiguration()
-			const updatedConfig = {
-				...apiConfiguration,
-				planModeApiProvider: "openrouter" as ApiProvider,
-				actModeApiProvider: "openrouter" as ApiProvider,
-			}
-			this.cacheService.setApiConfiguration(updatedConfig)
-
-			await this.postStateToWebview()
-			HostProvider.window.showMessage({
-				type: ShowMessageType.INFORMATION,
-				message: "Successfully logged out of Cline",
-			})
-		} catch (error) {
-			HostProvider.window.showMessage({
-				type: ShowMessageType.INFORMATION,
-				message: "Logout failed",
-			})
-		}
-	}
-
-	async setUserInfo(info?: UserInfo) {
-		this.cacheService.setGlobalState("userInfo", info)
 	}
 
 	async initTask(task?: string, images?: string[], files?: string[], historyItem?: HistoryItem) {
@@ -297,57 +255,6 @@ export class Controller {
 			await this.initTask(undefined, undefined, undefined, historyItem) // clears task again, so we need to abortTask manually above
 			// Dont send the state to the webview, the new Cline instance will send state when it's ready.
 			// Sending the state here sent an empty messages array to webview leading to virtuoso having to reload the entire list
-		}
-	}
-
-	async handleAuthCallback(customToken: string, provider: string | null = null) {
-		try {
-			await this.authService.handleAuthCallback(customToken, provider ? provider : "google")
-
-			const clineProvider: ApiProvider = "cline"
-
-			// Get current settings to determine how to update providers
-			const planActSeparateModelsSetting = this.cacheService.getGlobalStateKey("planActSeparateModelsSetting")
-
-			const currentMode = await this.getCurrentMode()
-
-			// Get current API configuration from cache
-			const currentApiConfiguration = this.cacheService.getApiConfiguration()
-
-			const updatedConfig = { ...currentApiConfiguration }
-
-			if (planActSeparateModelsSetting) {
-				// Only update the current mode's provider
-				if (currentMode === "plan") {
-					updatedConfig.planModeApiProvider = clineProvider
-				} else {
-					updatedConfig.actModeApiProvider = clineProvider
-				}
-			} else {
-				// Update both modes to keep them in sync
-				updatedConfig.planModeApiProvider = clineProvider
-				updatedConfig.actModeApiProvider = clineProvider
-			}
-
-			// Update the API configuration through cache service
-			this.cacheService.setApiConfiguration(updatedConfig)
-
-			// Mark welcome view as completed since user has successfully logged in
-			this.cacheService.setGlobalState("welcomeViewCompleted", true)
-
-			if (this.task) {
-				this.task.api = buildApiHandler({ ...updatedConfig, ulid: this.task.ulid }, currentMode)
-			}
-
-			await this.postStateToWebview()
-		} catch (error) {
-			console.error("Failed to handle auth callback:", error)
-			HostProvider.window.showMessage({
-				type: ShowMessageType.ERROR,
-				message: "Failed to log in to Cline",
-			})
-			// Even on login failure, we preserve any existing tokens
-			// Only clear tokens on explicit logout
 		}
 	}
 
@@ -576,7 +483,6 @@ export class Controller {
 		const openaiReasoningEffort = this.cacheService.getGlobalStateKey("openaiReasoningEffort")
 		const mode = this.cacheService.getGlobalStateKey("mode")
 		const strictPlanModeEnabled = this.cacheService.getGlobalStateKey("strictPlanModeEnabled")
-		const userInfo = this.cacheService.getGlobalStateKey("userInfo")
 		const mcpMarketplaceEnabled = this.cacheService.getGlobalStateKey("mcpMarketplaceEnabled")
 		const mcpDisplayMode = this.cacheService.getGlobalStateKey("mcpDisplayMode")
 		const telemetrySetting = this.cacheService.getGlobalStateKey("telemetrySetting")
@@ -587,9 +493,7 @@ export class Controller {
 		const terminalReuseEnabled = this.cacheService.getGlobalStateKey("terminalReuseEnabled")
 		const defaultTerminalProfile = this.cacheService.getGlobalStateKey("defaultTerminalProfile")
 		const isNewUser = this.cacheService.getGlobalStateKey("isNewUser")
-		const welcomeViewCompleted = Boolean(
-			this.cacheService.getGlobalStateKey("welcomeViewCompleted") || this.authService.getInfo()?.user?.uid,
-		)
+		const welcomeViewCompleted = Boolean(this.cacheService.getGlobalStateKey("welcomeViewCompleted"))
 		const mcpResponsesCollapsed = this.cacheService.getGlobalStateKey("mcpResponsesCollapsed")
 		const terminalOutputLineLimit = this.cacheService.getGlobalStateKey("terminalOutputLineLimit")
 		const localClineRulesToggles = this.cacheService.getWorkspaceStateKey("localClineRulesToggles")
@@ -630,7 +534,6 @@ export class Controller {
 			openaiReasoningEffort,
 			mode,
 			strictPlanModeEnabled,
-			userInfo,
 			mcpMarketplaceEnabled,
 			mcpDisplayMode,
 			telemetrySetting,

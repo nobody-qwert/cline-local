@@ -737,7 +737,6 @@ export class CacheService {
 			preferredLanguage: state.preferredLanguage,
 			openaiReasoningEffort: state.openaiReasoningEffort,
 			mode: state.mode,
-			userInfo: state.userInfo,
 			mcpMarketplaceEnabled: state.mcpMarketplaceEnabled,
 			mcpDisplayMode: state.mcpDisplayMode,
 			mcpResponsesCollapsed: state.mcpResponsesCollapsed,

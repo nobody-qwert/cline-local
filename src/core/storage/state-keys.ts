@@ -2,7 +2,6 @@ import { ApiProvider, BedrockModelId, ModelInfo } from "@shared/api"
 import { ClineRulesToggles } from "@/shared/cline-rules"
 import { McpDisplayMode } from "@/shared/McpDisplayMode"
 import { TelemetrySetting } from "@/shared/TelemetrySetting"
-import { UserInfo } from "@/shared/UserInfo"
 import { BrowserSettings } from "@/shared/BrowserSettings"
 import { HistoryItem } from "@/shared/HistoryItem"
 import { AutoApprovalSettings } from "@/shared/AutoApprovalSettings"
@@ -71,7 +70,6 @@ export type GlobalStateKey =
 	| "globalClineRulesToggles"
 	| "globalWorkflowToggles"
 	| "browserSettings"
-	| "userInfo"
 	| "liteLlmBaseUrl"
 	| "liteLlmUsePromptCache"
 	| "fireworksModelMaxCompletionTokens"
@@ -193,7 +191,6 @@ export interface GlobalState {
 	globalClineRulesToggles: ClineRulesToggles
 	globalWorkflowToggles: ClineRulesToggles
 	browserSettings: BrowserSettings
-	userInfo: UserInfo | undefined
 	liteLlmBaseUrl: string | undefined
 	liteLlmUsePromptCache: boolean | undefined
 	fireworksModelMaxCompletionTokens: number | undefined

@@ -7,7 +7,6 @@ import { Mode, OpenaiReasoningEffort } from "./storage/types"
 import { HistoryItem } from "./HistoryItem"
 import { TelemetrySetting } from "./TelemetrySetting"
 import { ClineRulesToggles } from "./cline-rules"
-import { UserInfo } from "./UserInfo"
 import { McpDisplayMode } from "./McpDisplayMode"
 
 // webview will hold state
@@ -53,7 +52,6 @@ export interface ExtensionState {
 	terminalOutputLineLimit: number
 	defaultTerminalProfile?: string
 	uriScheme?: string
-	userInfo?: UserInfo
 	version: string
 	distinctId: string
 	globalClineRulesToggles: ClineRulesToggles
