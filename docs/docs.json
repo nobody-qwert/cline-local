@@ -133,7 +133,6 @@
 			{
 				"group": "Local Provider Configuration",
 				"pages": [
-					"provider-config/vscode-language-model-api",
 					"provider-config/ollama",
 					"provider-config/openai-compatible"
 				]
