@@ -189,8 +189,24 @@ Choose models available from your selected provider.
 
 ## Versioning and CHANGELOG
 
-- This fork tracks its own versions independently from upstream
-- `CHANGELOG.md` in this repo records changes specific to Cline Local
+**Cline Local** follows independent semantic versioning starting from v1.0.0:
+
+- **Major versions (2.0.0, 3.0.0)**: Breaking changes or significant architectural updates
+- **Minor versions (1.1.0, 1.2.0)**: New features, upstream merges with compatible changes  
+- **Patch versions (1.0.1, 1.0.2)**: Bug fixes, security updates, minor improvements
+
+### Upstream Integration Policy
+
+When merging relevant changes from upstream Cline:
+- Only privacy-compatible features are integrated
+- Cloud/telemetry features are explicitly excluded
+- Changes are documented as "merged upstream improvements" with version references
+- Fork-specific modifications are clearly distinguished from upstream contributions
+
+### Changelog Structure
+
+- `CHANGELOG.md` records changes specific to Cline Local starting from v1.0.0
+- `CHANGELOG-UPSTREAM.md` preserves the complete upstream changelog for reference
 - Expect version skew vs upstream due to selective syncing and removal of cloud/browser features
 
 ---

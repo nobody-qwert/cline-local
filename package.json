@@ -1,22 +1,22 @@
 {
-	"name": "claude-dev",
-	"displayName": "Cline",
-	"description": "Autonomous coding agent right in your IDE, capable of creating/editing files, running commands, and more with your permission every step of the way.",
-	"version": "3.25.3",
+	"name": "cline-local",
+	"displayName": "Cline Local",
+	"description": "Lean, local-only fork of Cline - autonomous coding agent focused on privacy and local development with no cloud dependencies, telemetry, or background processes.",
+	"version": "1.0.0",
 	"icon": "assets/icons/icon.png",
 	"engines": {
 		"vscode": "^1.84.0"
 	},
 	"author": {
-		"name": "Cline Bot Inc."
+		"name": "Cline Local Contributors"
 	},
 	"license": "Apache-2.0",
-	"publisher": "saoudrizwan",
+	"publisher": "nobody-qwert",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/cline/cline"
+		"url": "https://github.com/nobody-qwert/cline-local"
 	},
-	"homepage": "https://cline.bot",
+	"homepage": "https://github.com/nobody-qwert/cline-local",
 	"categories": [
 		"AI",
 		"Chat",
@@ -27,17 +27,19 @@
 	],
 	"keywords": [
 		"cline",
+		"cline-local",
+		"local",
+		"privacy",
+		"offline",
 		"claude",
 		"dev",
 		"mcp",
-		"openrouter",
 		"coding",
 		"agent",
 		"autonomous",
-		"chatgpt",
-		"sonnet",
 		"ai",
-		"llama"
+		"local-only",
+		"no-telemetry"
 	],
 	"activationEvents": [
 		"onLanguage",
