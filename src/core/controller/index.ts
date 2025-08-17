@@ -182,10 +182,11 @@ export class Controller {
 			}
 			this.cacheService.setGlobalState("autoApprovalSettings", updatedAutoApprovalSettings)
 		}
-		// Apply remote feature flag gate to focus chain settings
+		// Local-only Focus Chain settings (ignore remote feature flags in lean/local build)
 		const effectiveFocusChainSettings = {
 			...(focusChainSettings || { enabled: true, remindClineInterval: 6 }),
-			enabled: Boolean(focusChainSettings?.enabled) && Boolean(focusChainFeatureFlagEnabled),
+			// Respect local toggle only. Default to enabled when undefined.
+			enabled: focusChainSettings?.enabled ?? true,
 		}
 
 		this.task = new Task(

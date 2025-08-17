@@ -109,23 +109,20 @@ const FeatureSettingsSection = ({ renderSectionHeader }: FeatureSettingsSectionP
 							Enforces strict tool use while in plan mode, preventing file edits.
 						</p>
 					</div>
-					{focusChainFeatureFlagEnabled && (
-						<div style={{ marginTop: 10 }}>
-							<VSCodeCheckbox
-								checked={focusChainSettings?.enabled || false}
-								onChange={(e: any) => {
-									const checked = e.target.checked === true
-									updateSetting("focusChainSettings", { ...focusChainSettings, enabled: checked })
-								}}>
-								Enable Focus Chain
-							</VSCodeCheckbox>
-							<p className="text-xs text-[var(--vscode-descriptionForeground)]">
-								Enables enhanced task progress tracking and automatic focus chain list management throughout
-								tasks.
-							</p>
-						</div>
-					)}
-					{focusChainFeatureFlagEnabled && focusChainSettings?.enabled && (
+					<div style={{ marginTop: 10 }}>
+						<VSCodeCheckbox
+							checked={focusChainSettings?.enabled || false}
+							onChange={(e: any) => {
+								const checked = e.target.checked === true
+								updateSetting("focusChainSettings", { ...focusChainSettings, enabled: checked })
+							}}>
+							Enable Focus Chain
+						</VSCodeCheckbox>
+						<p className="text-xs text-[var(--vscode-descriptionForeground)]">
+							Enables enhanced task progress tracking and automatic focus chain list management throughout tasks.
+						</p>
+					</div>
+					{focusChainSettings?.enabled && (
 						<div style={{ marginTop: 10, marginLeft: 20 }}>
 							<label
 								htmlFor="focus-chain-remind-interval"

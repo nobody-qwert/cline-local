@@ -135,26 +135,21 @@ export async function updateSettings(controller: Controller, request: UpdateSett
 			controller.cacheService.setGlobalState("strictPlanModeEnabled", request.strictPlanModeEnabled)
 		}
 
-		// Update focus chain settings
+		// Update focus chain settings (local-only; ignore remote flags)
 		if (request.focusChainSettings !== undefined) {
-			const remoteEnabled = controller.cacheService.getGlobalStateKey("focusChainFeatureFlagEnabled")
-			if (remoteEnabled === false) {
-				// No-op when feature flag disabled
-			} else {
-				const currentSettings = controller.cacheService.getGlobalStateKey("focusChainSettings")
-				const wasEnabled = currentSettings?.enabled ?? false
-				const isEnabled = request.focusChainSettings.enabled
+			const currentSettings = controller.cacheService.getGlobalStateKey("focusChainSettings")
+			const wasEnabled = currentSettings?.enabled ?? false
+			const isEnabled = request.focusChainSettings.enabled
 
-				const focusChainSettings = {
-					enabled: isEnabled,
-					remindClineInterval: request.focusChainSettings.remindClineInterval,
-				}
-				controller.cacheService.setGlobalState("focusChainSettings", focusChainSettings)
+			const focusChainSettings: FocusChainSettings = {
+				enabled: isEnabled,
+				remindClineInterval: request.focusChainSettings.remindClineInterval,
+			}
+			controller.cacheService.setGlobalState("focusChainSettings", focusChainSettings)
 
-				// Capture telemetry when setting changes
-				if (wasEnabled !== isEnabled) {
-					telemetryService.captureFocusChainToggle(isEnabled)
-				}
+			// Capture telemetry when setting changes
+			if (wasEnabled !== isEnabled) {
+				telemetryService.captureFocusChainToggle(isEnabled)
 			}
 		}
 
