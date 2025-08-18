@@ -50,21 +50,6 @@ export class LmStudioHandler implements ApiHandler {
 		let finalSystemPrompt = systemPrompt
 		const thinkingEnabled = (this.options.thinkingBudgetTokens || 0) > 0
 
-		// For GPT-OSS models, use Harmony format "Reasoning: low|medium|high"
-		// These models always reason, but we can control the effort level
-		if (isGptOss && !/Reasoning:\s*(low|medium|high)/i.test(systemPrompt)) {
-			if (thinkingEnabled) {
-				const effort = this.options.openaiReasoningEffort || "medium"
-				finalSystemPrompt = `${systemPrompt}\n\nReasoning: ${effort}`
-			} else {
-				// When thinking is disabled, use minimal reasoning effort
-				finalSystemPrompt = `${systemPrompt}\n\nReasoning: low`
-			}
-		} else if (!isGptOss && !thinkingEnabled) {
-			// For non-GPT-OSS models, explicitly instruct to not use reasoning when thinking is disabled
-			finalSystemPrompt = `${systemPrompt}\n\nDo not use reasoning or thinking. Provide direct responses without internal reasoning.`
-		}
-
 		const openAiMessages: OpenAI.Chat.ChatCompletionMessageParam[] = [
 			{ role: "system", content: finalSystemPrompt },
 			...convertToOpenAiMessages(messages),
