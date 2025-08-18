@@ -188,6 +188,7 @@ export class CacheService {
 		const {
 			// Local provider configuration fields only
 			requestTimeoutMs,
+			openaiReasoningEffort,
 			ollamaBaseUrl,
 			ollamaApiKey,
 			ollamaApiOptionsCtxNum,
@@ -218,6 +219,7 @@ export class CacheService {
 			planModeVsCodeLmModelSelector,
 			planModeOllamaModelId,
 			planModeLmStudioModelId,
+			planModeThinkingBudgetTokens,
 
 			// Act mode configuration updates
 			actModeApiProvider,
@@ -225,6 +227,7 @@ export class CacheService {
 			actModeVsCodeLmModelSelector,
 			actModeOllamaModelId,
 			actModeLmStudioModelId,
+			actModeThinkingBudgetTokens,
 
 			// Global state updates
 			ollamaBaseUrl,
@@ -232,6 +235,7 @@ export class CacheService {
 			lmStudioBaseUrl,
 			favoritedModelIds,
 			requestTimeoutMs,
+			openaiReasoningEffort,
 		})
 
 		// Batch update secrets (local providers only)
@@ -503,6 +507,7 @@ export class CacheService {
 		return {
 			// Local provider configuration fields only
 			requestTimeoutMs: this.globalStateCache["requestTimeoutMs"],
+			openaiReasoningEffort: this.globalStateCache["openaiReasoningEffort"],
 			ollamaBaseUrl: this.globalStateCache["ollamaBaseUrl"],
 			ollamaApiKey: this.secretsCache["ollamaApiKey"],
 			ollamaApiOptionsCtxNum: this.globalStateCache["ollamaApiOptionsCtxNum"],

@@ -1,4 +1,5 @@
 import type { LanguageModelChatSelector } from "../api/providers/types"
+import { OpenaiReasoningEffort } from "@/shared/storage/types"
 
 export type ApiProvider = "ollama" | "lmstudio"
 
@@ -7,6 +8,7 @@ export interface ApiHandlerOptions {
 	ulid?: string // Used to identify the task in API requests
 	requestTimeoutMs?: number
 	onRetryAttempt?: (attempt: number, maxRetries: number, delay: number, error: any) => void
+	openaiReasoningEffort?: OpenaiReasoningEffort // OpenAI reasoning effort level: "low" | "medium" | "high"
 
 	// Local provider configurations
 	ollamaBaseUrl?: string

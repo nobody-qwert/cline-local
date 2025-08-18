@@ -10,6 +10,7 @@ interface LmStudioHandlerOptions {
 	lmStudioBaseUrl?: string
 	lmStudioModelId?: string
 	thinkingBudgetTokens?: number
+	openaiReasoningEffort?: string
 }
 
 export class LmStudioHandler implements ApiHandler {
@@ -49,7 +50,7 @@ export class LmStudioHandler implements ApiHandler {
 		let finalSystemPrompt = systemPrompt
 		const thinkingEnabled = (this.options.thinkingBudgetTokens || 0) > 0
 		if (isGptOss && thinkingEnabled && !/Reasoning:\s*(low|medium|high)/i.test(systemPrompt)) {
-			const effort = "medium" // TODO: plumb from settings.openaiReasoningEffort if needed
+			const effort = this.options.openaiReasoningEffort || "medium"
 			finalSystemPrompt = `${systemPrompt}\n\nReasoning: ${effort}`
 		}
 

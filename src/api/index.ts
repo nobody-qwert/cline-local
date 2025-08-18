@@ -40,6 +40,7 @@ function createHandlerForProvider(
 				lmStudioModelId: mode === "plan" ? options.planModeLmStudioModelId : options.actModeLmStudioModelId,
 				thinkingBudgetTokens:
 					mode === "plan" ? options.planModeThinkingBudgetTokens : options.actModeThinkingBudgetTokens,
+				openaiReasoningEffort: options.openaiReasoningEffort,
 			})
 		default:
 			return new OllamaHandler({
