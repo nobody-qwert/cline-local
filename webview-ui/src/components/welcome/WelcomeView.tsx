@@ -48,7 +48,7 @@ const WelcomeView = memo(() => {
 						appearance="secondary"
 						onClick={() => setShowApiOptions(!showApiOptions)}
 						className="mt-2.5 w-full">
-						Use your own API key
+						Configure provider
 					</VSCodeButton>
 				)}
 

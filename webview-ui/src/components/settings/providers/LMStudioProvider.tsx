@@ -4,6 +4,7 @@ import { useInterval } from "react-use"
 import { DebouncedTextField } from "../common/DebouncedTextField"
 import { ModelsServiceClient } from "@/services/grpc-client"
 import { BaseUrlField } from "../common/BaseUrlField"
+import { StatusPill } from "../common/StatusPill"
 import { useApiConfigurationHandlers } from "../utils/useApiConfigurationHandlers"
 import { useExtensionState } from "@/context/ExtensionStateContext"
 import { getModeSpecificFields } from "../utils/providerUtils"
@@ -28,6 +29,11 @@ export const LMStudioProvider = ({ showModelOptions, isPopup, currentMode }: LMS
 
 	const [lmStudioModels, setLmStudioModels] = useState<string[]>([])
 
+	// Connection status
+	const [connOk, setConnOk] = useState<boolean | null>(null)
+	const [statusText, setStatusText] = useState<string>("")
+	const [statusTip, setStatusTip] = useState<string | undefined>(undefined)
+
 	// Poll LM Studio models
 	const requestLmStudioModels = useCallback(async () => {
 		try {
@@ -36,10 +42,16 @@ export const LMStudioProvider = ({ showModelOptions, isPopup, currentMode }: LMS
 			} as any)
 			if (response && response.values) {
 				setLmStudioModels(response.values)
+				setConnOk(true)
+				setStatusText(`Connected — ${response.values.length} models`)
+				setStatusTip(undefined)
 			}
-		} catch (error) {
+		} catch (error: any) {
 			console.error("Failed to fetch LM Studio models:", error)
 			setLmStudioModels([])
+			setConnOk(false)
+			setStatusText("Cannot connect")
+			setStatusTip(String(error?.message || "Connection failed"))
 		}
 	}, [apiConfiguration?.lmStudioBaseUrl])
 
@@ -57,16 +69,29 @@ export const LMStudioProvider = ({ showModelOptions, isPopup, currentMode }: LMS
 				placeholder="Default: http://localhost:1234"
 				label="Use custom base URL"
 			/>
+			<div style={{ marginTop: 4 }}>
+				<StatusPill
+					status={connOk === null ? "unknown" : connOk ? "ok" : "error"}
+					text={connOk === null ? "Not checked" : statusText}
+					tooltip={statusTip}
+				/>
+			</div>
 
-			<DebouncedTextField
-				initialValue={lmStudioModelId || ""}
-				onChange={(value) =>
-					handleModeFieldChange({ plan: "planModeLmStudioModelId", act: "actModeLmStudioModelId" }, value, currentMode)
-				}
-				style={{ width: "100%" }}
-				placeholder={"e.g. meta-llama-3.1-8b-instruct"}>
-				<span style={{ fontWeight: 500 }}>Model ID</span>
-			</DebouncedTextField>
+			{lmStudioModels.length === 0 && (
+				<DebouncedTextField
+					initialValue={lmStudioModelId || ""}
+					onChange={(value) =>
+						handleModeFieldChange(
+							{ plan: "planModeLmStudioModelId", act: "actModeLmStudioModelId" },
+							value,
+							currentMode,
+						)
+					}
+					style={{ width: "100%" }}
+					placeholder={"e.g. meta-llama-3.1-8b-instruct"}>
+					<span style={{ fontWeight: 500 }}>Model ID</span>
+				</DebouncedTextField>
+			)}
 
 			{lmStudioModels.length > 0 && (
 				<VSCodeRadioGroup

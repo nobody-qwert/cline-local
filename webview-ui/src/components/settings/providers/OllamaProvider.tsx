@@ -7,6 +7,7 @@ import { ModelsServiceClient } from "@/services/grpc-client"
 import { StringRequest } from "@shared/proto/cline/common"
 import OllamaModelPicker from "../OllamaModelPicker"
 import { BaseUrlField } from "../common/BaseUrlField"
+import { StatusPill } from "../common/StatusPill"
 import { useExtensionState } from "@/context/ExtensionStateContext"
 import { useApiConfigurationHandlers } from "../utils/useApiConfigurationHandlers"
 import { getModeSpecificFields } from "../utils/providerUtils"
@@ -30,6 +31,10 @@ export const OllamaProvider = ({ showModelOptions, isPopup, currentMode }: Ollam
 	const { ollamaModelId } = getModeSpecificFields(apiConfiguration, currentMode)
 
 	const [ollamaModels, setOllamaModels] = useState<string[]>([])
+	// Connection status
+	const [connOk, setConnOk] = useState<boolean | null>(null)
+	const [statusText, setStatusText] = useState<string>("")
+	const [statusTip, setStatusTip] = useState<string | undefined>(undefined)
 
 	// Poll ollama models
 	const requestOllamaModels = useCallback(async () => {
@@ -41,10 +46,16 @@ export const OllamaProvider = ({ showModelOptions, isPopup, currentMode }: Ollam
 			)
 			if (response && response.values) {
 				setOllamaModels(response.values)
+				setConnOk(true)
+				setStatusText(`Connected — ${response.values.length} models`)
+				setStatusTip(undefined)
 			}
-		} catch (error) {
+		} catch (error: any) {
 			console.error("Failed to fetch Ollama models:", error)
 			setOllamaModels([])
+			setConnOk(false)
+			setStatusText("Cannot connect")
+			setStatusTip(String(error?.message || "Connection failed"))
 		}
 	}, [apiConfiguration?.ollamaBaseUrl])
 
@@ -73,6 +84,14 @@ export const OllamaProvider = ({ showModelOptions, isPopup, currentMode }: Ollam
 				/>
 			)}
 
+			<div style={{ marginTop: 4 }}>
+				<StatusPill
+					status={connOk === null ? "unknown" : connOk ? "ok" : "error"}
+					text={connOk === null ? "Not checked" : statusText}
+					tooltip={statusTip}
+				/>
+			</div>
+
 			{/* Model selection - use filterable picker */}
 			<label htmlFor="ollama-model-selection">
 				<span style={{ fontWeight: 500 }}>Model</span>
@@ -86,8 +105,8 @@ export const OllamaProvider = ({ showModelOptions, isPopup, currentMode }: Ollam
 				placeholder={ollamaModels.length > 0 ? "Search and select a model..." : "e.g. llama3.1"}
 			/>
 
-			{/* Show status message based on model availability */}
-			{ollamaModels.length === 0 && (
+			{/* Show status message based on connectivity */}
+			{connOk === false && (
 				<p
 					style={{
 						fontSize: "12px",
@@ -95,8 +114,7 @@ export const OllamaProvider = ({ showModelOptions, isPopup, currentMode }: Ollam
 						color: "var(--vscode-descriptionForeground)",
 						fontStyle: "italic",
 					}}>
-					Unable to fetch models from Ollama server. Please ensure Ollama is running and accessible, or enter the model
-					ID manually above.
+					Unable to connect to Ollama server. Ensure it is running and accessible, or enter the model ID manually above.
 				</p>
 			)}
 

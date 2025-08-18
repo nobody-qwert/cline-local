@@ -100,11 +100,11 @@ const ApiOptions = ({ showModelOptions, apiErrorMessage, modelIdErrorMessage, is
 				</select>
 			</DropdownContainer>
 
-			{apiConfiguration && selectedProvider === "lmstudio" && (
+			{selectedProvider === "lmstudio" && (
 				<LMStudioProvider showModelOptions={showModelOptions} isPopup={isPopup} currentMode={currentMode} />
 			)}
 
-			{apiConfiguration && selectedProvider === "ollama" && (
+			{selectedProvider === "ollama" && (
 				<OllamaProvider showModelOptions={showModelOptions} isPopup={isPopup} currentMode={currentMode} />
 			)}
 
