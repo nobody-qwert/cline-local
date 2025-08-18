@@ -8,96 +8,49 @@ Cline Local is a lean, local‑only fork of the Cline VSCode extension. It prese
 
 ---
 
-## Features
+## Core capabilities
 
-- **Plan/Act workflow** with human‑in‑the‑loop controls  
-  Reviews diffs before file changes; prompts approval before running terminal commands
-- **File operations**  
-  Create/edit files with diffs; adapts to linter/compiler output to fix issues automatically
-- **Terminal integration**  
-  Execute commands and stream output; continue tasks while long‑running processes run in background
-- **MCP integration**  
-  Extend capabilities by connecting to MCP servers for custom tools/resources
-- **Read‑only web ingestion**  
-  `web_fetch` fetches HTTP(S) pages, strips non‑content HTML, converts to Markdown
-- **Local provider support**  
-  OpenAI‑compatible (configurable `baseUrl`), Ollama, and LM Studio
-- **Git‑friendly**  
-  No background checkpoints; designed to work cleanly with your own Git workflows
+- Plan/Act workflow with human‑in‑the‑loop approvals (diff review for file edits; approval before terminal commands)
+- Create and edit files with diffs; adapts to linter/compiler output to self‑correct common issues
+- Terminal integration: execute commands with approval and stream output; long‑running processes can continue while tasks proceed
+- MCP integration: connect to servers for custom tools/resources
+- Read‑only web ingestion via `web_fetch` (HTTP→Markdown; no browser automation)
+- Local providers: OpenAI‑compatible (configurable `baseUrl`), Ollama, LM Studio
+- Git‑friendly by design: no background checkpoints; works cleanly with your Git workflows
 
 ---
 
-## Differences vs Full Version
+## Key differences from upstream
 
-- **Local‑only model focus**
-  - Providers limited to OpenAI‑compatible (configurable `baseUrl`), Ollama, and LM Studio
-  - Cloud‑specific providers (Anthropic, Bedrock, Gemini, Mistral, OpenRouter, etc.) removed
-- **No browser automation**
-  - The `browser_action` tool and computer‑use features are removed
-  - Web content ingestion is read‑only via HTTP `web_fetch` (axios + cheerio + turndown)
-- **No telemetry, authentication, or billing**
-  - PostHog and related analytics removed
-  - Cline Account and billing UI removed
-- **No background checkpoints**
-  - Designed to work cleanly alongside your own Git practices without internal snapshots
-- **Repository policy**
-  - Public PRs disabled for this fork
-  - Manual sync with upstream cline/cline (see Repository Policy)
+- Removed
+  - Browser automation (`browser_action`, computer‑use features)
+  - Cloud provider integrations (Anthropic, OpenRouter, Gemini, Bedrock, Mistral, etc.)
+  - Telemetry/analytics and account/billing UIs
+  - Background checkpoints (no internal Git snapshots)
+- Retained and focused
+  - Plan/Act workflow with approvals
+  - MCP integration (custom tools/resources)
+  - Local‑only providers: OpenAI‑compatible (configurable `baseUrl`), Ollama, LM Studio
+  - Git‑friendly operation (works cleanly with your own Git practices)
 
 ---
 
-## Benefits for Local/Privacy‑First Environments
+## Privacy, security, and operations
 
-- **Smaller footprint and faster installs**
-  - Fewer dependencies; no cloud provider SDKs or analytics packages
-- **Privacy by default**
-  - No telemetry or account/billing flows; strictly controlled network access
-- **Git‑friendly workflows**
-  - No internal snapshotting; avoids `.git` churn and keeps history under your control
-- **Predictable and offline‑friendlier**
-  - Uses local providers (Ollama/LM Studio/OpenAI‑compatible with local `baseUrl`); no browser automation variability
-- **Simpler maintenance surface**
-  - Fewer moving parts to configure, debug, and update
+- No telemetry, account, or billing flows
+- Strictly controlled network access (only your provider endpoint and `web_fetch` when used)
+- Human‑in‑the‑loop approvals for file edits and terminal commands
+- Smaller dependency footprint; fewer moving parts
+- Works cleanly with Git; no internal snapshots
 
 ---
 
 ## What Cline Local Can Do
 
-<img align="right" width="340" src="https://github.com/user-attachments/assets/3cf21e04-7ce9-4d22-a7b9-ba2c595e88a4">
+See Core capabilities above.
 
-- **Analyze your workspace**
-  - Explore directory structure, run regex searches, and read files to build context
-- **Create and edit files**
-  - Show diffs in‑editor; you can accept, modify, or revert
-  - Monitors linter/compiler output to self‑correct common issues
-- **Run commands in your terminal**
-  - Executes with your approval, streams output back to the task loop
-  - Long‑running processes (e.g., dev servers) can continue while tasks proceed
-- **Use MCP (Model Context Protocol)**
-  - Connect to MCP servers to extend capabilities with custom tools/resources
-- **Fetch and convert web pages to Markdown (read‑only)**
-  - `web_fetch` performs HTTP/HTTPS requests, strips non‑content elements, and converts HTML to Markdown for contextual reading
-  - No browsing, clicking, or visual automation
 
-<img width="2000" height="0" src="https://github.com/user-attachments/assets/ee14e6f7-20b8-4391-9091-8e8e25561929"><br>
 
-## Removed in Cline Local
-
-- **Browser automation** (e.g., `browser_action`, computer‑use features)
-- **Cloud provider integrations** (Anthropic, OpenRouter, Gemini, Bedrock, Mistral, etc.)
-- **Telemetry/analytics and account/billing UIs**
-- **Background checkpoints** that performed Git snapshots inside your workspace
-  - This fork assumes developers manage Git directly, avoiding extra snapshots and `.git` churn
-
----
-
-## Supported Providers (Local)
-
-- OpenAI‑compatible (point `baseUrl` to your local/hosted compatible endpoint)
-- Ollama
-- LM Studio
-
----
 
 ## Quick Start (Build from Source)
 
@@ -127,7 +80,9 @@ Cline Local is a lean, local‑only fork of the Cline VSCode extension. It prese
 
 ---
 
-## Configure a Local Provider
+## Configure providers
+
+Supported local providers: OpenAI‑compatible (configurable `baseUrl`), Ollama, LM Studio.
 
 Open the extension UI → Settings, then select one of:
 
@@ -164,17 +119,9 @@ Choose models available from your selected provider.
 - `new_task` (create tasks with context)
 - `use_mcp_tool`, `access_mcp_resource` (MCP integration)
 - `web_fetch` (HTTP‑only)
-- Removed: `browser_action`
 
 ---
 
-## Security and Control
-
-- Human‑in‑the‑loop for all file edits and terminal commands
-- No telemetry or analytics in this fork
-- Network access is limited to what your configured tools perform (e.g., `web_fetch` HTTP requests; your provider endpoint if configured)
-
----
 
 ## Repository Policy
 
