@@ -1,5 +1,5 @@
 import type { LanguageModelChatSelector } from "../api/providers/types"
-import { OpenaiReasoningEffort } from "@/shared/storage/types"
+import { OpenaiReasoningEffort } from "@shared/storage/types"
 
 export type ApiProvider = "ollama" | "lmstudio"
 

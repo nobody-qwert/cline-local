@@ -1,5 +1,5 @@
 import { VSCodeDropdown, VSCodeOption, VSCodeLink } from "@vscode/webview-ui-toolkit/react"
-import { useState, useCallback, useEffect } from "react"
+import { useState, useCallback, useEffect, useRef } from "react"
 import { useInterval } from "react-use"
 import { DebouncedTextField } from "../common/DebouncedTextField"
 import { ModelsServiceClient } from "@/services/grpc-client"
@@ -35,8 +35,12 @@ export const LMStudioProvider = ({ showModelOptions, isPopup, currentMode }: LMS
 	const [statusText, setStatusText] = useState<string>("")
 	const [statusTip, setStatusTip] = useState<string | undefined>(undefined)
 
+	const inFlightRef = useRef(false)
+
 	// Poll LM Studio models
 	const requestLmStudioModels = useCallback(async () => {
+		if (inFlightRef.current) return
+		inFlightRef.current = true
 		try {
 			const response = await ModelsServiceClient.getLmStudioModels({
 				value: apiConfiguration?.lmStudioBaseUrl || "",
@@ -61,6 +65,12 @@ export const LMStudioProvider = ({ showModelOptions, isPopup, currentMode }: LMS
 						)
 					}
 				}
+			} else {
+				// Treat invalid response shape as a failed connection
+				setLmStudioModels([])
+				setConnOk(false)
+				setStatusText("Cannot connect")
+				setStatusTip("Unexpected response from LM Studio")
 			}
 		} catch (error: any) {
 			console.error("Failed to fetch LM Studio models:", error)
@@ -68,14 +78,17 @@ export const LMStudioProvider = ({ showModelOptions, isPopup, currentMode }: LMS
 			setConnOk(false)
 			setStatusText("Cannot connect")
 			setStatusTip(String(error?.message || "Connection failed"))
+		} finally {
+			inFlightRef.current = false
 		}
 	}, [apiConfiguration?.lmStudioBaseUrl, currentMode, handleModeFieldChange, lmStudioModelId])
 
 	useEffect(() => {
+		setConnOk(null)
 		requestLmStudioModels()
-	}, [requestLmStudioModels])
+	}, [apiConfiguration?.lmStudioBaseUrl])
 
-	useInterval(requestLmStudioModels, 2000)
+	useInterval(requestLmStudioModels, connOk === false ? 2000 : null)
 
 	// Determine if the selected model supports "thinking" and whether it's GPT-OSS (effort-based)
 	const { selectedModelInfo, selectedModelId } = normalizeApiConfiguration(apiConfiguration, currentMode)
