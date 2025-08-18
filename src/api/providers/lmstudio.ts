@@ -38,8 +38,22 @@ export class LmStudioHandler implements ApiHandler {
 	@withRetry({ retryAllErrors: true })
 	async *createMessage(systemPrompt: string, messages: Anthropic.Messages.MessageParam[]): ApiStream {
 		const client = this.ensureClient()
+
+		// Determine model capabilities for reasoning control
+		const modelId = this.getModel().id || ""
+		const lowerId = modelId.toLowerCase()
+		const isGptOss = lowerId.startsWith("gpt-oss") || lowerId.includes("/gpt-oss") || lowerId.includes("openai/gpt-oss")
+
+		// For GPT-OSS models, set Harmony "Reasoning: low|medium|high" in the system message.
+		// Default to "medium" if not specified elsewhere.
+		let finalSystemPrompt = systemPrompt
+		if (isGptOss && !/Reasoning:\s*(low|medium|high)/i.test(systemPrompt)) {
+			const effort = "medium" // TODO: plumb from settings.openaiReasoningEffort if needed
+			finalSystemPrompt = `${systemPrompt}\n\nReasoning: ${effort}`
+		}
+
 		const openAiMessages: OpenAI.Chat.ChatCompletionMessageParam[] = [
-			{ role: "system", content: systemPrompt },
+			{ role: "system", content: finalSystemPrompt },
 			...convertToOpenAiMessages(messages),
 		]
 
@@ -52,7 +66,8 @@ export class LmStudioHandler implements ApiHandler {
 				stream_options: { include_usage: true },
 			}
 			// If thinking budget is enabled, include OpenAI-compatible reasoning params
-			if (this.options.thinkingBudgetTokens && this.options.thinkingBudgetTokens > 0) {
+			// Skip for GPT-OSS models (they use Harmony "Reasoning: low|medium|high" instead)
+			if (!isGptOss && this.options.thinkingBudgetTokens && this.options.thinkingBudgetTokens > 0) {
 				req.reasoning = { budget_tokens: this.options.thinkingBudgetTokens }
 			}
 			const stream = (await client.chat.completions.create(req)) as any

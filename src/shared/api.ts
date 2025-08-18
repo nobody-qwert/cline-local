@@ -47,6 +47,8 @@ export interface ModelInfo {
 	contextWindow?: number
 	supportsImages?: boolean
 	supportsPromptCache: boolean
+	// Whether model supports OpenAI-compatible reasoning output (e.g., streams "reasoning_content")
+	supportsReasoning?: boolean
 	inputPrice?: number
 	outputPrice?: number
 	cacheWritesPrice?: number
@@ -72,6 +74,7 @@ export const lmStudioModelInfoSaneDefaults: ModelInfo = {
 	contextWindow: 128_000,
 	supportsImages: false,
 	supportsPromptCache: false,
+	supportsReasoning: false,
 	inputPrice: 0,
 	outputPrice: 0,
 }
@@ -88,9 +91,39 @@ export function getLmStudioModelInfoForModelId(modelId?: string): ModelInfo {
 		return base
 	}
 	const id = modelId.toLowerCase()
-	if (id.startsWith("gpt-oss") || id.includes("/gpt-oss")) {
-		return { ...base, contextWindow: 131_072 }
+
+	// GPT-OSS (OpenAI Harmony-style reasoning; effort is low|medium|high via system prompt)
+	if (id.startsWith("gpt-oss") || id.includes("/gpt-oss") || id.includes("openai/gpt-oss")) {
+		return { ...base, contextWindow: 131_072, supportsReasoning: true }
 	}
+
+	// Qwen 30B families (context windows and thinking support)
+	const isQwenThinking2507 =
+		id.includes("qwen3-30b-a3b-thinking-2507") || (id.includes("qwen3-30b-a3b") && id.includes("thinking"))
+	const isQwenBaseA3B = id.includes("qwen3-30b-a3b") && !id.includes("instruct") && !id.includes("thinking")
+	const isQwenInstruct2507 = id.includes("qwen3-30b-a3b-instruct-2507")
+	const isQwenCoder30bInstruct =
+		id.includes("qwen3-coder-30b-a3b-instruct") || id.includes("qwen-coder-30b-a3b-instruct") || id.includes("qwen-coder-30b")
+	const isMlxPort =
+		id.includes("mlx") && (id.includes("qwen3-coder-30b-a3b-instruct") || id.includes("qwen-coder-30b-a3b-instruct"))
+	const isQwen3_30b_3ab_2507 = id.includes("qwen3-30b-3ab-2507")
+
+	// Thinking-only variant
+	if (isQwenThinking2507) {
+		return { ...base, contextWindow: 262_144, supportsReasoning: true }
+	}
+
+	// Base A3B (supports thinking and non-thinking)
+	if (isQwenBaseA3B) {
+		return { ...base, contextWindow: 131_072, supportsReasoning: true }
+	}
+
+	// Non-thinking instruct variants (including MLX ports)
+	if (isQwenInstruct2507 || isQwenCoder30bInstruct || isMlxPort || isQwen3_30b_3ab_2507) {
+		return { ...base, contextWindow: 262_144, supportsReasoning: false }
+	}
+
+	// Default sane LM Studio local model behavior
 	return base
 }
 
