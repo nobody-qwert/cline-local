@@ -45,13 +45,18 @@ export class LmStudioHandler implements ApiHandler {
 		const lowerId = modelId.toLowerCase()
 		const isGptOss = lowerId.startsWith("gpt-oss") || lowerId.includes("/gpt-oss") || lowerId.includes("openai/gpt-oss")
 
-		// For GPT-OSS models, set Harmony "Reasoning: low|medium|high" in the system message
-		// only when thinking is enabled via the UI toggle (ThinkingBudgetSlider).
+		// For GPT-OSS models, set Harmony "Reasoning: low|medium|high|off" in the system message
+		// based on whether thinking is enabled via the UI toggle (ThinkingBudgetSlider).
 		let finalSystemPrompt = systemPrompt
 		const thinkingEnabled = (this.options.thinkingBudgetTokens || 0) > 0
-		if (isGptOss && thinkingEnabled && !/Reasoning:\s*(low|medium|high)/i.test(systemPrompt)) {
-			const effort = this.options.openaiReasoningEffort || "medium"
-			finalSystemPrompt = `${systemPrompt}\n\nReasoning: ${effort}`
+		if (isGptOss && !/Reasoning:\s*(low|medium|high|off)/i.test(systemPrompt)) {
+			if (thinkingEnabled) {
+				const effort = this.options.openaiReasoningEffort || "medium"
+				finalSystemPrompt = `${systemPrompt}\n\nReasoning: ${effort}`
+			} else {
+				// Explicitly disable reasoning for GPT-OSS models
+				finalSystemPrompt = `${systemPrompt}\n\nReasoning: off`
+			}
 		}
 
 		const openAiMessages: OpenAI.Chat.ChatCompletionMessageParam[] = [
@@ -69,8 +74,13 @@ export class LmStudioHandler implements ApiHandler {
 			}
 			// If thinking budget is enabled, include OpenAI-compatible reasoning params
 			// Skip for GPT-OSS models (they use Harmony "Reasoning: low|medium|high" instead)
-			if (!isGptOss && this.options.thinkingBudgetTokens && this.options.thinkingBudgetTokens > 0) {
-				req.reasoning = { budget_tokens: this.options.thinkingBudgetTokens }
+			if (!isGptOss) {
+				if (this.options.thinkingBudgetTokens && this.options.thinkingBudgetTokens > 0) {
+					req.reasoning = { budget_tokens: this.options.thinkingBudgetTokens }
+				} else {
+					// Explicitly disable reasoning when thinking is not enabled
+					req.reasoning = false
+				}
 			}
 			const stream = (await client.chat.completions.create(req)) as any
 			for await (const chunk of stream as any) {
