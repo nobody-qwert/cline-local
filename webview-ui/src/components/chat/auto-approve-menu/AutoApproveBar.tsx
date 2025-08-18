@@ -1,9 +1,7 @@
-import { useRef, useState, useMemo } from "react"
+import { useRef, useState } from "react"
 import { useExtensionState } from "@/context/ExtensionStateContext"
-import { useAutoApproveActions } from "@/hooks/useAutoApproveActions"
 import { CODE_BLOCK_BG_COLOR } from "@/components/common/CodeBlock"
 import { getAsVar, VSC_TITLEBAR_INACTIVE_FOREGROUND } from "@/utils/vscStyles"
-import AutoApproveMenuItem from "./AutoApproveMenuItem"
 import AutoApproveModal from "./AutoApproveModal"
 import { ACTION_METADATA, NOTIFICATIONS_SETTING } from "./constants"
 
@@ -13,57 +11,40 @@ interface AutoApproveBarProps {
 
 const AutoApproveBar = ({ style }: AutoApproveBarProps) => {
 	const { autoApprovalSettings } = useExtensionState()
-	const { isChecked, isFavorited, updateAction } = useAutoApproveActions()
 
 	const [isModalVisible, setIsModalVisible] = useState(false)
 	const buttonRef = useRef<HTMLDivElement>(null)
 
-	const favorites = useMemo(() => autoApprovalSettings.favorites || [], [autoApprovalSettings.favorites])
-
-	// Render a favorited item with a checkbox
-	const renderFavoritedItem = (favId: string) => {
-		const actions = [...ACTION_METADATA.flatMap((a) => [a, a.subAction]), NOTIFICATIONS_SETTING]
-		const action = actions.find((a) => a?.id === favId)
-		if (!action) return null
-
-		return (
-			<AutoApproveMenuItem
-				action={action}
-				isChecked={isChecked}
-				isFavorited={isFavorited}
-				onToggle={updateAction}
-				condensed={true}
-				showIcon={false}
-			/>
-		)
-	}
-
 	const getQuickAccessItems = () => {
 		const notificationsEnabled = autoApprovalSettings.enableNotifications
-		const enabledActionsNames = Object.keys(autoApprovalSettings.actions).filter(
+
+		// Determine which action IDs are enabled
+		const enabledActionIds = Object.keys(autoApprovalSettings.actions).filter(
 			(key) => autoApprovalSettings.actions[key as keyof typeof autoApprovalSettings.actions],
 		)
-		const enabledActions = enabledActionsNames.map((action) => {
-			return ACTION_METADATA.flatMap((a) => [a, a.subAction]).find((a) => a?.id === action)
-		})
 
-		let minusFavorites = enabledActions.filter((action) => !favorites.includes(action?.id ?? "") && action?.shortName)
+		// Map enabled IDs to metadata with short names
+		const allActions = ACTION_METADATA.flatMap((a) => [a, a.subAction]).filter(Boolean)
+		const enabledActions = enabledActionIds
+			.map((id) => allActions.find((a) => a?.id === id))
+			.filter((a) => a && a.shortName) as { shortName: string }[]
 
+		// Build summary items
+		const summaryItems: string[] = enabledActions.map((a) => a.shortName)
 		if (notificationsEnabled) {
-			minusFavorites.push(NOTIFICATIONS_SETTING)
+			summaryItems.push(NOTIFICATIONS_SETTING.shortName)
 		}
 
+		if (summaryItems.length === 0) return null
+
 		return [
-			...favorites.map((favId) => renderFavoritedItem(favId)),
-			minusFavorites.length > 0 ? (
-				<span className="text-[color:var(--vscode-foreground-muted)] pl-[10px] opacity-60" key="separator">
-					✓
-				</span>
-			) : null,
-			...minusFavorites.map((action, index) => (
-				<span className="text-[color:var(--vscode-foreground-muted)] opacity-60" key={action?.id}>
-					{action?.shortName}
-					{index < minusFavorites.length - 1 && ","}
+			<span className="text-[color:var(--vscode-foreground-muted)] pl-[10px] opacity-60" key="separator">
+				✓
+			</span>,
+			...summaryItems.map((name, index) => (
+				<span className="text-[color:var(--vscode-foreground-muted)] opacity-60" key={`${name}-${index}`}>
+					{name}
+					{index < summaryItems.length - 1 && ","}
 				</span>
 			)),
 		]
