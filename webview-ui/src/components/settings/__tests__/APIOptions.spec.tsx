@@ -114,11 +114,9 @@ describe("ApiOptions Component", () => {
 		mockExtensionState({
 			planModeApiProvider: "ollama",
 			actModeApiProvider: "ollama",
-			fireworksApiKey: "",
-			planModeFireworksModelId: "",
-			actModeFireworksModelId: "",
-			fireworksModelMaxCompletionTokens: 2000,
-			fireworksModelMaxTokens: 4000,
+			ollamaApiKey: "",
+			planModeOllamaModelId: "",
+			actModeOllamaModelId: "",
 		})
 	})
 
@@ -221,7 +219,7 @@ describe("ApiOptions Component", () => {
 		mockExtensionState({
 			planModeApiProvider: "ollama",
 			actModeApiProvider: "ollama",
-			nebiusApiKey: "",
+			ollamaApiKey: "",
 		})
 	})
 

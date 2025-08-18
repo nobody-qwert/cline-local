@@ -65,6 +65,7 @@ export function getModeSpecificFields(apiConfiguration: ApiConfiguration | undef
 			apiModelId: undefined as string | undefined,
 			lmStudioModelId: undefined as string | undefined,
 			ollamaModelId: undefined as string | undefined,
+			thinkingBudgetTokens: undefined as number | undefined,
 			// kept for compatibility with callers
 			vsCodeLmModelSelector: undefined as any,
 		}
@@ -75,6 +76,8 @@ export function getModeSpecificFields(apiConfiguration: ApiConfiguration | undef
 		apiModelId: mode === "plan" ? apiConfiguration.planModeApiModelId : apiConfiguration.actModeApiModelId,
 		lmStudioModelId: mode === "plan" ? apiConfiguration.planModeLmStudioModelId : apiConfiguration.actModeLmStudioModelId,
 		ollamaModelId: mode === "plan" ? apiConfiguration.planModeOllamaModelId : apiConfiguration.actModeOllamaModelId,
+		thinkingBudgetTokens:
+			mode === "plan" ? apiConfiguration.planModeThinkingBudgetTokens : apiConfiguration.actModeThinkingBudgetTokens,
 		// kept for compatibility with callers
 		vsCodeLmModelSelector: undefined as any,
 	}

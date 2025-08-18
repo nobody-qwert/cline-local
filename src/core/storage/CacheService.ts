@@ -198,12 +198,14 @@ export class CacheService {
 			planModeVsCodeLmModelSelector,
 			planModeOllamaModelId,
 			planModeLmStudioModelId,
+			planModeThinkingBudgetTokens,
 			// Act mode configurations (local providers only)
 			actModeApiProvider,
 			actModeApiModelId,
 			actModeVsCodeLmModelSelector,
 			actModeOllamaModelId,
 			actModeLmStudioModelId,
+			actModeThinkingBudgetTokens,
 			// Favorited model IDs
 			favoritedModelIds,
 		} = apiConfiguration
@@ -407,12 +409,14 @@ export class CacheService {
 			planModeVsCodeLmModelSelector,
 			planModeOllamaModelId,
 			planModeLmStudioModelId,
+			planModeThinkingBudgetTokens,
 			// Act mode configurations
 			actModeApiProvider,
 			actModeApiModelId,
 			actModeVsCodeLmModelSelector,
 			actModeOllamaModelId,
 			actModeLmStudioModelId,
+			actModeThinkingBudgetTokens,
 			// Favorited model IDs
 			favoritedModelIds,
 		} = state.apiConfiguration || {}
@@ -458,6 +462,7 @@ export class CacheService {
 			planModeVsCodeLmModelSelector,
 			planModeOllamaModelId,
 			planModeLmStudioModelId,
+			planModeThinkingBudgetTokens,
 
 			// Act mode configuration updates (local providers only)
 			actModeApiProvider,
@@ -465,6 +470,7 @@ export class CacheService {
 			actModeVsCodeLmModelSelector,
 			actModeOllamaModelId,
 			actModeLmStudioModelId,
+			actModeThinkingBudgetTokens,
 		} satisfies GlobalState
 
 		// Populate global state cache directly
@@ -508,6 +514,7 @@ export class CacheService {
 			planModeVsCodeLmModelSelector: this.globalStateCache["planModeVsCodeLmModelSelector"],
 			planModeOllamaModelId: this.globalStateCache["planModeOllamaModelId"],
 			planModeLmStudioModelId: this.globalStateCache["planModeLmStudioModelId"],
+			planModeThinkingBudgetTokens: this.globalStateCache["planModeThinkingBudgetTokens"],
 
 			// Act mode configurations (local providers only)
 			actModeApiProvider: this.globalStateCache["actModeApiProvider"],
@@ -515,6 +522,7 @@ export class CacheService {
 			actModeVsCodeLmModelSelector: this.globalStateCache["actModeVsCodeLmModelSelector"],
 			actModeOllamaModelId: this.globalStateCache["actModeOllamaModelId"],
 			actModeLmStudioModelId: this.globalStateCache["actModeLmStudioModelId"],
+			actModeThinkingBudgetTokens: this.globalStateCache["actModeThinkingBudgetTokens"],
 
 			// Favorited model IDs
 			favoritedModelIds: this.globalStateCache["favoritedModelIds"],

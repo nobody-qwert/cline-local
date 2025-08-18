@@ -40,12 +40,14 @@ export function convertApiConfigurationToProto(config: ApiConfiguration): ProtoA
 		planModeApiModelId: config.planModeApiModelId,
 		planModeOllamaModelId: config.planModeOllamaModelId,
 		planModeLmStudioModelId: config.planModeLmStudioModelId,
+		planModeThinkingBudgetTokens: config.planModeThinkingBudgetTokens,
 
 		// Act mode configurations (local providers only)
 		actModeApiProvider: config.actModeApiProvider ? convertApiProviderToProto(config.actModeApiProvider) : undefined,
 		actModeApiModelId: config.actModeApiModelId,
 		actModeOllamaModelId: config.actModeOllamaModelId,
 		actModeLmStudioModelId: config.actModeLmStudioModelId,
+		actModeThinkingBudgetTokens: config.actModeThinkingBudgetTokens,
 
 		// Favorited model IDs
 		favoritedModelIds: config.favoritedModelIds || [],
@@ -108,7 +110,6 @@ export function convertApiConfigurationToProto(config: ApiConfiguration): ProtoA
 		sapAiCoreTokenUrl: "",
 		sapAiCoreBaseUrl: "",
 		huaweiCloudMaasApiKey: "",
-		planModeThinkingBudgetTokens: 0,
 		planModeReasoningEffort: "",
 		planModeVsCodeLmModelSelector: undefined,
 		planModeAwsBedrockCustomSelected: false,
@@ -132,7 +133,6 @@ export function convertApiConfigurationToProto(config: ApiConfiguration): ProtoA
 		planModeSapAiCoreModelId: "",
 		planModeHuaweiCloudMaasModelId: "",
 		planModeHuaweiCloudMaasModelInfo: undefined,
-		actModeThinkingBudgetTokens: 0,
 		actModeReasoningEffort: "",
 		actModeVsCodeLmModelSelector: undefined,
 		actModeAwsBedrockCustomSelected: false,
@@ -177,6 +177,7 @@ export function convertProtoToApiConfiguration(protoConfig: ProtoApiConfiguratio
 		planModeApiModelId: protoConfig.planModeApiModelId,
 		planModeOllamaModelId: protoConfig.planModeOllamaModelId,
 		planModeLmStudioModelId: protoConfig.planModeLmStudioModelId,
+		planModeThinkingBudgetTokens: protoConfig.planModeThinkingBudgetTokens,
 
 		// Act mode configurations (local providers only)
 		actModeApiProvider:
@@ -184,6 +185,7 @@ export function convertProtoToApiConfiguration(protoConfig: ProtoApiConfiguratio
 		actModeApiModelId: protoConfig.actModeApiModelId,
 		actModeOllamaModelId: protoConfig.actModeOllamaModelId,
 		actModeLmStudioModelId: protoConfig.actModeLmStudioModelId,
+		actModeThinkingBudgetTokens: protoConfig.actModeThinkingBudgetTokens,
 
 		// Favorited model IDs
 		favoritedModelIds:

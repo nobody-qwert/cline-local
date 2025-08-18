@@ -11,17 +11,7 @@ import { type TerminalProfile } from "@shared/proto/cline/state"
 import { WebviewProviderType as WebviewProviderTypeEnum, WebviewProviderTypeRequest } from "@shared/proto/cline/ui"
 import { convertProtoToClineMessage } from "@shared/proto-conversions/cline-message"
 import { convertProtoMcpServersToMcpServers } from "@shared/proto-conversions/mcp/mcp-server-conversion"
-import {
-	groqDefaultModelId,
-	groqModels,
-	basetenDefaultModelId,
-	basetenModels,
-	type ModelInfo,
-	openRouterDefaultModelId,
-	openRouterDefaultModelInfo,
-	requestyDefaultModelId,
-	requestyDefaultModelInfo,
-} from "../../../src/shared/api"
+import { type ModelInfo } from "../../../src/shared/api"
 import type { McpMarketplaceCatalog, McpServer, McpViewTab } from "../../../src/shared/mcp"
 import {
 	FileServiceClient,
@@ -184,22 +174,14 @@ export const ExtensionStateContextProvider: React.FC<{
 	const [didHydrateState, setDidHydrateState] = useState(false)
 	const [showWelcome, setShowWelcome] = useState(false)
 	const [theme, setTheme] = useState<Record<string, string>>()
-	const [openRouterModels, setOpenRouterModels] = useState<Record<string, ModelInfo>>({
-		[openRouterDefaultModelId]: openRouterDefaultModelInfo,
-	})
+	const [openRouterModels, setOpenRouterModels] = useState<Record<string, ModelInfo>>({})
 	const [totalTasksSize, setTotalTasksSize] = useState<number | null>(null)
 	const [availableTerminalProfiles, setAvailableTerminalProfiles] = useState<TerminalProfile[]>([])
 
 	const [openAiModels, setOpenAiModels] = useState<string[]>([])
-	const [requestyModels, setRequestyModels] = useState<Record<string, ModelInfo>>({
-		[requestyDefaultModelId]: requestyDefaultModelInfo,
-	})
-	const [groqModelsState, setGroqModels] = useState<Record<string, ModelInfo>>({
-		[groqDefaultModelId]: groqModels[groqDefaultModelId],
-	})
-	const [basetenModelsState, setBasetenModels] = useState<Record<string, ModelInfo>>({
-		[basetenDefaultModelId]: basetenModels[basetenDefaultModelId],
-	})
+	const [requestyModels, setRequestyModels] = useState<Record<string, ModelInfo>>({})
+	const [groqModelsState, setGroqModels] = useState<Record<string, ModelInfo>>({})
+	const [basetenModelsState, setBasetenModels] = useState<Record<string, ModelInfo>>({})
 	const [huggingFaceModels, setHuggingFaceModels] = useState<Record<string, ModelInfo>>({})
 	const [mcpServers, setMcpServers] = useState<McpServer[]>([])
 	const [mcpMarketplaceCatalog, setMcpMarketplaceCatalog] = useState<McpMarketplaceCatalog>({ items: [] })

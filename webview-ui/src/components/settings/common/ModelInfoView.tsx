@@ -1,10 +1,9 @@
 import { VSCodeLink } from "@vscode/webview-ui-toolkit/react"
 import { Fragment, useState } from "react"
-import { ModelInfo, geminiModels } from "@shared/api"
+import { ModelInfo } from "@shared/api"
 import { ModelDescriptionMarkdown } from "../ModelDescriptionMarkdown"
 import {
 	formatPrice,
-	hasThinkingBudget,
 	supportsImages,
 	supportsBrowserUse,
 	supportsPromptCache,
@@ -99,8 +98,6 @@ export const ModelInfoView = ({ selectedModelId, modelInfo, isPopup }: ModelInfo
 	// Internal state management for description expansion
 	const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false)
 
-	const isGemini = Object.keys(geminiModels).includes(selectedModelId)
-	const hasThinkingConfig = hasThinkingBudget(modelInfo)
 	const hasTiers = !!modelInfo.tiers && modelInfo.tiers.length > 0
 
 	// Create elements for input pricing
@@ -118,17 +115,7 @@ export const ModelInfoView = ({ selectedModelId, modelInfo, isPopup }: ModelInfo
 
 	// --- Output Price Logic ---
 	let outputPriceElement = null
-	if (hasThinkingConfig && modelInfo.outputPrice !== undefined && modelInfo.thinkingConfig?.outputPrice !== undefined) {
-		// Display both standard and thinking budget prices
-		outputPriceElement = (
-			<Fragment key="outputPriceConditional">
-				<span style={{ fontWeight: 500 }}>Output price (Standard):</span> {formatTokenPrice(modelInfo.outputPrice)}
-				<br />
-				<span style={{ fontWeight: 500 }}>Output price (Thinking Budget &gt; 0):</span>{" "}
-				{formatTokenPrice(modelInfo.thinkingConfig.outputPrice)}
-			</Fragment>
-		)
-	} else if (hasTiers) {
+	if (hasTiers) {
 		// Display tiered output pricing
 		outputPriceElement = (
 			<Fragment key="outputPriceTiers">
@@ -170,14 +157,12 @@ export const ModelInfoView = ({ selectedModelId, modelInfo, isPopup }: ModelInfo
 			supportsLabel="Supports browser use"
 			doesNotSupportLabel="Does not support browser use"
 		/>,
-		!isGemini && (
-			<ModelInfoSupportsItem
-				key="supportsPromptCache"
-				isSupported={supportsPromptCache(modelInfo)}
-				supportsLabel="Supports prompt caching"
-				doesNotSupportLabel="Does not support prompt caching"
-			/>
-		),
+		<ModelInfoSupportsItem
+			key="supportsPromptCache"
+			isSupported={supportsPromptCache(modelInfo)}
+			supportsLabel="Supports prompt caching"
+			doesNotSupportLabel="Does not support prompt caching"
+		/>,
 		modelInfo.contextWindow !== undefined && modelInfo.contextWindow > 0 && (
 			<span key="contextWindow">
 				<span style={{ fontWeight: 500 }}>Context Window:</span> {formatTokenLimit(modelInfo.contextWindow)} tokens

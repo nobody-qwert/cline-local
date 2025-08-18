@@ -201,32 +201,30 @@ export function createTestServer(controller: Controller): http.Server {
 					// Clear any existing task
 					await visibleWebview.controller.clearTask()
 
-					// TODO: convert apiKey to clineAccountId
-					// If API key is provided, update the API configuration
+					// If API key is provided, update the API configuration for local testing
 					if (apiKey) {
-						Logger.log("API key provided, updating API configuration")
+						Logger.log("API key provided, updating API configuration for local testing")
 
 						// Get current API configuration
 						const apiConfiguration = visibleWebview.controller.cacheService.getApiConfiguration()
 
-						// Update API configuration with API key
+						// Update API configuration to use ollama for testing
 						const updatedConfig = {
 							...apiConfiguration,
-							apiProvider: "cline" as ApiProvider,
-							clineAccountId: apiKey,
+							ollamaApiKey: apiKey,
 						}
 
 						// Store the API key securely
-						visibleWebview.controller.cacheService.setSecret("clineAccountId", apiKey)
+						visibleWebview.controller.cacheService.setSecret("ollamaApiKey", apiKey)
 
 						visibleWebview.controller.cacheService.setApiConfiguration(updatedConfig)
 
-						// Update cache service to use cline provider
+						// Update cache service to use ollama provider for testing
 						const currentConfig = visibleWebview.controller.cacheService.getApiConfiguration()
 						visibleWebview.controller.cacheService.setApiConfiguration({
 							...currentConfig,
-							planModeApiProvider: "cline",
-							actModeApiProvider: "cline",
+							planModeApiProvider: "ollama",
+							actModeApiProvider: "ollama",
 						})
 
 						// Post state to webview to reflect changes

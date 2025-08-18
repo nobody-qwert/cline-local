@@ -9,6 +9,7 @@ import { withRetry } from "../retry"
 interface LmStudioHandlerOptions {
 	lmStudioBaseUrl?: string
 	lmStudioModelId?: string
+	thinkingBudgetTokens?: number
 }
 
 export class LmStudioHandler implements ApiHandler {
@@ -43,14 +44,19 @@ export class LmStudioHandler implements ApiHandler {
 		]
 
 		try {
-			const stream = await client.chat.completions.create({
+			const req: any = {
 				model: this.getModel().id,
 				messages: openAiMessages,
 				stream: true,
 				// Request usage in streaming chunks (OpenAI-compatible)
 				stream_options: { include_usage: true },
-			})
-			for await (const chunk of stream) {
+			}
+			// If thinking budget is enabled, include OpenAI-compatible reasoning params
+			if (this.options.thinkingBudgetTokens && this.options.thinkingBudgetTokens > 0) {
+				req.reasoning = { budget_tokens: this.options.thinkingBudgetTokens }
+			}
+			const stream = (await client.chat.completions.create(req)) as any
+			for await (const chunk of stream as any) {
 				const delta = chunk.choices[0]?.delta
 				if (delta?.content) {
 					yield {

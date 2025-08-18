@@ -19,12 +19,14 @@ export interface ApiHandlerOptions {
 	planModeVsCodeLmModelSelector?: LanguageModelChatSelector
 	planModeOllamaModelId?: string
 	planModeLmStudioModelId?: string
+	planModeThinkingBudgetTokens?: number
 
 	// Act mode configurations
 	actModeApiModelId?: string
 	actModeVsCodeLmModelSelector?: LanguageModelChatSelector
 	actModeOllamaModelId?: string
 	actModeLmStudioModelId?: string
+	actModeThinkingBudgetTokens?: number
 }
 
 export type ApiConfiguration = ApiHandlerOptions & {

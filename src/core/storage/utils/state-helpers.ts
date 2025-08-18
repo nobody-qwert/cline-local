@@ -57,6 +57,7 @@ export async function readStateFromDisk(context: ExtensionContext) {
 	const planModeVsCodeLmModelSelector = context.globalState.get("planModeVsCodeLmModelSelector") as any | undefined
 	const planModeOllamaModelId = context.globalState.get("planModeOllamaModelId") as string | undefined
 	const planModeLmStudioModelId = context.globalState.get("planModeLmStudioModelId") as string | undefined
+	const planModeThinkingBudgetTokens = context.globalState.get("planModeThinkingBudgetTokens") as number | undefined
 
 	// Act mode configurations (local providers only)
 	const actModeApiProvider = context.globalState.get("actModeApiProvider") as ApiProvider | undefined
@@ -64,6 +65,7 @@ export async function readStateFromDisk(context: ExtensionContext) {
 	const actModeVsCodeLmModelSelector = context.globalState.get("actModeVsCodeLmModelSelector") as any | undefined
 	const actModeOllamaModelId = context.globalState.get("actModeOllamaModelId") as string | undefined
 	const actModeLmStudioModelId = context.globalState.get("actModeLmStudioModelId") as string | undefined
+	const actModeThinkingBudgetTokens = context.globalState.get("actModeThinkingBudgetTokens") as number | undefined
 
 	let apiProvider: ApiProvider = planModeApiProvider || "lmstudio"
 
@@ -101,6 +103,7 @@ export async function readStateFromDisk(context: ExtensionContext) {
 			planModeVsCodeLmModelSelector,
 			planModeOllamaModelId,
 			planModeLmStudioModelId,
+			planModeThinkingBudgetTokens,
 
 			// Act mode configurations (local providers only)
 			actModeApiProvider: actModeApiProvider || apiProvider,
@@ -108,6 +111,7 @@ export async function readStateFromDisk(context: ExtensionContext) {
 			actModeVsCodeLmModelSelector,
 			actModeOllamaModelId,
 			actModeLmStudioModelId,
+			actModeThinkingBudgetTokens,
 
 			// Favorited model IDs
 			favoritedModelIds,

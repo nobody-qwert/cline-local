@@ -5,46 +5,21 @@ import path from "path"
 import { readStateFromDisk } from "./utils/state-helpers"
 
 export async function migrateWorkspaceToGlobalStorage(context: vscode.ExtensionContext) {
-	// Keys to migrate from workspace storage back to global storage
+	// Keys to migrate from workspace storage back to global storage (local providers only)
 	const keysToMigrate = [
 		// Core settings
 		"apiProvider",
 		"apiModelId",
-		"thinkingBudgetTokens",
-		"reasoningEffort",
 		"vsCodeLmModelSelector",
 
-		// Provider-specific model keys
-		"awsBedrockCustomSelected",
-		"awsBedrockCustomModelBaseId",
-		"openRouterModelId",
-		"openRouterModelInfo",
-		"openAiModelId",
-		"openAiModelInfo",
+		// Local provider model keys
 		"ollamaModelId",
 		"lmStudioModelId",
-		"liteLlmModelId",
-		"liteLlmModelInfo",
-		"requestyModelId",
-		"requestyModelInfo",
-		"togetherModelId",
-		"fireworksModelId",
-		"sapAiCoreModelId",
-		"groqModelId",
-		"groqModelInfo",
-		"huggingFaceModelId",
-		"huggingFaceModelInfo",
 
-		// Previous mode settings
+		// Previous mode settings (local providers only)
 		"previousModeApiProvider",
 		"previousModeModelId",
-		"previousModeModelInfo",
 		"previousModeVsCodeLmModelSelector",
-		"previousModeThinkingBudgetTokens",
-		"previousModeReasoningEffort",
-		"previousModeAwsBedrockCustomSelected",
-		"previousModeAwsBedrockCustomModelBaseId",
-		"previousModeSapAiCoreModelId",
 	]
 
 	for (const key of keysToMigrate) {
@@ -150,48 +125,23 @@ export async function migrateLegacyApiConfigurationToModeSpecific(context: vscod
 			| boolean
 			| undefined
 
-		// Read legacy values directly
+		// Read legacy values directly (local providers only)
 		const apiProvider = await context.globalState.get("apiProvider")
 		const apiModelId = await context.globalState.get("apiModelId")
-		const thinkingBudgetTokens = await context.globalState.get("thinkingBudgetTokens")
-		const reasoningEffort = await context.globalState.get("reasoningEffort")
 		const vsCodeLmModelSelector = await context.globalState.get("vsCodeLmModelSelector")
-		const awsBedrockCustomSelected = await context.globalState.get("awsBedrockCustomSelected")
-		const awsBedrockCustomModelBaseId = await context.globalState.get("awsBedrockCustomModelBaseId")
-		const openRouterModelId = await context.globalState.get("openRouterModelId")
-		const openRouterModelInfo = await context.globalState.get("openRouterModelInfo")
-		const openAiModelId = await context.globalState.get("openAiModelId")
-		const openAiModelInfo = await context.globalState.get("openAiModelInfo")
 		const ollamaModelId = await context.globalState.get("ollamaModelId")
 		const lmStudioModelId = await context.globalState.get("lmStudioModelId")
-		const liteLlmModelId = await context.globalState.get("liteLlmModelId")
-		const liteLlmModelInfo = await context.globalState.get("liteLlmModelInfo")
-		const requestyModelId = await context.globalState.get("requestyModelId")
-		const requestyModelInfo = await context.globalState.get("requestyModelInfo")
-		const togetherModelId = await context.globalState.get("togetherModelId")
-		const fireworksModelId = await context.globalState.get("fireworksModelId")
-		const sapAiCoreModelId = await context.globalState.get("sapAiCoreModelId")
-		const groqModelId = await context.globalState.get("groqModelId")
-		const groqModelInfo = await context.globalState.get("groqModelInfo")
-		const huggingFaceModelId = await context.globalState.get("huggingFaceModelId")
-		const huggingFaceModelInfo = await context.globalState.get("huggingFaceModelInfo")
 
-		// Read previous mode values
+		// Read previous mode values (local providers only)
 		const previousModeApiProvider = await context.globalState.get("previousModeApiProvider")
 		const previousModeModelId = await context.globalState.get("previousModeModelId")
-		const previousModeModelInfo = await context.globalState.get("previousModeModelInfo")
 		const previousModeVsCodeLmModelSelector = await context.globalState.get("previousModeVsCodeLmModelSelector")
-		const previousModeThinkingBudgetTokens = await context.globalState.get("previousModeThinkingBudgetTokens")
-		const previousModeReasoningEffort = await context.globalState.get("previousModeReasoningEffort")
-		const previousModeAwsBedrockCustomSelected = await context.globalState.get("previousModeAwsBedrockCustomSelected")
-		const previousModeAwsBedrockCustomModelBaseId = await context.globalState.get("previousModeAwsBedrockCustomModelBaseId")
-		const previousModeSapAiCoreModelId = await context.globalState.get("previousModeSapAiCoreModelId")
 
-		// Migrate based on planActSeparateModelsSetting
+		// Migrate based on planActSeparateModelsSetting (simplified for local providers only)
 		if (planActSeparateModelsSetting === false) {
 			console.log("Migrating with separate models DISABLED - using current values for both modes")
 
-			// Use current values for both plan and act modes
+			// Use current values for both plan and act modes (local providers only)
 			if (apiProvider !== undefined) {
 				await context.globalState.update("planModeApiProvider", apiProvider)
 				await context.globalState.update("actModeApiProvider", apiProvider)
@@ -200,41 +150,9 @@ export async function migrateLegacyApiConfigurationToModeSpecific(context: vscod
 				await context.globalState.update("planModeApiModelId", apiModelId)
 				await context.globalState.update("actModeApiModelId", apiModelId)
 			}
-			if (thinkingBudgetTokens !== undefined) {
-				await context.globalState.update("planModeThinkingBudgetTokens", thinkingBudgetTokens)
-				await context.globalState.update("actModeThinkingBudgetTokens", thinkingBudgetTokens)
-			}
-			if (reasoningEffort !== undefined) {
-				await context.globalState.update("planModeReasoningEffort", reasoningEffort)
-				await context.globalState.update("actModeReasoningEffort", reasoningEffort)
-			}
 			if (vsCodeLmModelSelector !== undefined) {
 				await context.globalState.update("planModeVsCodeLmModelSelector", vsCodeLmModelSelector)
 				await context.globalState.update("actModeVsCodeLmModelSelector", vsCodeLmModelSelector)
-			}
-			if (awsBedrockCustomSelected !== undefined) {
-				await context.globalState.update("planModeAwsBedrockCustomSelected", awsBedrockCustomSelected)
-				await context.globalState.update("actModeAwsBedrockCustomSelected", awsBedrockCustomSelected)
-			}
-			if (awsBedrockCustomModelBaseId !== undefined) {
-				await context.globalState.update("planModeAwsBedrockCustomModelBaseId", awsBedrockCustomModelBaseId)
-				await context.globalState.update("actModeAwsBedrockCustomModelBaseId", awsBedrockCustomModelBaseId)
-			}
-			if (openRouterModelId !== undefined) {
-				await context.globalState.update("planModeOpenRouterModelId", openRouterModelId)
-				await context.globalState.update("actModeOpenRouterModelId", openRouterModelId)
-			}
-			if (openRouterModelInfo !== undefined) {
-				await context.globalState.update("planModeOpenRouterModelInfo", openRouterModelInfo)
-				await context.globalState.update("actModeOpenRouterModelInfo", openRouterModelInfo)
-			}
-			if (openAiModelId !== undefined) {
-				await context.globalState.update("planModeOpenAiModelId", openAiModelId)
-				await context.globalState.update("actModeOpenAiModelId", openAiModelId)
-			}
-			if (openAiModelInfo !== undefined) {
-				await context.globalState.update("planModeOpenAiModelInfo", openAiModelInfo)
-				await context.globalState.update("actModeOpenAiModelInfo", openAiModelInfo)
 			}
 			if (ollamaModelId !== undefined) {
 				await context.globalState.update("planModeOllamaModelId", ollamaModelId)
@@ -244,125 +162,24 @@ export async function migrateLegacyApiConfigurationToModeSpecific(context: vscod
 				await context.globalState.update("planModeLmStudioModelId", lmStudioModelId)
 				await context.globalState.update("actModeLmStudioModelId", lmStudioModelId)
 			}
-			if (liteLlmModelId !== undefined) {
-				await context.globalState.update("planModeLiteLlmModelId", liteLlmModelId)
-				await context.globalState.update("actModeLiteLlmModelId", liteLlmModelId)
-			}
-			if (liteLlmModelInfo !== undefined) {
-				await context.globalState.update("planModeLiteLlmModelInfo", liteLlmModelInfo)
-				await context.globalState.update("actModeLiteLlmModelInfo", liteLlmModelInfo)
-			}
-			if (requestyModelId !== undefined) {
-				await context.globalState.update("planModeRequestyModelId", requestyModelId)
-				await context.globalState.update("actModeRequestyModelId", requestyModelId)
-			}
-			if (requestyModelInfo !== undefined) {
-				await context.globalState.update("planModeRequestyModelInfo", requestyModelInfo)
-				await context.globalState.update("actModeRequestyModelInfo", requestyModelInfo)
-			}
-			if (togetherModelId !== undefined) {
-				await context.globalState.update("planModeTogetherModelId", togetherModelId)
-				await context.globalState.update("actModeTogetherModelId", togetherModelId)
-			}
-			if (fireworksModelId !== undefined) {
-				await context.globalState.update("planModeFireworksModelId", fireworksModelId)
-				await context.globalState.update("actModeFireworksModelId", fireworksModelId)
-			}
-			if (sapAiCoreModelId !== undefined) {
-				await context.globalState.update("planModeSapAiCoreModelId", sapAiCoreModelId)
-				await context.globalState.update("actModeSapAiCoreModelId", sapAiCoreModelId)
-			}
-			if (groqModelId !== undefined) {
-				await context.globalState.update("planModeGroqModelId", groqModelId)
-				await context.globalState.update("actModeGroqModelId", groqModelId)
-			}
-			if (groqModelInfo !== undefined) {
-				await context.globalState.update("planModeGroqModelInfo", groqModelInfo)
-				await context.globalState.update("actModeGroqModelInfo", groqModelInfo)
-			}
-			if (huggingFaceModelId !== undefined) {
-				await context.globalState.update("planModeHuggingFaceModelId", huggingFaceModelId)
-				await context.globalState.update("actModeHuggingFaceModelId", huggingFaceModelId)
-			}
-			if (huggingFaceModelInfo !== undefined) {
-				await context.globalState.update("planModeHuggingFaceModelInfo", huggingFaceModelInfo)
-				await context.globalState.update("actModeHuggingFaceModelInfo", huggingFaceModelInfo)
-			}
 		} else {
 			console.log("Migrating with separate models ENABLED - using current->plan, previous->act")
 
-			// Use current values for plan mode
+			// Use current values for plan mode (local providers only)
 			if (apiProvider !== undefined) {
 				await context.globalState.update("planModeApiProvider", apiProvider)
 			}
 			if (apiModelId !== undefined) {
 				await context.globalState.update("planModeApiModelId", apiModelId)
 			}
-			if (thinkingBudgetTokens !== undefined) {
-				await context.globalState.update("planModeThinkingBudgetTokens", thinkingBudgetTokens)
-			}
-			if (reasoningEffort !== undefined) {
-				await context.globalState.update("planModeReasoningEffort", reasoningEffort)
-			}
 			if (vsCodeLmModelSelector !== undefined) {
 				await context.globalState.update("planModeVsCodeLmModelSelector", vsCodeLmModelSelector)
-			}
-			if (awsBedrockCustomSelected !== undefined) {
-				await context.globalState.update("planModeAwsBedrockCustomSelected", awsBedrockCustomSelected)
-			}
-			if (awsBedrockCustomModelBaseId !== undefined) {
-				await context.globalState.update("planModeAwsBedrockCustomModelBaseId", awsBedrockCustomModelBaseId)
-			}
-			if (openRouterModelId !== undefined) {
-				await context.globalState.update("planModeOpenRouterModelId", openRouterModelId)
-			}
-			if (openRouterModelInfo !== undefined) {
-				await context.globalState.update("planModeOpenRouterModelInfo", openRouterModelInfo)
-			}
-			if (openAiModelId !== undefined) {
-				await context.globalState.update("planModeOpenAiModelId", openAiModelId)
-			}
-			if (openAiModelInfo !== undefined) {
-				await context.globalState.update("planModeOpenAiModelInfo", openAiModelInfo)
 			}
 			if (ollamaModelId !== undefined) {
 				await context.globalState.update("planModeOllamaModelId", ollamaModelId)
 			}
 			if (lmStudioModelId !== undefined) {
 				await context.globalState.update("planModeLmStudioModelId", lmStudioModelId)
-			}
-			if (liteLlmModelId !== undefined) {
-				await context.globalState.update("planModeLiteLlmModelId", liteLlmModelId)
-			}
-			if (liteLlmModelInfo !== undefined) {
-				await context.globalState.update("planModeLiteLlmModelInfo", liteLlmModelInfo)
-			}
-			if (requestyModelId !== undefined) {
-				await context.globalState.update("planModeRequestyModelId", requestyModelId)
-			}
-			if (requestyModelInfo !== undefined) {
-				await context.globalState.update("planModeRequestyModelInfo", requestyModelInfo)
-			}
-			if (togetherModelId !== undefined) {
-				await context.globalState.update("planModeTogetherModelId", togetherModelId)
-			}
-			if (fireworksModelId !== undefined) {
-				await context.globalState.update("planModeFireworksModelId", fireworksModelId)
-			}
-			if (sapAiCoreModelId !== undefined) {
-				await context.globalState.update("planModeSapAiCoreModelId", sapAiCoreModelId)
-			}
-			if (groqModelId !== undefined) {
-				await context.globalState.update("planModeGroqModelId", groqModelId)
-			}
-			if (groqModelInfo !== undefined) {
-				await context.globalState.update("planModeGroqModelInfo", groqModelInfo)
-			}
-			if (huggingFaceModelId !== undefined) {
-				await context.globalState.update("planModeHuggingFaceModelId", huggingFaceModelId)
-			}
-			if (huggingFaceModelInfo !== undefined) {
-				await context.globalState.update("planModeHuggingFaceModelInfo", huggingFaceModelInfo)
 			}
 
 			// Use previous values for act mode (with fallback to current values)
@@ -376,51 +193,10 @@ export async function migrateLegacyApiConfigurationToModeSpecific(context: vscod
 			} else if (apiModelId !== undefined) {
 				await context.globalState.update("actModeApiModelId", apiModelId)
 			}
-			if (previousModeThinkingBudgetTokens !== undefined) {
-				await context.globalState.update("actModeThinkingBudgetTokens", previousModeThinkingBudgetTokens)
-			} else if (thinkingBudgetTokens !== undefined) {
-				await context.globalState.update("actModeThinkingBudgetTokens", thinkingBudgetTokens)
-			}
-			if (previousModeReasoningEffort !== undefined) {
-				await context.globalState.update("actModeReasoningEffort", previousModeReasoningEffort)
-			} else if (reasoningEffort !== undefined) {
-				await context.globalState.update("actModeReasoningEffort", reasoningEffort)
-			}
 			if (previousModeVsCodeLmModelSelector !== undefined) {
 				await context.globalState.update("actModeVsCodeLmModelSelector", previousModeVsCodeLmModelSelector)
 			} else if (vsCodeLmModelSelector !== undefined) {
 				await context.globalState.update("actModeVsCodeLmModelSelector", vsCodeLmModelSelector)
-			}
-			if (previousModeAwsBedrockCustomSelected !== undefined) {
-				await context.globalState.update("actModeAwsBedrockCustomSelected", previousModeAwsBedrockCustomSelected)
-			} else if (awsBedrockCustomSelected !== undefined) {
-				await context.globalState.update("actModeAwsBedrockCustomSelected", awsBedrockCustomSelected)
-			}
-			if (previousModeAwsBedrockCustomModelBaseId !== undefined) {
-				await context.globalState.update("actModeAwsBedrockCustomModelBaseId", previousModeAwsBedrockCustomModelBaseId)
-			} else if (awsBedrockCustomModelBaseId !== undefined) {
-				await context.globalState.update("actModeAwsBedrockCustomModelBaseId", awsBedrockCustomModelBaseId)
-			}
-			if (previousModeSapAiCoreModelId !== undefined) {
-				await context.globalState.update("actModeSapAiCoreModelId", previousModeSapAiCoreModelId)
-			} else if (sapAiCoreModelId !== undefined) {
-				await context.globalState.update("actModeSapAiCoreModelId", sapAiCoreModelId)
-			}
-
-			// For fields without previous variants, use current values for act mode
-			if (previousModeModelInfo !== undefined) {
-				await context.globalState.update("actModeOpenRouterModelInfo", previousModeModelInfo)
-			} else if (openRouterModelInfo !== undefined) {
-				await context.globalState.update("actModeOpenRouterModelInfo", openRouterModelInfo)
-			}
-			if (openRouterModelId !== undefined) {
-				await context.globalState.update("actModeOpenRouterModelId", openRouterModelId)
-			}
-			if (openAiModelId !== undefined) {
-				await context.globalState.update("actModeOpenAiModelId", openAiModelId)
-			}
-			if (openAiModelInfo !== undefined) {
-				await context.globalState.update("actModeOpenAiModelInfo", openAiModelInfo)
 			}
 			if (ollamaModelId !== undefined) {
 				await context.globalState.update("actModeOllamaModelId", ollamaModelId)
@@ -428,73 +204,18 @@ export async function migrateLegacyApiConfigurationToModeSpecific(context: vscod
 			if (lmStudioModelId !== undefined) {
 				await context.globalState.update("actModeLmStudioModelId", lmStudioModelId)
 			}
-			if (liteLlmModelId !== undefined) {
-				await context.globalState.update("actModeLiteLlmModelId", liteLlmModelId)
-			}
-			if (liteLlmModelInfo !== undefined) {
-				await context.globalState.update("actModeLiteLlmModelInfo", liteLlmModelInfo)
-			}
-			if (requestyModelId !== undefined) {
-				await context.globalState.update("actModeRequestyModelId", requestyModelId)
-			}
-			if (requestyModelInfo !== undefined) {
-				await context.globalState.update("actModeRequestyModelInfo", requestyModelInfo)
-			}
-			if (togetherModelId !== undefined) {
-				await context.globalState.update("actModeTogetherModelId", togetherModelId)
-			}
-			if (fireworksModelId !== undefined) {
-				await context.globalState.update("actModeFireworksModelId", fireworksModelId)
-			}
-			if (groqModelId !== undefined) {
-				await context.globalState.update("actModeGroqModelId", groqModelId)
-			}
-			if (groqModelInfo !== undefined) {
-				await context.globalState.update("actModeGroqModelInfo", groqModelInfo)
-			}
-			if (huggingFaceModelId !== undefined) {
-				await context.globalState.update("actModeHuggingFaceModelId", huggingFaceModelId)
-			}
-			if (huggingFaceModelInfo !== undefined) {
-				await context.globalState.update("actModeHuggingFaceModelInfo", huggingFaceModelInfo)
-			}
 		}
 
-		// Clean up legacy keys after successful migration
+		// Clean up legacy keys after successful migration (local providers only)
 		console.log("Cleaning up legacy keys...")
 		await context.globalState.update("apiProvider", undefined)
 		await context.globalState.update("apiModelId", undefined)
-		await context.globalState.update("thinkingBudgetTokens", undefined)
-		await context.globalState.update("reasoningEffort", undefined)
 		await context.globalState.update("vsCodeLmModelSelector", undefined)
-		await context.globalState.update("awsBedrockCustomSelected", undefined)
-		await context.globalState.update("awsBedrockCustomModelBaseId", undefined)
-		await context.globalState.update("openRouterModelId", undefined)
-		await context.globalState.update("openRouterModelInfo", undefined)
-		await context.globalState.update("openAiModelId", undefined)
-		await context.globalState.update("openAiModelInfo", undefined)
 		await context.globalState.update("ollamaModelId", undefined)
 		await context.globalState.update("lmStudioModelId", undefined)
-		await context.globalState.update("liteLlmModelId", undefined)
-		await context.globalState.update("liteLlmModelInfo", undefined)
-		await context.globalState.update("requestyModelId", undefined)
-		await context.globalState.update("requestyModelInfo", undefined)
-		await context.globalState.update("togetherModelId", undefined)
-		await context.globalState.update("fireworksModelId", undefined)
-		await context.globalState.update("sapAiCoreModelId", undefined)
-		await context.globalState.update("groqModelId", undefined)
-		await context.globalState.update("groqModelInfo", undefined)
-		await context.globalState.update("huggingFaceModelId", undefined)
-		await context.globalState.update("huggingFaceModelInfo", undefined)
 		await context.globalState.update("previousModeApiProvider", undefined)
 		await context.globalState.update("previousModeModelId", undefined)
-		await context.globalState.update("previousModeModelInfo", undefined)
 		await context.globalState.update("previousModeVsCodeLmModelSelector", undefined)
-		await context.globalState.update("previousModeThinkingBudgetTokens", undefined)
-		await context.globalState.update("previousModeReasoningEffort", undefined)
-		await context.globalState.update("previousModeAwsBedrockCustomSelected", undefined)
-		await context.globalState.update("previousModeAwsBedrockCustomModelBaseId", undefined)
-		await context.globalState.update("previousModeSapAiCoreModelId", undefined)
 
 		console.log("Successfully migrated legacy API configuration to mode-specific keys")
 	} catch (error) {
@@ -515,36 +236,16 @@ export async function migrateWelcomeViewCompleted(context: vscode.ExtensionConte
 			const extensionState = await readStateFromDisk(context)
 			const config = extensionState.apiConfiguration
 
-			// This is the original logic used for checking is the welcome view should be shown
-			// It was located in the ExtensionStateContextProvider
+			// Check for local provider configuration only
 			const hasKey = config
 				? [
-						config.apiKey,
-						config.openRouterApiKey,
-						config.awsRegion,
-						config.vertexProjectId,
-						config.openAiApiKey,
 						config.ollamaApiKey,
 						config.planModeOllamaModelId,
 						config.planModeLmStudioModelId,
 						config.actModeOllamaModelId,
 						config.actModeLmStudioModelId,
-						config.liteLlmApiKey,
-						config.geminiApiKey,
-						config.openAiNativeApiKey,
-						config.deepSeekApiKey,
-						config.requestyApiKey,
-						config.togetherApiKey,
-						config.qwenApiKey,
-						config.doubaoApiKey,
-						config.mistralApiKey,
 						config.planModeVsCodeLmModelSelector,
 						config.actModeVsCodeLmModelSelector,
-						config.clineAccountId,
-						config.asksageApiKey,
-						config.xaiApiKey,
-						config.sambanovaApiKey,
-						config.sapAiCoreClientId,
 					].some((key) => key !== undefined)
 				: false
 

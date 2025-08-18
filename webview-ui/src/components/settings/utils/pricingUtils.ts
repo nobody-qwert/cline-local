@@ -22,9 +22,10 @@ export const formatTokenPrice = (price: number) => {
 
 /**
  * Helper function to determine if a model supports thinking budget
+ * Local providers do not support thinking budget
  */
 export const hasThinkingBudget = (modelInfo: ModelInfo): boolean => {
-	return !!modelInfo.thinkingConfig
+	return false
 }
 
 /**

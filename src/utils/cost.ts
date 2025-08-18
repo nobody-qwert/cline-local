@@ -43,11 +43,7 @@ function calculateApiCostInternal(
 		}
 	}
 
-	// Override output price for thinking mode if applicable
-	if (usedThinkingBudget && modelInfo.thinkingConfig?.outputPrice !== undefined) {
-		effectiveOutputPrice = modelInfo.thinkingConfig.outputPrice
-		// TODO: Add support for tiered thinking budget output pricing if needed in the future
-	}
+	// Note: Thinking mode is not supported in local providers
 
 	const cacheWritesCost = (effectiveCacheWritesPrice / 1_000_000) * cacheCreationInputTokens
 	const cacheReadsCost = (effectiveCacheReadsPrice / 1_000_000) * cacheReadInputTokens

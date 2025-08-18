@@ -1,5 +1,3 @@
-import { anthropicModels } from "@shared/api"
-
 /**
  * Validates the thinking budget token value according to the specified rules:
  * - If disabled (0), return as is
@@ -13,7 +11,7 @@ import { anthropicModels } from "@shared/api"
  */
 export function validateThinkingBudget(
 	value: number,
-	maxTokens: number = anthropicModels["claude-3-7-sonnet-20250219"].maxTokens,
+	maxTokens: number = 128000, // Default for local models
 ): number {
 	// If disabled (0), return as is
 	if (value === 0) {

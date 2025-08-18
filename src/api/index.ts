@@ -38,6 +38,8 @@ function createHandlerForProvider(
 			return new LmStudioHandler({
 				lmStudioBaseUrl: options.lmStudioBaseUrl,
 				lmStudioModelId: mode === "plan" ? options.planModeLmStudioModelId : options.actModeLmStudioModelId,
+				thinkingBudgetTokens:
+					mode === "plan" ? options.planModeThinkingBudgetTokens : options.actModeThinkingBudgetTokens,
 			})
 		default:
 			return new OllamaHandler({
@@ -54,8 +56,6 @@ export function buildApiHandler(configuration: ApiConfiguration, mode: Mode): Ap
 	const { planModeApiProvider, actModeApiProvider, ...options } = configuration
 
 	const apiProvider = mode === "plan" ? planModeApiProvider : actModeApiProvider
-
-	// Thinking budget tokens removed in local-only version
 
 	return createHandlerForProvider(apiProvider, options, mode)
 }

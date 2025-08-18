@@ -53,6 +53,8 @@ export type GlobalStateKey =
 	| "actModeVsCodeLmModelSelector"
 	| "actModeOllamaModelId"
 	| "actModeLmStudioModelId"
+	| "planModeThinkingBudgetTokens"
+	| "actModeThinkingBudgetTokens"
 
 export type LocalStateKey = "localClineRulesToggles" | "localCursorRulesToggles" | "localWindsurfRulesToggles" | "workflowToggles"
 
@@ -92,12 +94,14 @@ export interface GlobalState {
 	planModeVsCodeLmModelSelector: any | undefined
 	planModeOllamaModelId: string | undefined
 	planModeLmStudioModelId: string | undefined
+	planModeThinkingBudgetTokens: number | undefined
 	// Act mode configurations
 	actModeApiProvider: ApiProvider
 	actModeApiModelId: string | undefined
 	actModeVsCodeLmModelSelector: any | undefined
 	actModeOllamaModelId: string | undefined
 	actModeLmStudioModelId: string | undefined
+	actModeThinkingBudgetTokens: number | undefined
 }
 
 export interface Secrets {
