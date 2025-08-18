@@ -55,28 +55,7 @@ export function buildApiHandler(configuration: ApiConfiguration, mode: Mode): Ap
 
 	const apiProvider = mode === "plan" ? planModeApiProvider : actModeApiProvider
 
-	// Validate thinking budget tokens against model's maxTokens to prevent API errors
-	// wrapped in a try-catch for safety, but this should never throw
-	try {
-		const thinkingBudgetTokens = mode === "plan" ? options.planModeThinkingBudgetTokens : options.actModeThinkingBudgetTokens
-		if (thinkingBudgetTokens && thinkingBudgetTokens > 0) {
-			const handler = createHandlerForProvider(apiProvider, options, mode)
-
-			const modelInfo = handler.getModel().info
-			if (modelInfo.maxTokens && thinkingBudgetTokens > modelInfo.maxTokens) {
-				const clippedValue = modelInfo.maxTokens - 1
-				if (mode === "plan") {
-					options.planModeThinkingBudgetTokens = clippedValue
-				} else {
-					options.actModeThinkingBudgetTokens = clippedValue
-				}
-			} else {
-				return handler // don't rebuild unless its necessary
-			}
-		}
-	} catch (error) {
-		console.error("buildApiHandler error:", error)
-	}
+	// Thinking budget tokens removed in local-only version
 
 	return createHandlerForProvider(apiProvider, options, mode)
 }

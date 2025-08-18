@@ -1,7 +1,7 @@
 import type { AnthropicCompat as Anthropic } from "../../types/anthropic-compat"
 import { Message, Ollama, Config } from "ollama"
 import { ApiHandler } from "../"
-import { ApiHandlerOptions, ModelInfo, openAiModelInfoSaneDefaults } from "../../shared/api"
+import { ApiHandlerOptions, ModelInfo, lmStudioModelInfoSaneDefaults } from "../../shared/api"
 import { convertToOllamaMessages } from "../transform/ollama-format"
 import { ApiStream } from "../transform/stream"
 import { withRetry } from "../retry"
@@ -111,8 +111,8 @@ export class OllamaHandler implements ApiHandler {
 		return {
 			id: this.options.ollamaModelId || "",
 			info: this.options.ollamaApiOptionsCtxNum
-				? { ...openAiModelInfoSaneDefaults, contextWindow: Number(this.options.ollamaApiOptionsCtxNum) || 32768 }
-				: openAiModelInfoSaneDefaults,
+				? { ...lmStudioModelInfoSaneDefaults, contextWindow: Number(this.options.ollamaApiOptionsCtxNum) || 32768 }
+				: lmStudioModelInfoSaneDefaults,
 		}
 	}
 }

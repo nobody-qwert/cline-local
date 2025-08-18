@@ -1,10 +1,10 @@
 import { memo, useCallback, useEffect, useMemo, useState } from "react"
-import { anthropicModels, ApiConfiguration, geminiDefaultModelId, geminiModels, ModelInfo } from "@shared/api"
+import { ApiConfiguration, ModelInfo } from "@shared/api"
 import { VSCodeCheckbox } from "@vscode/webview-ui-toolkit/react"
 import styled from "styled-components"
 import { useExtensionState } from "@/context/ExtensionStateContext"
 import { useApiConfigurationHandlers } from "./utils/useApiConfigurationHandlers"
-import { getModeSpecificFields } from "./utils/providerUtils"
+import { getModeSpecificFields, normalizeApiConfiguration } from "./utils/providerUtils"
 import { Mode } from "@shared/storage/types"
 
 // Constants
@@ -96,13 +96,11 @@ const ThinkingBudgetSlider = ({ maxBudget, currentMode }: ThinkingBudgetSliderPr
 
 	const [isEnabled, setIsEnabled] = useState<boolean>((modeFields.thinkingBudgetTokens || 0) > 0)
 
-	const maxTokens = useMemo(
-		() =>
-			modeFields.apiProvider === "gemini"
-				? geminiModels[geminiDefaultModelId].maxTokens
-				: anthropicModels["claude-3-7-sonnet-20250219"].maxTokens,
-		[modeFields.apiProvider],
-	)
+	const maxTokens = useMemo(() => {
+		const { selectedModelInfo } = normalizeApiConfiguration(apiConfiguration, currentMode)
+		const mt = selectedModelInfo?.maxTokens ?? -1
+		return mt > 0 ? mt : 128000
+	}, [apiConfiguration, currentMode])
 
 	// use maxBudget prop if provided, otherwise apply the percentage cap to maxTokens
 	const maxSliderValue = useMemo(() => {

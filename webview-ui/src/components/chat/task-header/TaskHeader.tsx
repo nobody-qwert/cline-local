@@ -157,17 +157,8 @@ const TaskHeader: React.FC<TaskHeaderProps> = ({
 	}, [task.text, windowWidth, isTaskExpanded])
 
 	const isCostAvailable = useMemo(() => {
-		const modeFields = getModeSpecificFields(apiConfiguration, mode)
-		const openAiCompatHasPricing =
-			modeFields.apiProvider === "openai" &&
-			modeFields.openAiModelInfo?.inputPrice &&
-			modeFields.openAiModelInfo?.outputPrice
-		if (openAiCompatHasPricing) {
-			return true
-		}
-		return (
-			modeFields.apiProvider !== "vscode-lm" && modeFields.apiProvider !== "ollama" && modeFields.apiProvider !== "lmstudio"
-		)
+		const { selectedModelInfo } = normalizeApiConfiguration(apiConfiguration, mode)
+		return Boolean(selectedModelInfo?.inputPrice || selectedModelInfo?.outputPrice)
 	}, [apiConfiguration, mode])
 
 	const shouldShowPromptCacheInfo = () => {

@@ -274,14 +274,6 @@ export class Task {
 
 		const currentProvider = this.mode === "plan" ? apiConfiguration.planModeApiProvider : apiConfiguration.actModeApiProvider
 
-		if (currentProvider === "openai" || currentProvider === "openai-native") {
-			if (this.mode === "plan") {
-				effectiveApiConfiguration.planModeReasoningEffort = this.openaiReasoningEffort
-			} else {
-				effectiveApiConfiguration.actModeReasoningEffort = this.openaiReasoningEffort
-			}
-		}
-
 		// Now that ulid is initialized, we can build the API handler
 		this.api = buildApiHandler(effectiveApiConfiguration, this.mode)
 

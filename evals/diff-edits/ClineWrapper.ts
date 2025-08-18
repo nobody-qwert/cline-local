@@ -1,5 +1,5 @@
-import { OpenRouterHandler } from "../../src/api/providers/openrouter"
-import { OpenAiNativeHandler } from "../../src/api/providers/openai-native"
+import { LmStudioHandler } from "../../src/api/providers/lmstudio"
+import { OllamaHandler } from "../../src/api/providers/ollama"
 import type { AnthropicCompat as Anthropic } from "../../src/types/anthropic-compat"
 
 import {
@@ -50,7 +50,7 @@ interface StreamResult {
  * Process the stream and return full response with timing data
  */
 async function processStream(
-	handler: OpenRouterHandler | OpenAiNativeHandler,
+	handler: LmStudioHandler | OllamaHandler,
 	systemPrompt: string,
 	messages: Anthropic.Messages.MessageParam[],
 ): Promise<StreamResult> {
@@ -186,7 +186,7 @@ export async function runSingleEvaluation(input: TestInput): Promise<TestResult>
 			}
 		}
 
-		const provider = input.provider || "openrouter"
+		const provider = input.provider || "lmstudio"
 
 		// Get the output of streaming output of this llm call
 		let streamResult: StreamResult
@@ -200,29 +200,23 @@ export async function runSingleEvaluation(input: TestInput): Promise<TestResult>
 		} else {
 			// Live mode: provider-specific API call logic
 			try {
-				let handler: OpenRouterHandler | OpenAiNativeHandler
-				
-				if (provider === "openai") {
-					const openAiOptions = {
-						openAiNativeApiKey: apiKey,
-						apiModelId: modelId,
+				let handler: LmStudioHandler | OllamaHandler
+
+				if (provider === "ollama") {
+					const ollamaOptions = {
+						ollamaBaseUrl: undefined,
+						ollamaApiKey: apiKey,
+						ollamaModelId: modelId,
+						ollamaApiOptionsCtxNum: undefined,
+						requestTimeoutMs: undefined,
 					}
-					handler = new OpenAiNativeHandler(openAiOptions)
+					handler = new OllamaHandler(ollamaOptions)
 				} else {
-					const openRouterOptions = {
-						openRouterApiKey: apiKey,
-						openRouterModelId: modelId,
-						thinkingBudgetTokens: thinkingBudgetTokens,
-						openRouterModelInfo: {
-							maxTokens: 10_000,
-							contextWindow: 1_000_000,
-							supportsImages: true,
-							supportsPromptCache: true,
-							inputPrice: 0,
-							outputPrice: 0,
-						},
+					const lmStudioOptions = {
+						lmStudioBaseUrl: undefined,
+						lmStudioModelId: modelId,
 					}
-					handler = new OpenRouterHandler(openRouterOptions)
+					handler = new LmStudioHandler(lmStudioOptions)
 				}
 				
 				streamResult = await processStream(handler, systemPrompt, messages)

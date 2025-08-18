@@ -365,7 +365,7 @@ export class Controller {
 			throw error
 		}
 
-		const openrouter: ApiProvider = "openrouter"
+		const openrouter: ApiProvider = "lmstudio"
 		const currentMode = await this.getCurrentMode()
 
 		// Update API configuration through cache service

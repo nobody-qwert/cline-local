@@ -11,8 +11,8 @@ vi.mock("../../../context/ExtensionStateContext", async (importOriginal) => {
 		// your mocked methods
 		useExtensionState: vi.fn(() => ({
 			apiConfiguration: {
-				planModeApiProvider: "requesty",
-				actModeApiProvider: "requesty",
+				planModeApiProvider: "lmstudio",
+				actModeApiProvider: "lmstudio",
 				requestyApiKey: "",
 				planModeRequestyModelId: "",
 				actModeRequestyModelId: "",
@@ -43,8 +43,8 @@ describe("ApiOptions Component", () => {
 		//@ts-expect-error - vscode is not defined in the global namespace in test environment
 		global.vscode = { postMessage: mockPostMessage }
 		mockExtensionState({
-			planModeApiProvider: "requesty",
-			actModeApiProvider: "requesty",
+			planModeApiProvider: "lmstudio",
+			actModeApiProvider: "lmstudio",
 		})
 	})
 
@@ -77,8 +77,8 @@ describe("ApiOptions Component", () => {
 		//@ts-expect-error - vscode is not defined in the global namespace in test environment
 		global.vscode = { postMessage: mockPostMessage }
 		mockExtensionState({
-			planModeApiProvider: "together",
-			actModeApiProvider: "together",
+			planModeApiProvider: "lmstudio",
+			actModeApiProvider: "lmstudio",
 		})
 	})
 
@@ -112,8 +112,8 @@ describe("ApiOptions Component", () => {
 		global.vscode = { postMessage: mockPostMessage }
 
 		mockExtensionState({
-			planModeApiProvider: "fireworks",
-			actModeApiProvider: "fireworks",
+			planModeApiProvider: "ollama",
+			actModeApiProvider: "ollama",
 			fireworksApiKey: "",
 			planModeFireworksModelId: "",
 			actModeFireworksModelId: "",
@@ -171,8 +171,8 @@ describe("OpenApiInfoOptions", () => {
 		//@ts-expect-error - vscode is not defined in the global namespace in test environment
 		global.vscode = { postMessage: mockPostMessage }
 		mockExtensionState({
-			planModeApiProvider: "openai",
-			actModeApiProvider: "openai",
+			planModeApiProvider: "lmstudio",
+			actModeApiProvider: "lmstudio",
 		})
 	})
 
@@ -219,8 +219,8 @@ describe("ApiOptions Component", () => {
 		global.vscode = { postMessage: mockPostMessage }
 
 		mockExtensionState({
-			planModeApiProvider: "nebius",
-			actModeApiProvider: "nebius",
+			planModeApiProvider: "ollama",
+			actModeApiProvider: "ollama",
 			nebiusApiKey: "",
 		})
 	})
