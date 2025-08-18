@@ -1,4 +1,4 @@
-import { Anthropic } from "@anthropic-ai/sdk"
+import type { AnthropicCompat as Anthropic } from "../../src/types/anthropic-compat"
 import { ToolUseName, ToolParamName } from "../../src/core/assistant-message"
 
 export interface InputMessage {

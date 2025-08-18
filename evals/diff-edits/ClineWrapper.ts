@@ -1,6 +1,6 @@
 import { OpenRouterHandler } from "../../src/api/providers/openrouter"
 import { OpenAiNativeHandler } from "../../src/api/providers/openai-native"
-import { Anthropic } from "@anthropic-ai/sdk"
+import type { AnthropicCompat as Anthropic } from "../../src/types/anthropic-compat"
 
 import {
 	parseAssistantMessageV2,
