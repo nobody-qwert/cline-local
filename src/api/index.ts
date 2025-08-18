@@ -9,6 +9,8 @@ export interface ApiHandler {
 	createMessage(systemPrompt: string, messages: Anthropic.Messages.MessageParam[]): ApiStream
 	getModel(): ApiHandlerModel
 	getApiStreamUsage?(): Promise<ApiStreamUsageChunk | undefined>
+	// Optional cancellation hook so providers can abort in-flight requests
+	cancelActiveRequest?(): void
 }
 
 export interface ApiHandlerModel {

@@ -890,6 +890,8 @@ export class Task {
 		}
 
 		this.taskState.abort = true // will stop any autonomously running promises
+		// Abort any in-flight API streaming request (e.g., LM Studio) so the server stops streaming
+		this.api.cancelActiveRequest?.()
 		this.terminalManager.disposeAll()
 		// Browser functionality removed - no browser cleanup needed
 		this.clineIgnoreController.dispose()

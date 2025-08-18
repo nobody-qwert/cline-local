@@ -17,6 +17,7 @@ export class LmStudioHandler implements ApiHandler {
 	private options: LmStudioHandlerOptions
 	private client: OpenAI | undefined
 	private lastUsage: ApiStreamUsageChunk | undefined
+	private abortController: AbortController | undefined
 
 	constructor(options: LmStudioHandlerOptions) {
 		this.options = options
@@ -39,6 +40,8 @@ export class LmStudioHandler implements ApiHandler {
 	@withRetry({ retryAllErrors: true })
 	async *createMessage(systemPrompt: string, messages: Anthropic.Messages.MessageParam[]): ApiStream {
 		const client = this.ensureClient()
+		const controller = new AbortController()
+		this.abortController = controller
 
 		// Determine model capabilities for reasoning control
 		const modelId = this.getModel().id || ""
@@ -72,6 +75,7 @@ export class LmStudioHandler implements ApiHandler {
 					method: "POST",
 					headers: { "Content-Type": "application/json" },
 					body: JSON.stringify(body),
+					signal: controller.signal,
 				} as any)
 				if (!resp.ok || !resp.body) {
 					throw new Error(`LM Studio request failed with status ${resp.status}`)
@@ -152,7 +156,14 @@ export class LmStudioHandler implements ApiHandler {
 					}
 				}
 			} catch (error) {
+				// Swallow aborts; propagate other errors
+				if (error instanceof Error && (error.name === "AbortError" || error.message?.includes("aborted"))) {
+					return
+				}
 				throw new Error(`LM Studio (GPT-OSS) request failed: ${error instanceof Error ? error.message : String(error)}`)
+			} finally {
+				// Clear controller on exit of this branch
+				this.abortController = undefined
 			}
 		} else {
 			// Non-GPT-OSS path: use OpenAI SDK
@@ -171,7 +182,7 @@ export class LmStudioHandler implements ApiHandler {
 					// Explicitly disable reasoning when thinking is not enabled
 					req.reasoning = false
 				}
-				const stream = (await client.chat.completions.create(req)) as any
+				const stream = (await (client as any).chat.completions.create(req, { signal: controller.signal })) as any
 				for await (const chunk of stream as any) {
 					const delta = chunk.choices[0]?.delta
 					if (delta?.content) {
@@ -195,10 +206,16 @@ export class LmStudioHandler implements ApiHandler {
 					}
 				}
 			} catch (error) {
+				// Handle aborts gracefully; otherwise surface a helpful error
+				if (error instanceof Error && (error.name === "AbortError" || error.message?.includes("aborted"))) {
+					return
+				}
 				// LM Studio doesn't return an error code/body for now
 				throw new Error(
 					"Please check the LM Studio developer logs to debug what went wrong. You may need to load the model with a larger context length to work with Cline's prompts.",
 				)
+			} finally {
+				this.abortController = undefined
 			}
 		}
 	}
@@ -211,6 +228,15 @@ export class LmStudioHandler implements ApiHandler {
 		return {
 			id: this.options.lmStudioModelId || "",
 			info: getLmStudioModelInfoForModelId(this.options.lmStudioModelId || ""),
+		}
+	}
+
+	// Allow Task/Controller to cancel an in-flight request
+	cancelActiveRequest(): void {
+		try {
+			this.abortController?.abort()
+		} finally {
+			this.abortController = undefined
 		}
 	}
 }
