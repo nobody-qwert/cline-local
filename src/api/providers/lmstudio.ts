@@ -81,10 +81,10 @@ export class LmStudioHandler implements ApiHandler {
 						text: delta.content,
 					}
 				}
-				if (delta && "reasoning_content" in delta && delta.reasoning_content) {
+				if (delta && "reasoning" in delta && delta.reasoning) {
 					yield {
 						type: "reasoning",
-						reasoning: (delta.reasoning_content as string | undefined) || "",
+						reasoning: (delta.reasoning as string | undefined) || "",
 					}
 				}
 				// Emit usage if LM Studio provides it (OpenAI-compatible include_usage)

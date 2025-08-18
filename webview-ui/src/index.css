@@ -147,6 +147,35 @@ vscode-dropdown::part(listbox) {
 	scrollbar-color: var(--vscode-scrollbarSlider-background) transparent;
 }
 
+/* Fix dropdown positioning and z-index */
+vscode-dropdown {
+	position: relative;
+	z-index: 1;
+}
+
+vscode-dropdown::part(listbox) {
+	z-index: 9999 !important;
+	position: fixed !important;
+	max-height: 300px !important;
+	overflow-y: auto !important;
+}
+
+/* Force dropdown to have higher stacking context */
+vscode-dropdown[open]::part(listbox) {
+	z-index: 9999 !important;
+}
+
+/* Ensure dropdown container doesn't clip the listbox */
+.dropdown-container {
+	overflow: visible !important;
+	z-index: 1;
+}
+
+/* Additional fix for any parent containers that might clip */
+vscode-dropdown[open] {
+	overflow: visible !important;
+}
+
 /* Faded icon buttons in textfields */
 
 .input-icon-button {
