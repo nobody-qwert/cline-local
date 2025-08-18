@@ -113,6 +113,13 @@ const ThinkingBudgetSlider = ({ maxBudget, currentMode }: ThinkingBudgetSliderPr
 	// Add local state for the slider value
 	const [localValue, setLocalValue] = useState(modeFields.thinkingBudgetTokens || 0)
 
+	// Keep local state in sync with persisted settings (e.g., when reopening settings or switching modes)
+	useEffect(() => {
+		const tokens = modeFields.thinkingBudgetTokens || 0
+		setIsEnabled(tokens > 0)
+		setLocalValue(tokens)
+	}, [modeFields.thinkingBudgetTokens])
+
 	const handleSliderChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
 		const value = parseInt(event.target.value, 10)
 		setLocalValue(value)

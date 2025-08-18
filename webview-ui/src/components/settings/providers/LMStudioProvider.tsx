@@ -1,4 +1,4 @@
-import { VSCodeRadioGroup, VSCodeRadio, VSCodeLink } from "@vscode/webview-ui-toolkit/react"
+import { VSCodeDropdown, VSCodeOption, VSCodeLink } from "@vscode/webview-ui-toolkit/react"
 import { useState, useCallback, useEffect } from "react"
 import { useInterval } from "react-use"
 import { DebouncedTextField } from "../common/DebouncedTextField"
@@ -41,11 +41,26 @@ export const LMStudioProvider = ({ showModelOptions, isPopup, currentMode }: LMS
 			const response = await ModelsServiceClient.getLmStudioModels({
 				value: apiConfiguration?.lmStudioBaseUrl || "",
 			} as any)
-			if (response && response.values) {
-				setLmStudioModels(response.values)
+			if (response && Array.isArray(response.values)) {
+				// Sort models alphabetically for a predictable dropdown order
+				const sorted = [...response.values].sort((a, b) => a.localeCompare(b))
+				setLmStudioModels(sorted)
 				setConnOk(true)
-				setStatusText(`Connected — ${response.values.length} models`)
+				setStatusText(`Connected — ${sorted.length} models`)
 				setStatusTip(undefined)
+
+				// Auto-select first model if none selected or current selection not present
+				const current = lmStudioModelId || ""
+				if (!current || !sorted.includes(current)) {
+					const first = sorted[0]
+					if (first) {
+						handleModeFieldChange(
+							{ plan: "planModeLmStudioModelId", act: "actModeLmStudioModelId" },
+							first,
+							currentMode,
+						)
+					}
+				}
 			}
 		} catch (error: any) {
 			console.error("Failed to fetch LM Studio models:", error)
@@ -54,7 +69,7 @@ export const LMStudioProvider = ({ showModelOptions, isPopup, currentMode }: LMS
 			setStatusText("Cannot connect")
 			setStatusTip(String(error?.message || "Connection failed"))
 		}
-	}, [apiConfiguration?.lmStudioBaseUrl])
+	}, [apiConfiguration?.lmStudioBaseUrl, currentMode, handleModeFieldChange, lmStudioModelId])
 
 	useEffect(() => {
 		requestLmStudioModels()
@@ -103,11 +118,10 @@ export const LMStudioProvider = ({ showModelOptions, isPopup, currentMode }: LMS
 			)}
 
 			{lmStudioModels.length > 0 && (
-				<VSCodeRadioGroup
-					value={lmStudioModels.includes(lmStudioModelId || "") ? lmStudioModelId : ""}
-					onChange={(e) => {
-						const value = (e.target as HTMLInputElement)?.value
-						// need to check value first since radio group returns empty string sometimes
+				<VSCodeDropdown
+					currentValue={lmStudioModels.includes(lmStudioModelId || "") ? lmStudioModelId : lmStudioModels[0]}
+					onChange={(e: any) => {
+						const value = e?.target?.currentValue as string | undefined
 						if (value) {
 							handleModeFieldChange(
 								{ plan: "planModeLmStudioModelId", act: "actModeLmStudioModelId" },
@@ -115,13 +129,14 @@ export const LMStudioProvider = ({ showModelOptions, isPopup, currentMode }: LMS
 								currentMode,
 							)
 						}
-					}}>
+					}}
+					className="w-full">
 					{lmStudioModels.map((model) => (
-						<VSCodeRadio key={model} value={model} checked={lmStudioModelId === model}>
+						<VSCodeOption key={model} value={model}>
 							{model}
-						</VSCodeRadio>
+						</VSCodeOption>
 					))}
-				</VSCodeRadioGroup>
+				</VSCodeDropdown>
 			)}
 
 			{/* Thinking controls */}
