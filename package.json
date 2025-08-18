@@ -104,13 +104,13 @@
 			"activitybar": [
 				{
 					"id": "cline-local-ActivityBar",
-					"title": "Cline (⌘+')",
+					"title": "Cline Local (⌘+')",
 					"icon": "assets/icons/icon.svg",
 					"when": "isMac"
 				},
 				{
 					"id": "cline-local-ActivityBar",
-					"title": "Cline (Ctrl+')",
+					"title": "Cline Local (Ctrl+')",
 					"icon": "assets/icons/icon.svg",
 					"when": "!isMac"
 				}
@@ -128,87 +128,87 @@
 		},
 		"commands": [
 			{
-				"command": "cline.plusButtonClicked",
+				"command": "clineLocal.plusButtonClicked",
 				"title": "New Task",
 				"icon": "$(add)"
 			},
 			{
-				"command": "cline.mcpButtonClicked",
+				"command": "clineLocal.mcpButtonClicked",
 				"title": "MCP Servers",
 				"icon": "$(server)"
 			},
 			{
-				"command": "cline.historyButtonClicked",
+				"command": "clineLocal.historyButtonClicked",
 				"title": "History",
 				"icon": "$(history)"
 			},
 			{
-				"command": "cline.popoutButtonClicked",
+				"command": "clineLocal.popoutButtonClicked",
 				"title": "Open in Editor",
 				"icon": "$(link-external)"
 			},
 			{
-				"command": "cline.settingsButtonClicked",
+				"command": "clineLocal.settingsButtonClicked",
 				"title": "Settings",
 				"icon": "$(settings-gear)"
 			},
 			{
-				"command": "cline.openInNewTab",
+				"command": "clineLocal.openInNewTab",
 				"title": "Open In New Tab",
-				"category": "Cline"
+				"category": "Cline Local"
 			},
 			{
-				"command": "cline.dev.createTestTasks",
+				"command": "clineLocal.dev.createTestTasks",
 				"title": "Create Test Tasks",
-				"category": "Cline",
-				"when": "cline.isDevMode"
+				"category": "Cline Local",
+				"when": "clineLocal.isDevMode"
 			},
 			{
-				"command": "cline.addToChat",
-				"title": "Add to Cline",
-				"category": "Cline"
+				"command": "clineLocal.addToChat",
+				"title": "Add to Cline Local",
+				"category": "Cline Local"
 			},
 			{
-				"command": "cline.addTerminalOutputToChat",
-				"title": "Add to Cline",
-				"category": "Cline"
+				"command": "clineLocal.addTerminalOutputToChat",
+				"title": "Add to Cline Local",
+				"category": "Cline Local"
 			},
 			{
-				"command": "cline.focusChatInput",
+				"command": "clineLocal.focusChatInput",
 				"title": "Jump to Chat Input",
-				"category": "Cline"
+				"category": "Cline Local"
 			},
 			{
-				"command": "cline.generateGitCommitMessage",
-				"title": "Generate Commit Message with Cline",
-				"category": "Cline",
+				"command": "clineLocal.generateGitCommitMessage",
+				"title": "Generate Commit Message with Cline Local",
+				"category": "Cline Local",
 				"icon": "$(robot)"
 			},
 			{
-				"command": "cline.abortGitCommitMessage",
-				"title": "Generate Commit Message with Cline - Stop",
-				"category": "Cline",
+				"command": "clineLocal.abortGitCommitMessage",
+				"title": "Generate Commit Message with Cline Local - Stop",
+				"category": "Cline Local",
 				"icon": "$(debug-stop)"
 			},
 			{
-				"command": "cline.explainCode",
-				"title": "Explain with Cline",
-				"category": "Cline"
+				"command": "clineLocal.explainCode",
+				"title": "Explain with Cline Local",
+				"category": "Cline Local"
 			},
 			{
-				"command": "cline.improveCode",
-				"title": "Improve with Cline",
-				"category": "Cline"
+				"command": "clineLocal.improveCode",
+				"title": "Improve with Cline Local",
+				"category": "Cline Local"
 			},
 			{
-				"command": "cline.openWalkthrough",
+				"command": "clineLocal.openWalkthrough",
 				"title": "Open Walkthrough",
-				"category": "Cline"
+				"category": "Cline Local"
 			}
 		],
 		"keybindings": [
 			{
-				"command": "cline.addToChat",
+				"command": "clineLocal.addToChat",
 				"key": "cmd+'",
 				"mac": "cmd+'",
 				"win": "ctrl+'",
@@ -216,11 +216,11 @@
 				"when": "editorHasSelection"
 			},
 			{
-				"command": "cline.generateGitCommitMessage",
+				"command": "clineLocal.generateGitCommitMessage",
 				"when": "config.git.enabled && scmProvider == git"
 			},
 			{
-				"command": "cline.focusChatInput",
+				"command": "clineLocal.focusChatInput",
 				"key": "cmd+'",
 				"mac": "cmd+'",
 				"win": "ctrl+'",
@@ -231,96 +231,96 @@
 		"menus": {
 			"view/title": [
 				{
-					"command": "cline.plusButtonClicked",
+					"command": "clineLocal.plusButtonClicked",
 					"group": "navigation@1",
 					"when": "view == cline-local.SidebarProvider"
 				},
 				{
-					"command": "cline.mcpButtonClicked",
+					"command": "clineLocal.mcpButtonClicked",
 					"group": "navigation@2",
 					"when": "view == cline-local.SidebarProvider"
 				},
 				{
-					"command": "cline.historyButtonClicked",
+					"command": "clineLocal.historyButtonClicked",
 					"group": "navigation@3",
 					"when": "view == cline-local.SidebarProvider"
 				},
 				{
-					"command": "cline.popoutButtonClicked",
+					"command": "clineLocal.popoutButtonClicked",
 					"group": "navigation@4",
 					"when": "view == cline-local.SidebarProvider"
 				},
 				{
-					"command": "cline.settingsButtonClicked",
+					"command": "clineLocal.settingsButtonClicked",
 					"group": "navigation@6",
 					"when": "view == cline-local.SidebarProvider"
 				}
 			],
 			"editor/title": [
 				{
-					"command": "cline.plusButtonClicked",
+					"command": "clineLocal.plusButtonClicked",
 					"group": "navigation@1",
 					"when": "activeWebviewPanelId == cline-local.TabPanelProvider"
 				},
 				{
-					"command": "cline.mcpButtonClicked",
+					"command": "clineLocal.mcpButtonClicked",
 					"group": "navigation@2",
 					"when": "activeWebviewPanelId == cline-local.TabPanelProvider"
 				},
 				{
-					"command": "cline.historyButtonClicked",
+					"command": "clineLocal.historyButtonClicked",
 					"group": "navigation@3",
 					"when": "activeWebviewPanelId == cline-local.TabPanelProvider"
 				},
 				{
-					"command": "cline.popoutButtonClicked",
+					"command": "clineLocal.popoutButtonClicked",
 					"group": "navigation@4",
 					"when": "activeWebviewPanelId == cline-local.TabPanelProvider"
 				},
 				{
-					"command": "cline.settingsButtonClicked",
+					"command": "clineLocal.settingsButtonClicked",
 					"group": "navigation@6",
 					"when": "activeWebviewPanelId == cline-local.TabPanelProvider"
 				}
 			],
 			"editor/context": [
 				{
-					"command": "cline.addToChat",
+					"command": "clineLocal.addToChat",
 					"group": "navigation",
 					"when": "editorHasSelection"
 				}
 			],
 			"terminal/context": [
 				{
-					"command": "cline.addTerminalOutputToChat",
+					"command": "clineLocal.addTerminalOutputToChat",
 					"group": "navigation"
 				}
 			],
 			"scm/title": [
 				{
-					"command": "cline.generateGitCommitMessage",
+					"command": "clineLocal.generateGitCommitMessage",
 					"group": "navigation",
-					"when": "config.git.enabled && scmProvider == git && !cline.isGeneratingCommit"
+					"when": "config.git.enabled && scmProvider == git && !clineLocal.isGeneratingCommit"
 				},
 				{
-					"command": "cline.abortGitCommitMessage",
+					"command": "clineLocal.abortGitCommitMessage",
 					"group": "navigation",
-					"when": "config.git.enabled && scmProvider == git && cline.isGeneratingCommit"
+					"when": "config.git.enabled && scmProvider == git && clineLocal.isGeneratingCommit"
 				}
 			],
 			"commandPalette": [
 				{
-					"command": "cline.generateGitCommitMessage",
-					"when": "config.git.enabled && scmProvider == git && !cline.isGeneratingCommit"
+					"command": "clineLocal.generateGitCommitMessage",
+					"when": "config.git.enabled && scmProvider == git && !clineLocal.isGeneratingCommit"
 				},
 				{
-					"command": "cline.abortGitCommitMessage",
-					"when": "config.git.enabled && scmProvider == git && cline.isGeneratingCommit"
+					"command": "clineLocal.abortGitCommitMessage",
+					"when": "config.git.enabled && scmProvider == git && clineLocal.isGeneratingCommit"
 				}
 			]
 		},
 		"configuration": {
-			"title": "Cline",
+			"title": "Cline Local",
 			"properties": {}
 		}
 	},
