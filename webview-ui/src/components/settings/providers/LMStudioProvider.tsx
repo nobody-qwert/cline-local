@@ -7,7 +7,8 @@ import { BaseUrlField } from "../common/BaseUrlField"
 import { StatusPill } from "../common/StatusPill"
 import { useApiConfigurationHandlers } from "../utils/useApiConfigurationHandlers"
 import { useExtensionState } from "@/context/ExtensionStateContext"
-import { getModeSpecificFields } from "../utils/providerUtils"
+import { getModeSpecificFields, normalizeApiConfiguration } from "../utils/providerUtils"
+import ThinkingBudgetSlider from "../ThinkingBudgetSlider"
 import { Mode } from "@shared/storage/types"
 /**
  * Props for the LMStudioProvider component
@@ -22,7 +23,7 @@ interface LMStudioProviderProps {
  * The LM Studio provider configuration component
  */
 export const LMStudioProvider = ({ showModelOptions, isPopup, currentMode }: LMStudioProviderProps) => {
-	const { apiConfiguration } = useExtensionState()
+	const { apiConfiguration, openaiReasoningEffort } = useExtensionState()
 	const { handleFieldChange, handleModeFieldChange } = useApiConfigurationHandlers()
 
 	const { lmStudioModelId } = getModeSpecificFields(apiConfiguration, currentMode)
@@ -60,6 +61,14 @@ export const LMStudioProvider = ({ showModelOptions, isPopup, currentMode }: LMS
 	}, [requestLmStudioModels])
 
 	useInterval(requestLmStudioModels, 2000)
+
+	// Determine if the selected model supports "thinking" and whether it's GPT-OSS (effort-based)
+	const { selectedModelInfo, selectedModelId } = normalizeApiConfiguration(apiConfiguration, currentMode)
+	const modelIdForCheck = (selectedModelId || lmStudioModelId || "").toLowerCase()
+	const isGptOss =
+		modelIdForCheck.startsWith("gpt-oss") ||
+		modelIdForCheck.includes("/gpt-oss") ||
+		modelIdForCheck.includes("openai/gpt-oss")
 
 	return (
 		<div>
@@ -113,6 +122,32 @@ export const LMStudioProvider = ({ showModelOptions, isPopup, currentMode }: LMS
 						</VSCodeRadio>
 					))}
 				</VSCodeRadioGroup>
+			)}
+
+			{/* Thinking controls */}
+			{selectedModelInfo?.supportsReasoning && (
+				<div style={{ marginTop: 10 }}>
+					{isGptOss ? (
+						<div
+							style={{
+								fontSize: "12px",
+								color: "var(--vscode-descriptionForeground)",
+								lineHeight: 1.5,
+								border: "1px solid var(--vscode-editorGroup-border)",
+								borderRadius: 4,
+								padding: "8px 10px",
+								background: "var(--vscode-textCodeBlock-background)",
+							}}>
+							<b>Thinking</b> for GPT‑OSS models is controlled by the “OpenAI Reasoning Effort” setting (Features →
+							OpenAI Reasoning Effort). Current effort:{" "}
+							<span style={{ fontWeight: 600 }}>{openaiReasoningEffort || "medium"}</span>. No numeric budget is
+							required for GPT‑OSS.
+						</div>
+					) : (
+						// For non‑GPT‑OSS models that support reasoning, expose the Thinking Budget slider (toggle + slider)
+						<ThinkingBudgetSlider currentMode={currentMode} />
+					)}
+				</div>
 			)}
 
 			<p
