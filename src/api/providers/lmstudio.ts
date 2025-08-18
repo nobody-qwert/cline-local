@@ -45,18 +45,24 @@ export class LmStudioHandler implements ApiHandler {
 		const lowerId = modelId.toLowerCase()
 		const isGptOss = lowerId.startsWith("gpt-oss") || lowerId.includes("/gpt-oss") || lowerId.includes("openai/gpt-oss")
 
-		// For GPT-OSS models, set Harmony "Reasoning: low|medium|high|off" in the system message
+		// For LM Studio models, add reasoning control to the system message
 		// based on whether thinking is enabled via the UI toggle (ThinkingBudgetSlider).
 		let finalSystemPrompt = systemPrompt
 		const thinkingEnabled = (this.options.thinkingBudgetTokens || 0) > 0
-		if (isGptOss && !/Reasoning:\s*(low|medium|high|off)/i.test(systemPrompt)) {
+
+		// For GPT-OSS models, use Harmony format "Reasoning: low|medium|high"
+		// These models always reason, but we can control the effort level
+		if (isGptOss && !/Reasoning:\s*(low|medium|high)/i.test(systemPrompt)) {
 			if (thinkingEnabled) {
 				const effort = this.options.openaiReasoningEffort || "medium"
 				finalSystemPrompt = `${systemPrompt}\n\nReasoning: ${effort}`
 			} else {
-				// Explicitly disable reasoning for GPT-OSS models
-				finalSystemPrompt = `${systemPrompt}\n\nReasoning: off`
+				// When thinking is disabled, use minimal reasoning effort
+				finalSystemPrompt = `${systemPrompt}\n\nReasoning: low`
 			}
+		} else if (!isGptOss && !thinkingEnabled) {
+			// For non-GPT-OSS models, explicitly instruct to not use reasoning when thinking is disabled
+			finalSystemPrompt = `${systemPrompt}\n\nDo not use reasoning or thinking. Provide direct responses without internal reasoning.`
 		}
 
 		const openAiMessages: OpenAI.Chat.ChatCompletionMessageParam[] = [
@@ -64,59 +70,151 @@ export class LmStudioHandler implements ApiHandler {
 			...convertToOpenAiMessages(messages),
 		]
 
-		try {
-			const req: any = {
+		// For GPT-OSS models, bypass the OpenAI SDK to preserve non-standard fields like "reasoning_effort"
+		if (isGptOss) {
+			const url = (this.options.lmStudioBaseUrl || "http://localhost:1234") + "/v1/chat/completions"
+			const body: any = {
 				model: this.getModel().id,
 				messages: openAiMessages,
 				stream: true,
 				// Request usage in streaming chunks (OpenAI-compatible)
 				stream_options: { include_usage: true },
+				// Top-level reasoning effort per LM Studio GPT-OSS format
+				reasoning_effort: thinkingEnabled ? this.options.openaiReasoningEffort || "medium" : "low",
 			}
-			// If thinking budget is enabled, include OpenAI-compatible reasoning params
-			// Skip for GPT-OSS models (they use Harmony "Reasoning: low|medium|high" instead)
-			if (!isGptOss) {
+			try {
+				const resp = await fetch(url, {
+					method: "POST",
+					headers: { "Content-Type": "application/json" },
+					body: JSON.stringify(body),
+				} as any)
+				if (!resp.ok || !resp.body) {
+					throw new Error(`LM Studio request failed with status ${resp.status}`)
+				}
+				const reader = (resp.body as any).getReader()
+				const decoder = new TextDecoder()
+				let buffer = ""
+				while (true) {
+					const { done, value } = await reader.read()
+					if (done) break
+					buffer += decoder.decode(value, { stream: true })
+					let newlineIndex = buffer.indexOf("\n")
+					while (newlineIndex !== -1) {
+						const line = buffer.slice(0, newlineIndex).trim()
+						buffer = buffer.slice(newlineIndex + 1)
+						if (line.startsWith("data:")) {
+							const dataStr = line.slice(5).trim()
+							if (dataStr === "[DONE]") {
+								// End of stream
+							} else {
+								try {
+									const chunk = JSON.parse(dataStr)
+									const delta = chunk?.choices?.[0]?.delta
+									if (delta?.content) {
+										yield { type: "text", text: delta.content }
+									}
+									if (delta && "reasoning" in delta && delta.reasoning) {
+										yield { type: "reasoning", reasoning: (delta.reasoning as string | undefined) || "" }
+									}
+									const usage = (chunk as any)?.usage
+									if (usage && (usage.prompt_tokens !== null || usage.completion_tokens !== null)) {
+										const usageChunk: ApiStreamUsageChunk = {
+											type: "usage",
+											inputTokens: usage.prompt_tokens || 0,
+											outputTokens: usage.completion_tokens || 0,
+											cacheReadTokens: usage.prompt_tokens_details?.cached_tokens || 0,
+											cacheWriteTokens: usage.prompt_cache_miss_tokens || 0,
+										}
+										this.lastUsage = usageChunk
+										yield usageChunk
+									}
+								} catch {
+									// ignore parse errors
+								}
+							}
+						}
+						newlineIndex = buffer.indexOf("\n")
+					}
+				}
+				// Flush any remaining buffer content
+				if (buffer.startsWith("data:")) {
+					const dataStr = buffer.slice(5).trim()
+					if (dataStr && dataStr !== "[DONE]") {
+						try {
+							const chunk = JSON.parse(dataStr)
+							const delta = chunk?.choices?.[0]?.delta
+							if (delta?.content) {
+								yield { type: "text", text: delta.content }
+							}
+							if (delta && "reasoning" in delta && delta.reasoning) {
+								yield { type: "reasoning", reasoning: (delta.reasoning as string | undefined) || "" }
+							}
+							const usage = (chunk as any)?.usage
+							if (usage && (usage.prompt_tokens !== null || usage.completion_tokens !== null)) {
+								const usageChunk: ApiStreamUsageChunk = {
+									type: "usage",
+									inputTokens: usage.prompt_tokens || 0,
+									outputTokens: usage.completion_tokens || 0,
+									cacheReadTokens: usage.prompt_tokens_details?.cached_tokens || 0,
+									cacheWriteTokens: usage.prompt_cache_miss_tokens || 0,
+								}
+								this.lastUsage = usageChunk
+								yield usageChunk
+							}
+						} catch {
+							// ignore parse errors
+						}
+					}
+				}
+			} catch (error) {
+				throw new Error(`LM Studio (GPT-OSS) request failed: ${error instanceof Error ? error.message : String(error)}`)
+			}
+		} else {
+			// Non-GPT-OSS path: use OpenAI SDK
+			try {
+				const req: any = {
+					model: this.getModel().id,
+					messages: openAiMessages,
+					stream: true,
+					// Request usage in streaming chunks (OpenAI-compatible)
+					stream_options: { include_usage: true },
+				}
+				// If thinking budget is enabled, include OpenAI-compatible reasoning params
 				if (this.options.thinkingBudgetTokens && this.options.thinkingBudgetTokens > 0) {
 					req.reasoning = { budget_tokens: this.options.thinkingBudgetTokens }
 				} else {
 					// Explicitly disable reasoning when thinking is not enabled
 					req.reasoning = false
 				}
+				const stream = (await client.chat.completions.create(req)) as any
+				for await (const chunk of stream as any) {
+					const delta = chunk.choices[0]?.delta
+					if (delta?.content) {
+						yield { type: "text", text: delta.content }
+					}
+					if (delta && "reasoning" in delta && delta.reasoning) {
+						yield { type: "reasoning", reasoning: (delta.reasoning as string | undefined) || "" }
+					}
+					// Emit usage if LM Studio provides it (OpenAI-compatible include_usage)
+					const usage = (chunk as any)?.usage
+					if (usage && (usage.prompt_tokens !== null || usage.completion_tokens !== null)) {
+						const usageChunk: ApiStreamUsageChunk = {
+							type: "usage",
+							inputTokens: usage.prompt_tokens || 0,
+							outputTokens: usage.completion_tokens || 0,
+							cacheReadTokens: usage.prompt_tokens_details?.cached_tokens || 0,
+							cacheWriteTokens: usage.prompt_cache_miss_tokens || 0,
+						}
+						this.lastUsage = usageChunk
+						yield usageChunk
+					}
+				}
+			} catch (error) {
+				// LM Studio doesn't return an error code/body for now
+				throw new Error(
+					"Please check the LM Studio developer logs to debug what went wrong. You may need to load the model with a larger context length to work with Cline's prompts.",
+				)
 			}
-			const stream = (await client.chat.completions.create(req)) as any
-			for await (const chunk of stream as any) {
-				const delta = chunk.choices[0]?.delta
-				if (delta?.content) {
-					yield {
-						type: "text",
-						text: delta.content,
-					}
-				}
-				if (delta && "reasoning" in delta && delta.reasoning) {
-					yield {
-						type: "reasoning",
-						reasoning: (delta.reasoning as string | undefined) || "",
-					}
-				}
-				// Emit usage if LM Studio provides it (OpenAI-compatible include_usage)
-				const usage = (chunk as any)?.usage
-				if (usage && (usage.prompt_tokens !== null || usage.completion_tokens !== null)) {
-					const usageChunk: ApiStreamUsageChunk = {
-						type: "usage",
-						inputTokens: usage.prompt_tokens || 0,
-						outputTokens: usage.completion_tokens || 0,
-						// Best-effort cache metrics if LM Studio provides them
-						cacheReadTokens: usage.prompt_tokens_details?.cached_tokens || 0,
-						cacheWriteTokens: usage.prompt_cache_miss_tokens || 0,
-					}
-					this.lastUsage = usageChunk
-					yield usageChunk
-				}
-			}
-		} catch (error) {
-			// LM Studio doesn't return an error code/body for now
-			throw new Error(
-				"Please check the LM Studio developer logs to debug what went wrong. You may need to load the model with a larger context length to work with Cline's prompts.",
-			)
 		}
 	}
 
