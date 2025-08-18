@@ -126,8 +126,8 @@ export const LMStudioProvider = ({ showModelOptions, isPopup, currentMode }: LMS
 
 			{/* Thinking controls */}
 			{selectedModelInfo?.supportsReasoning && (
-				<div style={{ marginTop: 10 }}>
-					{isGptOss ? (
+				<div style={{ marginTop: 10, display: "flex", flexDirection: "column", gap: 8 }}>
+					{isGptOss && (
 						<div
 							style={{
 								fontSize: "12px",
@@ -140,13 +140,13 @@ export const LMStudioProvider = ({ showModelOptions, isPopup, currentMode }: LMS
 							}}>
 							<b>Thinking</b> for GPT‑OSS models is controlled by the “OpenAI Reasoning Effort” setting (Features →
 							OpenAI Reasoning Effort). Current effort:{" "}
-							<span style={{ fontWeight: 600 }}>{openaiReasoningEffort || "medium"}</span>. No numeric budget is
-							required for GPT‑OSS.
+							<span style={{ fontWeight: 600 }}>{openaiReasoningEffort || "medium"}</span>. Use the toggle below to
+							enable/disable thinking for this mode. Numeric budget is ignored for GPT‑OSS.
 						</div>
-					) : (
-						// For non‑GPT‑OSS models that support reasoning, expose the Thinking Budget slider (toggle + slider)
-						<ThinkingBudgetSlider currentMode={currentMode} />
 					)}
+					{/* Expose the standard toggle + budget slider UI. For GPT‑OSS, the toggle enables thinking,
+					    while the numeric budget is ignored. For other models, both toggle and budget apply. */}
+					<ThinkingBudgetSlider currentMode={currentMode} />
 				</div>
 			)}
 

@@ -44,10 +44,11 @@ export class LmStudioHandler implements ApiHandler {
 		const lowerId = modelId.toLowerCase()
 		const isGptOss = lowerId.startsWith("gpt-oss") || lowerId.includes("/gpt-oss") || lowerId.includes("openai/gpt-oss")
 
-		// For GPT-OSS models, set Harmony "Reasoning: low|medium|high" in the system message.
-		// Default to "medium" if not specified elsewhere.
+		// For GPT-OSS models, set Harmony "Reasoning: low|medium|high" in the system message
+		// only when thinking is enabled via the UI toggle (ThinkingBudgetSlider).
 		let finalSystemPrompt = systemPrompt
-		if (isGptOss && !/Reasoning:\s*(low|medium|high)/i.test(systemPrompt)) {
+		const thinkingEnabled = (this.options.thinkingBudgetTokens || 0) > 0
+		if (isGptOss && thinkingEnabled && !/Reasoning:\s*(low|medium|high)/i.test(systemPrompt)) {
 			const effort = "medium" // TODO: plumb from settings.openaiReasoningEffort if needed
 			finalSystemPrompt = `${systemPrompt}\n\nReasoning: ${effort}`
 		}
