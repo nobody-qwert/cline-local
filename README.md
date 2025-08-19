@@ -1,9 +1,5 @@
 # Cline Local – Lean, local‑only fork of Cline
 
-<p align="center">
-  <img src="https://media.githubusercontent.com/media/cline/cline/main/assets/docs/demo.gif" width="100%" />
-</p>
-
 Cline Local is a lean, local‑only fork of the Cline VSCode extension. It preserves the Plan/Act toolchain, MCP support, and file/terminal integration while permanently removing browser automation, telemetry/analytics, authentication/billing, cloud‑only model providers, and background checkpoints. This variant is designed for teams who manage Git directly and for environments with strict data protection policies where cloud APIs are restricted or disallowed.
 
 ---
