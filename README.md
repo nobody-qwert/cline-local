@@ -4,9 +4,22 @@ Cline Local is a lean, local‑only fork of the Cline VSCode extension. It prese
 
 ---
 
+## Latest Release
+
+- v0.1.0: [Release notes](https://github.com/nobody-qwert/cline-local/releases/tag/v0.1.0) • [Download VSIX](https://github.com/nobody-qwert/cline-local/releases/download/v0.1.0/cline-local-0.1.0.vsix)
+
+## Compatibility (v0.1.0)
+
+- Tested backend: LM Studio only
+- Known‑good models:
+  - GPT‑OSS family: `gpt-oss*`, `openai/gpt-oss` (reasoning supported)
+  - Qwen 30B A3B variants: `qwen3-30b-a3b-thinking-2507`, `qwen3-30b-a3b`, `qwen3-30b-a3b-instruct-2507`, `qwen3-coder-30b-a3b-instruct` (incl. MLX port)
+- Others may work via OpenAI‑compatible endpoints or Ollama, but are untested in this release.
+
 ## Core capabilities
 
 - Plan/Act workflow with human‑in‑the‑loop approvals (diff review for file edits; approval before terminal commands)
+- Focus Chain: automatic task breakdown with step‑by‑step completion progress
 - Create and edit files with diffs; adapts to linter/compiler output to self‑correct common issues
 - Terminal integration: execute commands with approval and stream output; long‑running processes can continue while tasks proceed
 - MCP integration: connect to servers for custom tools/resources
@@ -47,6 +60,16 @@ See Core capabilities above.
 
 
 
+
+## Install (VSIX)
+
+- Download the VSIX from the latest release
+- VSCode → Extensions → ••• → Install from VSIX…
+- Select the file, then Reload
+
+![Install from VSIX in VSCode](assets/docs/install.png)
+
+---
 
 ## Quick Start (Build from Source)
 
