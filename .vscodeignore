@@ -35,6 +35,8 @@ evals/
 buf.yaml
 .changeset/
 .clinerules/
+locales/**
+assets/docs/**
 
 # Ignore all webview-ui files except the build directory (https://github.com/microsoft/vscode-webview-ui-toolkit-samples/blob/main/frameworks/hello-world-react-cra/.vscodeignore)
 webview-ui/src/**
@@ -49,6 +51,10 @@ webview-ui/node_modules/**
 # Ignore docs
 docs/**
 old_docs/**
+# Ignore locales
+locales/**
+# Ignore doc assets
+assets/docs/**
 
 # Fix issue where codicons don't get packaged (https://github.com/microsoft/vscode-extension-samples/issues/692)
 !node_modules/@vscode/codicons/dist/codicon.css

@@ -47,7 +47,6 @@ import { AutoApprove } from "./tools/autoApprove"
 import { showNotificationForApprovalIfAutoApprovalEnabled } from "./utils"
 import { Mode } from "@shared/storage/types"
 import { continuationPrompt } from "../prompts/contextManagement"
-import { UrlContentFetcher } from "@services/browser/UrlContentFetcher"
 
 export class ToolExecutor {
 	private autoApprover: AutoApprove
@@ -1849,71 +1848,7 @@ export class ToolExecutor {
 					break
 				}
 			}
-			case "web_fetch": {
-				const url: string | undefined = block.params.url
-				try {
-					if (block.partial) {
-						const partialMessage = JSON.stringify({
-							tool: "webFetch",
-							content: this.removeClosingTag(block, "url", url),
-						} satisfies ClineSayTool)
-						if (this.shouldAutoApproveTool(block.name)) {
-							this.removeLastPartialMessageIfExistsWithType("ask", "tool")
-							await this.say("tool", partialMessage, undefined, undefined, block.partial)
-						} else {
-							this.removeLastPartialMessageIfExistsWithType("say", "tool")
-							await this.ask("tool", partialMessage, block.partial).catch(() => {})
-						}
-						break
-					} else {
-						if (!url) {
-							this.taskState.consecutiveMistakeCount++
-							this.pushToolResult(await this.sayAndCreateMissingParamError("web_fetch", "url"), block)
-							await this.saveCheckpoint()
-							break
-						}
-						this.taskState.consecutiveMistakeCount = 0
-
-						const completeMessage = JSON.stringify({
-							tool: "webFetch",
-							content: url,
-						} satisfies ClineSayTool)
-						if (this.shouldAutoApproveTool(block.name)) {
-							this.removeLastPartialMessageIfExistsWithType("ask", "tool")
-							await this.say("tool", completeMessage, undefined, undefined, false)
-							this.taskState.consecutiveAutoApprovedRequestsCount++
-						} else {
-							showNotificationForApprovalIfAutoApprovalEnabled(
-								`Cline wants to fetch content from ${url}`,
-								this.autoApprovalSettings.enabled,
-								this.autoApprovalSettings.enableNotifications,
-							)
-							this.removeLastPartialMessageIfExistsWithType("say", "tool")
-							const didApprove = await this.askApproval("tool", block, completeMessage)
-							if (!didApprove) {
-								await this.saveCheckpoint()
-								break
-							}
-						}
-
-						// Execute web fetch
-						const urlContentFetcher = new UrlContentFetcher(this.context)
-						const markdownContent = await urlContentFetcher.urlToMarkdown(url)
-						this.pushToolResult(markdownContent, block)
-
-						if (!block.partial && this.focusChainSettings.enabled) {
-							await this.updateFCListFromToolResponse(block.params.task_progress)
-						}
-
-						await this.saveCheckpoint()
-						break
-					}
-				} catch (error) {
-					await this.handleError("fetching web content", error, block)
-					await this.saveCheckpoint()
-					break
-				}
-			}
+			// web_fetch tool removed - web fetching disabled
 			case "load_mcp_documentation": {
 				try {
 					if (block.partial) {
