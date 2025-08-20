@@ -155,11 +155,10 @@ Choose models available from your selected provider.
 
 ## Versioning and CHANGELOG
 
-**Cline Local** follows independent semantic versioning starting from v1.0.0:
-
-- **Major versions (2.0.0, 3.0.0)**: Breaking changes or significant architectural updates
-- **Minor versions (1.1.0, 1.2.0)**: New features, upstream merges with compatible changes  
-- **Patch versions (1.0.1, 1.0.2)**: Bug fixes, security updates, minor improvements
+Cline Local currently uses pre-1.0 semantic versioning (v0.1.x). Until v1.0.0, minor version bumps may include breaking changes. After v1.0.0, we will follow standard semantic versioning:
+- MAJOR: Breaking changes or significant architectural updates
+- MINOR: New features, upstream merges with compatible changes
+- PATCH: Bug fixes, security updates, minor improvements
 
 ### Upstream Integration Policy
 
@@ -171,9 +170,9 @@ When merging relevant changes from upstream Cline:
 
 ### Changelog Structure
 
-- `CHANGELOG.md` records changes specific to Cline Local starting from v1.0.0
-- `CHANGELOG-UPSTREAM.md` preserves the complete upstream changelog for reference
-- Expect version skew vs upstream due to selective syncing and removal of cloud/browser features
+- `CHANGELOG.md` records changes specific to Cline Local (since v0.1.0)
+- Relevant upstream changes are referenced in our release notes when applicable
+- Expect version skew vs upstream due to selective syncing and the removal of cloud/browser features
 
 ---
 
