@@ -105,9 +105,6 @@ Supported local providers: OpenAI‑compatible (configurable `baseUrl`), Ollama,
 
 Open the extension UI → Settings, then select one of:
 
-- OpenAI‑compatible
-  - Set `baseUrl` to your local endpoint (e.g., `http://localhost:1234/v1`)
-  - Provide an API key if required by your endpoint
 - Ollama
   - Ensure Ollama is running locally (default `http://localhost:11434`)
 - LM Studio
