@@ -145,7 +145,7 @@ Choose models available from your selected provider.
 ## Repository Policy
 
 - Upstream: https://github.com/cline/cline
-- This fork's origin: see your configured git remotes
+- Originally derived from cline/cline (Apache 2.0). The GitHub fork relationship has been detached due to divergence; an upstream remote is kept for reference.
 - PRs disabled: This fork does not accept public pull requests
 - Manual upstream sync:
   - Changes are cherry‑picked or merged manually from upstream as needed
@@ -188,6 +188,8 @@ When merging relevant changes from upstream Cline:
 
 - Licensed under Apache 2.0 (same as upstream). See `LICENSE`
 - Derived from the Cline project by Cline Bot Inc.
+- Not affiliated with or endorsed by Cline Bot Inc. “Cline” is a trademark of its respective owner.
+- Disclaimer: This software is provided “AS IS”, without warranty of any kind. The authors and contributors are not liable for any damages or misuse. See the LICENSE for details.
 - All trademarks and brand names belong to their respective owners
 
 ---
