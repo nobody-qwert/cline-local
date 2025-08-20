@@ -23,9 +23,7 @@ import { readTextFromClipboard, writeTextToClipboard } from "@/utils/env"
 import type { ExtensionContext } from "vscode"
 import { initialize, tearDown } from "./common"
 import { addToCline } from "./core/controller/commands/addToCline"
-import { explainWithCline } from "./core/controller/commands/explainWithCline"
 import { fixWithCline } from "./core/controller/commands/fixWithCline"
-import { improveWithCline } from "./core/controller/commands/improveWithCline"
 import { sendAddToInputEvent } from "./core/controller/ui/subscribeToAddToInput"
 import { sendFocusChatInputEvent } from "./core/controller/ui/subscribeToFocusChatInput"
 import { focusChatInput, getContextForCommand } from "./hosts/vscode/commandUtils"
@@ -315,24 +313,6 @@ export async function activate(context: vscode.ExtensionContext) {
 					}
 					actions.push(addAction)
 
-					// Explain with Cline Local (Always available)
-					const explainAction = new vscode.CodeAction("Explain with Cline Local", vscode.CodeActionKind.RefactorExtract) // Using a refactor kind
-					explainAction.command = {
-						command: "clineLocal.explainCode",
-						title: "Explain with Cline Local",
-						arguments: [expandedRange],
-					}
-					actions.push(explainAction)
-
-					// Improve with Cline Local (Always available)
-					const improveAction = new vscode.CodeAction("Improve with Cline Local", vscode.CodeActionKind.RefactorRewrite) // Using a refactor kind
-					improveAction.command = {
-						command: "clineLocal.improveCode",
-						title: "Improve with Cline Local",
-						arguments: [expandedRange],
-					}
-					actions.push(improveAction)
-
 					// Fix with Cline (Only if diagnostics exist)
 					if (context.diagnostics.length > 0) {
 						const fixAction = new vscode.CodeAction("Fix with Cline Local", vscode.CodeActionKind.QuickFix)
@@ -381,24 +361,6 @@ export async function activate(context: vscode.ExtensionContext) {
 				await fixWithCline(context.controller, context.commandContext)
 			},
 		),
-	)
-	context.subscriptions.push(
-		vscode.commands.registerCommand("clineLocal.explainCode", async (range: vscode.Range) => {
-			const context = await getContextForCommand(range)
-			if (!context) {
-				return
-			}
-			await explainWithCline(context.controller, context.commandContext)
-		}),
-	)
-	context.subscriptions.push(
-		vscode.commands.registerCommand("clineLocal.improveCode", async (range: vscode.Range) => {
-			const context = await getContextForCommand(range)
-			if (!context) {
-				return
-			}
-			await improveWithCline(context.controller, context.commandContext)
-		}),
 	)
 
 	// Register the focusChatInput command handler

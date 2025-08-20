@@ -44,7 +44,10 @@
 	"activationEvents": [
 		"onLanguage",
 		"onStartupFinished",
-		"workspaceContains:evals.env"
+		"workspaceContains:evals.env",
+		"onCommand:clineLocal.addToChat",
+		"onCommand:clineLocal.focusChatInput",
+		"onCommand:clineLocal.addTerminalOutputToChat"
 	],
 	"main": "./dist/extension.js",
 	"contributes": {
@@ -158,12 +161,6 @@
 				"category": "Cline Local"
 			},
 			{
-				"command": "clineLocal.dev.createTestTasks",
-				"title": "Create Test Tasks",
-				"category": "Cline Local",
-				"when": "clineLocal.isDevMode"
-			},
-			{
 				"command": "clineLocal.addToChat",
 				"title": "Add to Cline Local",
 				"category": "Cline Local"
@@ -189,16 +186,6 @@
 				"title": "Generate Commit Message with Cline Local - Stop",
 				"category": "Cline Local",
 				"icon": "$(debug-stop)"
-			},
-			{
-				"command": "clineLocal.explainCode",
-				"title": "Explain with Cline Local",
-				"category": "Cline Local"
-			},
-			{
-				"command": "clineLocal.improveCode",
-				"title": "Improve with Cline Local",
-				"category": "Cline Local"
 			},
 			{
 				"command": "clineLocal.openWalkthrough",
