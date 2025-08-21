@@ -1,4 +1,4 @@
-import { VSCodeDropdown, VSCodeOption, VSCodeLink, VSCodeCheckbox } from "@vscode/webview-ui-toolkit/react"
+import { VSCodeDropdown, VSCodeOption, VSCodeLink } from "@vscode/webview-ui-toolkit/react"
 import { useState, useCallback, useEffect, useRef } from "react"
 import { useInterval } from "react-use"
 import { DebouncedTextField } from "../common/DebouncedTextField"
@@ -99,20 +99,22 @@ export const LMStudioProvider = ({ showModelOptions, isPopup, currentMode }: LMS
 		modelIdForCheck.includes("/gpt-oss") ||
 		modelIdForCheck.includes("openai/gpt-oss")
 
-	// Track "Enable extended thinking" state for this mode (used for GPT-OSS too)
+	// Mode fields (thinking tokens) for current mode
 	const modeFields = getModeSpecificFields(apiConfiguration, currentMode)
-	const [thinkingEnabled, setThinkingEnabled] = useState<boolean>((modeFields.thinkingBudgetTokens || 0) > 0)
-
-	useEffect(() => {
-		setThinkingEnabled((modeFields.thinkingBudgetTokens || 0) > 0)
-	}, [modeFields.thinkingBudgetTokens])
 
 	const DEFAULT_MIN_VALID_TOKENS = 1024
-	const handleThinkingToggle = (e: any) => {
-		const checked = e.target.checked === true
-		const newValue = checked ? DEFAULT_MIN_VALID_TOKENS : 0
-		handleModeFieldChange({ plan: "planModeThinkingBudgetTokens", act: "actModeThinkingBudgetTokens" }, newValue, currentMode)
-	}
+	// Ensure GPT‑OSS models always have "thinking enabled" (non-zero tokens) for internal consistency.
+	// Numeric value is ignored by GPT‑OSS, but non-zero keeps downstream logic uniform.
+	useEffect(() => {
+		if (isGptOss && (modeFields.thinkingBudgetTokens || 0) <= 0) {
+			handleModeFieldChange(
+				{ plan: "planModeThinkingBudgetTokens", act: "actModeThinkingBudgetTokens" },
+				DEFAULT_MIN_VALID_TOKENS,
+				currentMode,
+			)
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [isGptOss, modeFields.thinkingBudgetTokens, currentMode])
 
 	return (
 		<div>
@@ -174,10 +176,6 @@ export const LMStudioProvider = ({ showModelOptions, isPopup, currentMode }: LMS
 				<div style={{ marginTop: 10, display: "flex", flexDirection: "column", gap: 8 }}>
 					{isGptOss ? (
 						<>
-							<VSCodeCheckbox checked={thinkingEnabled} onChange={handleThinkingToggle}>
-								Enable extended thinking
-							</VSCodeCheckbox>
-
 							<label
 								htmlFor="openai-reasoning-effort-dropdown"
 								className="block text-sm font-medium text-[var(--vscode-foreground)] mb-1">
