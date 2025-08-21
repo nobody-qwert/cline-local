@@ -1,4 +1,4 @@
-import { VSCodeDropdown, VSCodeOption, VSCodeLink } from "@vscode/webview-ui-toolkit/react"
+import { VSCodeDropdown, VSCodeOption, VSCodeLink, VSCodeCheckbox } from "@vscode/webview-ui-toolkit/react"
 import { useState, useCallback, useEffect, useRef } from "react"
 import { useInterval } from "react-use"
 import { DebouncedTextField } from "../common/DebouncedTextField"
@@ -6,10 +6,11 @@ import { ModelsServiceClient } from "@/services/grpc-client"
 import { BaseUrlField } from "../common/BaseUrlField"
 import { StatusPill } from "../common/StatusPill"
 import { useApiConfigurationHandlers } from "../utils/useApiConfigurationHandlers"
+import { updateSetting } from "../utils/settingsHandlers"
 import { useExtensionState } from "@/context/ExtensionStateContext"
 import { getModeSpecificFields, normalizeApiConfiguration } from "../utils/providerUtils"
 import ThinkingBudgetSlider from "../ThinkingBudgetSlider"
-import { Mode } from "@shared/storage/types"
+import { Mode, OpenaiReasoningEffort } from "@shared/storage/types"
 /**
  * Props for the LMStudioProvider component
  */
@@ -98,6 +99,21 @@ export const LMStudioProvider = ({ showModelOptions, isPopup, currentMode }: LMS
 		modelIdForCheck.includes("/gpt-oss") ||
 		modelIdForCheck.includes("openai/gpt-oss")
 
+	// Track "Enable extended thinking" state for this mode (used for GPT-OSS too)
+	const modeFields = getModeSpecificFields(apiConfiguration, currentMode)
+	const [thinkingEnabled, setThinkingEnabled] = useState<boolean>((modeFields.thinkingBudgetTokens || 0) > 0)
+
+	useEffect(() => {
+		setThinkingEnabled((modeFields.thinkingBudgetTokens || 0) > 0)
+	}, [modeFields.thinkingBudgetTokens])
+
+	const DEFAULT_MIN_VALID_TOKENS = 1024
+	const handleThinkingToggle = (e: any) => {
+		const checked = e.target.checked === true
+		const newValue = checked ? DEFAULT_MIN_VALID_TOKENS : 0
+		handleModeFieldChange({ plan: "planModeThinkingBudgetTokens", act: "actModeThinkingBudgetTokens" }, newValue, currentMode)
+	}
+
 	return (
 		<div>
 			<BaseUrlField
@@ -155,26 +171,33 @@ export const LMStudioProvider = ({ showModelOptions, isPopup, currentMode }: LMS
 			{/* Thinking controls */}
 			{selectedModelInfo?.supportsReasoning && (
 				<div style={{ marginTop: 10, display: "flex", flexDirection: "column", gap: 8 }}>
-					{isGptOss && (
-						<div
-							style={{
-								fontSize: "12px",
-								color: "var(--vscode-descriptionForeground)",
-								lineHeight: 1.5,
-								border: "1px solid var(--vscode-editorGroup-border)",
-								borderRadius: 4,
-								padding: "8px 10px",
-								background: "var(--vscode-textCodeBlock-background)",
-							}}>
-							<b>Thinking</b> for GPT‑OSS models is controlled by the “OpenAI Reasoning Effort” setting (Features →
-							OpenAI Reasoning Effort). Current effort:{" "}
-							<span style={{ fontWeight: 600 }}>{openaiReasoningEffort || "medium"}</span>. Use the toggle below to
-							enable/disable thinking for this mode. Numeric budget is ignored for GPT‑OSS.
-						</div>
+					{isGptOss ? (
+						<>
+							<VSCodeCheckbox checked={thinkingEnabled} onChange={handleThinkingToggle}>
+								Enable extended thinking
+							</VSCodeCheckbox>
+
+							<label
+								htmlFor="openai-reasoning-effort-dropdown"
+								className="block text-sm font-medium text-[var(--vscode-foreground)] mb-1">
+								OpenAI Reasoning Effort
+							</label>
+							<VSCodeDropdown
+								id="openai-reasoning-effort-dropdown"
+								currentValue={openaiReasoningEffort || "medium"}
+								onChange={(e: any) => {
+									const newValue = e.target.currentValue as OpenaiReasoningEffort
+									updateSetting("openaiReasoningEffort", newValue)
+								}}
+								className="w-full">
+								<VSCodeOption value="low">Low</VSCodeOption>
+								<VSCodeOption value="medium">Medium</VSCodeOption>
+								<VSCodeOption value="high">High</VSCodeOption>
+							</VSCodeDropdown>
+						</>
+					) : (
+						<ThinkingBudgetSlider currentMode={currentMode} />
 					)}
-					{/* Expose the standard toggle + budget slider UI. For GPT‑OSS, the toggle enables thinking,
-					    while the numeric budget is ignored. For other models, both toggle and budget apply. */}
-					<ThinkingBudgetSlider currentMode={currentMode} />
 				</div>
 			)}
 
@@ -192,11 +215,7 @@ export const LMStudioProvider = ({ showModelOptions, isPopup, currentMode }: LMS
 				<VSCodeLink href="https://lmstudio.ai/docs/basics/server" style={{ display: "inline", fontSize: "inherit" }}>
 					local server
 				</VSCodeLink>{" "}
-				feature to use it with this extension.{" "}
-				<span style={{ color: "var(--vscode-errorForeground)" }}>
-					(<span style={{ fontWeight: 500 }}>Note:</span> Cline uses complex prompts and works best with Claude models.
-					Less capable models may not work as expected.)
-				</span>
+				feature to use it with this extension.
 			</p>
 		</div>
 	)
