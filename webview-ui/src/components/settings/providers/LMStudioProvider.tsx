@@ -159,6 +159,7 @@ export const LMStudioProvider = ({ showModelOptions, isPopup, currentMode }: LMS
 							)
 						}
 					}}
+					style={{ position: "relative", zIndex: 9999 }}
 					className="w-full">
 					{lmStudioModels.map((model) => (
 						<VSCodeOption key={model} value={model}>
@@ -189,6 +190,7 @@ export const LMStudioProvider = ({ showModelOptions, isPopup, currentMode }: LMS
 									const newValue = e.target.currentValue as OpenaiReasoningEffort
 									updateSetting("openaiReasoningEffort", newValue)
 								}}
+								style={{ position: "relative", zIndex: 0 }}
 								className="w-full">
 								<VSCodeOption value="low">Low</VSCodeOption>
 								<VSCodeOption value="medium">Medium</VSCodeOption>
