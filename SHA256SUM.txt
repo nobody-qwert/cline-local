@@ -1,0 +1,1 @@
+83b8f4306a3804dd207519c8da8c4845ed5cff7c51cc2422f46bad42dcdc7b8e  cline-local-0.2.1.vsix
