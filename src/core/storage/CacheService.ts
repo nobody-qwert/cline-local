@@ -212,31 +212,39 @@ export class CacheService {
 		} = apiConfiguration
 
 		// Batch update global state keys (local providers only)
-		this.setGlobalStateBatch({
-			// Plan mode configuration updates
-			planModeApiProvider,
-			planModeApiModelId,
-			planModeVsCodeLmModelSelector,
-			planModeOllamaModelId,
-			planModeLmStudioModelId,
-			planModeThinkingBudgetTokens,
+		// Only persist fields that are explicitly provided to avoid clearing values (e.g., openaiReasoningEffort)
+		const gsUpdates: Partial<GlobalState> = {}
+		const setGS = <K extends keyof GlobalState>(key: K, value: GlobalState[K] | undefined) => {
+			if (value !== undefined) {
+				gsUpdates[key] = value
+			}
+		}
 
-			// Act mode configuration updates
-			actModeApiProvider,
-			actModeApiModelId,
-			actModeVsCodeLmModelSelector,
-			actModeOllamaModelId,
-			actModeLmStudioModelId,
-			actModeThinkingBudgetTokens,
+		// Plan mode configuration updates
+		setGS("planModeApiProvider", planModeApiProvider)
+		setGS("planModeApiModelId", planModeApiModelId as any)
+		setGS("planModeVsCodeLmModelSelector", planModeVsCodeLmModelSelector as any)
+		setGS("planModeOllamaModelId", planModeOllamaModelId as any)
+		setGS("planModeLmStudioModelId", planModeLmStudioModelId as any)
+		setGS("planModeThinkingBudgetTokens", planModeThinkingBudgetTokens as any)
 
-			// Global state updates
-			ollamaBaseUrl,
-			ollamaApiOptionsCtxNum,
-			lmStudioBaseUrl,
-			favoritedModelIds,
-			requestTimeoutMs,
-			openaiReasoningEffort,
-		})
+		// Act mode configuration updates
+		setGS("actModeApiProvider", actModeApiProvider)
+		setGS("actModeApiModelId", actModeApiModelId as any)
+		setGS("actModeVsCodeLmModelSelector", actModeVsCodeLmModelSelector as any)
+		setGS("actModeOllamaModelId", actModeOllamaModelId as any)
+		setGS("actModeLmStudioModelId", actModeLmStudioModelId as any)
+		setGS("actModeThinkingBudgetTokens", actModeThinkingBudgetTokens as any)
+
+		// Global state updates
+		setGS("ollamaBaseUrl", ollamaBaseUrl as any)
+		setGS("ollamaApiOptionsCtxNum", ollamaApiOptionsCtxNum as any)
+		setGS("lmStudioBaseUrl", lmStudioBaseUrl as any)
+		setGS("favoritedModelIds", favoritedModelIds as any)
+		setGS("requestTimeoutMs", requestTimeoutMs as any)
+		setGS("openaiReasoningEffort", openaiReasoningEffort as any)
+
+		this.setGlobalStateBatch(gsUpdates)
 
 		// Batch update secrets (local providers only)
 		this.setSecretsBatch({
