@@ -47,7 +47,7 @@ function createHandlerForProvider(
 			const topK = useIdeaProfile ? (options.planModeLmStudioTopK ?? 40) : (options.actModeLmStudioTopK ?? 0)
 			const repeatPenalty = useIdeaProfile
 				? (options.planModeLmStudioRepeatPenalty ?? 1.05)
-				: (options.actModeLmStudioRepeatPenalty ?? 1.0)
+				: (options.actModeLmStudioRepeatPenalty ?? 1.1)
 
 			return new LmStudioHandler({
 				lmStudioBaseUrl: options.lmStudioBaseUrl,

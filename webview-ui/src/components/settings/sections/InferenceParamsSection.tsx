@@ -113,7 +113,7 @@ const InferenceParamsSection = () => {
 						}}
 					/>
 					<DebouncedTextField
-						initialValue={String(apiConfiguration?.actModeLmStudioRepeatPenalty ?? 1.0)}
+						initialValue={String(apiConfiguration?.actModeLmStudioRepeatPenalty ?? 1.1)}
 						onChange={(v) => {
 							const num = clampNum(v, 0, 2, 1.0)
 							handleFieldChange("actModeLmStudioRepeatPenalty" as any, num as any)
@@ -141,7 +141,7 @@ const InferenceParamsSection = () => {
 								actModeLmStudioTemperature: 0.1 as any,
 								actModeLmStudioTopP: 1.0 as any,
 								actModeLmStudioTopK: 0 as any,
-								actModeLmStudioRepeatPenalty: 1.0 as any,
+								actModeLmStudioRepeatPenalty: 1.1 as any,
 							})
 						}>
 						Reset Strict Defaults
