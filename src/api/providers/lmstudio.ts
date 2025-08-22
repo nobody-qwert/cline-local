@@ -11,6 +11,11 @@ interface LmStudioHandlerOptions {
 	lmStudioModelId?: string
 	thinkingBudgetTokens?: number
 	openaiReasoningEffort?: string
+	// Sampling params (LM Studio OpenAI-compatible)
+	temperature?: number // 0..1
+	topP?: number // 0..1
+	topK?: number // 0..100
+	repeatPenalty?: number // 0..2
 }
 
 export class LmStudioHandler implements ApiHandler {
@@ -48,6 +53,14 @@ export class LmStudioHandler implements ApiHandler {
 		const lowerId = modelId.toLowerCase()
 		const isGptOss = lowerId.startsWith("gpt-oss") || lowerId.includes("/gpt-oss") || lowerId.includes("openai/gpt-oss")
 
+		// Clamp and resolve sampling params
+		const clamp = (v: number | undefined, min: number, max: number) =>
+			v === undefined ? undefined : Math.max(min, Math.min(max, v))
+		const resolvedTemperature = clamp(this.options.temperature, 0, 1)
+		const resolvedTopP = clamp(this.options.topP, 0, 1)
+		const resolvedTopK = clamp(this.options.topK, 0, 100)
+		const resolvedRepeatPenalty = clamp(this.options.repeatPenalty, 0, 2)
+
 		// For LM Studio models, add reasoning control to the system message
 		// based on whether thinking is enabled via the UI toggle (ThinkingBudgetSlider).
 		let finalSystemPrompt = systemPrompt
@@ -69,6 +82,11 @@ export class LmStudioHandler implements ApiHandler {
 				stream_options: { include_usage: true },
 				// Top-level reasoning effort per LM Studio GPT-OSS format
 				reasoning_effort: (this.options.openaiReasoningEffort as "low" | "medium" | "high") || "low",
+				// Sampling params (supported by LM Studio OpenAI-compatible server)
+				temperature: resolvedTemperature,
+				top_p: resolvedTopP,
+				top_k: resolvedTopK,
+				repeat_penalty: resolvedRepeatPenalty,
 			}
 			try {
 				const resp = await fetch(url, {
@@ -174,6 +192,11 @@ export class LmStudioHandler implements ApiHandler {
 					stream: true,
 					// Request usage in streaming chunks (OpenAI-compatible)
 					stream_options: { include_usage: true },
+					// Sampling params (OpenAI SDK request object is 'any' here)
+					temperature: resolvedTemperature,
+					top_p: resolvedTopP,
+					top_k: resolvedTopK,
+					repeat_penalty: resolvedRepeatPenalty,
 				}
 				// If thinking budget is enabled, include OpenAI-compatible reasoning params
 				if (this.options.thinkingBudgetTokens && this.options.thinkingBudgetTokens > 0) {

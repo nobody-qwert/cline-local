@@ -120,8 +120,14 @@ message ModelsApiConfiguration {
   optional ApiProvider plan_mode_api_provider = 100;
   optional string plan_mode_api_model_id = 101;
   optional int32 plan_mode_thinking_budget_tokens = 102;
+  optional bool plan_idea_mode_enabled = 103;
   optional string plan_mode_ollama_model_id = 111;
   optional string plan_mode_lm_studio_model_id = 112;
+  // LM Studio sampling params for Plan (Idea profile when plan_idea_mode_enabled = true)
+  optional double plan_mode_lm_studio_temperature = 113;
+  optional double plan_mode_lm_studio_top_p = 114;
+  optional int32 plan_mode_lm_studio_top_k = 115;
+  optional double plan_mode_lm_studio_repeat_penalty = 116;
 
   // Act mode configurations (local-only)
   optional ApiProvider act_mode_api_provider = 200;
@@ -129,6 +135,11 @@ message ModelsApiConfiguration {
   optional int32 act_mode_thinking_budget_tokens = 202;
   optional string act_mode_ollama_model_id = 211;
   optional string act_mode_lm_studio_model_id = 212;
+  // LM Studio sampling params for Act (Strict profile; also used in Plan when Idea mode is OFF)
+  optional double act_mode_lm_studio_temperature = 213;
+  optional double act_mode_lm_studio_top_p = 214;
+  optional int32 act_mode_lm_studio_top_k = 215;
+  optional double act_mode_lm_studio_repeat_penalty = 216;
 
   // Favorites
   repeated string favorited_model_ids = 300;

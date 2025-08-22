@@ -209,6 +209,13 @@ message ApiConfiguration {
   optional string plan_mode_sap_ai_core_model_id = 119;
   optional string plan_mode_huawei_cloud_maas_model_id = 120;
   optional string plan_mode_huawei_cloud_maas_model_info = 121;
+
+  // LM Studio sampling params (Plan)
+  optional bool plan_idea_mode_enabled = 122;                       // visible only in Plan mode UI
+  optional double plan_mode_lm_studio_temperature = 123;            // 0..1
+  optional double plan_mode_lm_studio_top_p = 124;                  // 0..1
+  optional int32 plan_mode_lm_studio_top_k = 125;                   // 0..100
+  optional double plan_mode_lm_studio_repeat_penalty = 126;         // 0..2
   
   // Act mode configurations
   optional string act_mode_api_provider = 200;
@@ -233,6 +240,12 @@ message ApiConfiguration {
   optional string act_mode_sap_ai_core_model_id = 219;
   optional string act_mode_huawei_cloud_maas_model_id = 220;
   optional string act_mode_huawei_cloud_maas_model_info = 221;
+
+  // LM Studio sampling params (Act - Strict)
+  optional double act_mode_lm_studio_temperature = 222;             // 0..1
+  optional double act_mode_lm_studio_top_p = 223;                   // 0..1
+  optional int32 act_mode_lm_studio_top_k = 224;                    // 0..100
+  optional double act_mode_lm_studio_repeat_penalty = 225;          // 0..2
   
   // Favorited model IDs
   repeated string favorited_model_ids = 300;

@@ -41,6 +41,12 @@ export function convertApiConfigurationToProto(config: ApiConfiguration): ProtoA
 		planModeOllamaModelId: config.planModeOllamaModelId,
 		planModeLmStudioModelId: config.planModeLmStudioModelId,
 		planModeThinkingBudgetTokens: config.planModeThinkingBudgetTokens,
+		// LM Studio sampling (Plan / Idea profile)
+		planIdeaModeEnabled: config.planIdeaModeEnabled,
+		planModeLmStudioTemperature: config.planModeLmStudioTemperature,
+		planModeLmStudioTopP: config.planModeLmStudioTopP,
+		planModeLmStudioTopK: config.planModeLmStudioTopK,
+		planModeLmStudioRepeatPenalty: config.planModeLmStudioRepeatPenalty,
 
 		// Act mode configurations (local providers only)
 		actModeApiProvider: config.actModeApiProvider ? convertApiProviderToProto(config.actModeApiProvider) : undefined,
@@ -48,6 +54,11 @@ export function convertApiConfigurationToProto(config: ApiConfiguration): ProtoA
 		actModeOllamaModelId: config.actModeOllamaModelId,
 		actModeLmStudioModelId: config.actModeLmStudioModelId,
 		actModeThinkingBudgetTokens: config.actModeThinkingBudgetTokens,
+		// LM Studio sampling (Act / Strict profile)
+		actModeLmStudioTemperature: config.actModeLmStudioTemperature,
+		actModeLmStudioTopP: config.actModeLmStudioTopP,
+		actModeLmStudioTopK: config.actModeLmStudioTopK,
+		actModeLmStudioRepeatPenalty: config.actModeLmStudioRepeatPenalty,
 
 		// Favorited model IDs
 		favoritedModelIds: config.favoritedModelIds || [],
@@ -73,6 +84,12 @@ export function convertProtoToApiConfiguration(protoConfig: ProtoApiConfiguratio
 		planModeOllamaModelId: protoConfig.planModeOllamaModelId,
 		planModeLmStudioModelId: protoConfig.planModeLmStudioModelId,
 		planModeThinkingBudgetTokens: protoConfig.planModeThinkingBudgetTokens,
+		// LM Studio sampling (Plan / Idea profile)
+		planIdeaModeEnabled: (protoConfig as any).planIdeaModeEnabled,
+		planModeLmStudioTemperature: (protoConfig as any).planModeLmStudioTemperature,
+		planModeLmStudioTopP: (protoConfig as any).planModeLmStudioTopP,
+		planModeLmStudioTopK: (protoConfig as any).planModeLmStudioTopK,
+		planModeLmStudioRepeatPenalty: (protoConfig as any).planModeLmStudioRepeatPenalty,
 
 		// Act mode configurations (local providers only)
 		actModeApiProvider:
@@ -81,6 +98,11 @@ export function convertProtoToApiConfiguration(protoConfig: ProtoApiConfiguratio
 		actModeOllamaModelId: protoConfig.actModeOllamaModelId,
 		actModeLmStudioModelId: protoConfig.actModeLmStudioModelId,
 		actModeThinkingBudgetTokens: protoConfig.actModeThinkingBudgetTokens,
+		// LM Studio sampling (Act / Strict profile)
+		actModeLmStudioTemperature: (protoConfig as any).actModeLmStudioTemperature,
+		actModeLmStudioTopP: (protoConfig as any).actModeLmStudioTopP,
+		actModeLmStudioTopK: (protoConfig as any).actModeLmStudioTopK,
+		actModeLmStudioRepeatPenalty: (protoConfig as any).actModeLmStudioRepeatPenalty,
 
 		// Favorited model IDs
 		favoritedModelIds:

@@ -55,6 +55,16 @@ export type GlobalStateKey =
 	| "actModeLmStudioModelId"
 	| "planModeThinkingBudgetTokens"
 	| "actModeThinkingBudgetTokens"
+	// LM Studio sampling params and Idea toggle
+	| "planIdeaModeEnabled"
+	| "planModeLmStudioTemperature"
+	| "planModeLmStudioTopP"
+	| "planModeLmStudioTopK"
+	| "planModeLmStudioRepeatPenalty"
+	| "actModeLmStudioTemperature"
+	| "actModeLmStudioTopP"
+	| "actModeLmStudioTopK"
+	| "actModeLmStudioRepeatPenalty"
 
 export type LocalStateKey = "localClineRulesToggles" | "localCursorRulesToggles" | "localWindsurfRulesToggles" | "workflowToggles"
 
@@ -95,6 +105,12 @@ export interface GlobalState {
 	planModeOllamaModelId: string | undefined
 	planModeLmStudioModelId: string | undefined
 	planModeThinkingBudgetTokens: number | undefined
+	// LM Studio sampling params and Idea toggle (Plan)
+	planIdeaModeEnabled: boolean | undefined
+	planModeLmStudioTemperature: number | undefined
+	planModeLmStudioTopP: number | undefined
+	planModeLmStudioTopK: number | undefined
+	planModeLmStudioRepeatPenalty: number | undefined
 	// Act mode configurations
 	actModeApiProvider: ApiProvider
 	actModeApiModelId: string | undefined
@@ -102,6 +118,11 @@ export interface GlobalState {
 	actModeOllamaModelId: string | undefined
 	actModeLmStudioModelId: string | undefined
 	actModeThinkingBudgetTokens: number | undefined
+	// LM Studio sampling params (Act - Strict)
+	actModeLmStudioTemperature: number | undefined
+	actModeLmStudioTopP: number | undefined
+	actModeLmStudioTopK: number | undefined
+	actModeLmStudioRepeatPenalty: number | undefined
 }
 
 export interface Secrets {

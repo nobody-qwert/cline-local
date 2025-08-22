@@ -22,6 +22,12 @@ export interface ApiHandlerOptions {
 	planModeOllamaModelId?: string
 	planModeLmStudioModelId?: string
 	planModeThinkingBudgetTokens?: number
+	// LM Studio sampling params (Idea profile when Idea Mode is ON in Plan mode)
+	planIdeaModeEnabled?: boolean
+	planModeLmStudioTemperature?: number
+	planModeLmStudioTopP?: number
+	planModeLmStudioTopK?: number
+	planModeLmStudioRepeatPenalty?: number
 
 	// Act mode configurations
 	actModeApiModelId?: string
@@ -29,6 +35,11 @@ export interface ApiHandlerOptions {
 	actModeOllamaModelId?: string
 	actModeLmStudioModelId?: string
 	actModeThinkingBudgetTokens?: number
+	// LM Studio sampling params (Strict profile; also used when Idea Mode is OFF)
+	actModeLmStudioTemperature?: number
+	actModeLmStudioTopP?: number
+	actModeLmStudioTopK?: number
+	actModeLmStudioRepeatPenalty?: number
 }
 
 export type ApiConfiguration = ApiHandlerOptions & {

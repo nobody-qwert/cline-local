@@ -36,14 +36,30 @@ function createHandlerForProvider(
 				ollamaApiOptionsCtxNum: options.ollamaApiOptionsCtxNum,
 				requestTimeoutMs: options.requestTimeoutMs,
 			})
-		case "lmstudio":
+		case "lmstudio": {
+			// Determine Idea vs Strict profile
+			const useIdeaProfile = mode === "plan" && !!options.planIdeaModeEnabled
+			const temperature = useIdeaProfile
+				? (options.planModeLmStudioTemperature ?? 0.9)
+				: (options.actModeLmStudioTemperature ?? 0.1)
+			const topP = useIdeaProfile ? (options.planModeLmStudioTopP ?? 0.95) : (options.actModeLmStudioTopP ?? 1.0)
+			const topK = useIdeaProfile ? (options.planModeLmStudioTopK ?? 40) : (options.actModeLmStudioTopK ?? 0)
+			const repeatPenalty = useIdeaProfile
+				? (options.planModeLmStudioRepeatPenalty ?? 1.05)
+				: (options.actModeLmStudioRepeatPenalty ?? 1.0)
+
 			return new LmStudioHandler({
 				lmStudioBaseUrl: options.lmStudioBaseUrl,
 				lmStudioModelId: mode === "plan" ? options.planModeLmStudioModelId : options.actModeLmStudioModelId,
 				thinkingBudgetTokens:
 					mode === "plan" ? options.planModeThinkingBudgetTokens : options.actModeThinkingBudgetTokens,
 				openaiReasoningEffort: options.openaiReasoningEffort,
+				temperature,
+				topP,
+				topK,
+				repeatPenalty,
 			})
+		}
 		default:
 			return new OllamaHandler({
 				ollamaBaseUrl: options.ollamaBaseUrl,

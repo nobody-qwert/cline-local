@@ -227,6 +227,12 @@ export class CacheService {
 		setGS("planModeOllamaModelId", planModeOllamaModelId as any)
 		setGS("planModeLmStudioModelId", planModeLmStudioModelId as any)
 		setGS("planModeThinkingBudgetTokens", planModeThinkingBudgetTokens as any)
+		// LM Studio sampling (Plan / Idea)
+		setGS("planIdeaModeEnabled", (apiConfiguration as any).planIdeaModeEnabled as any)
+		setGS("planModeLmStudioTemperature", (apiConfiguration as any).planModeLmStudioTemperature as any)
+		setGS("planModeLmStudioTopP", (apiConfiguration as any).planModeLmStudioTopP as any)
+		setGS("planModeLmStudioTopK", (apiConfiguration as any).planModeLmStudioTopK as any)
+		setGS("planModeLmStudioRepeatPenalty", (apiConfiguration as any).planModeLmStudioRepeatPenalty as any)
 
 		// Act mode configuration updates
 		setGS("actModeApiProvider", actModeApiProvider)
@@ -235,6 +241,11 @@ export class CacheService {
 		setGS("actModeOllamaModelId", actModeOllamaModelId as any)
 		setGS("actModeLmStudioModelId", actModeLmStudioModelId as any)
 		setGS("actModeThinkingBudgetTokens", actModeThinkingBudgetTokens as any)
+		// LM Studio sampling (Act / Strict)
+		setGS("actModeLmStudioTemperature", (apiConfiguration as any).actModeLmStudioTemperature as any)
+		setGS("actModeLmStudioTopP", (apiConfiguration as any).actModeLmStudioTopP as any)
+		setGS("actModeLmStudioTopK", (apiConfiguration as any).actModeLmStudioTopK as any)
+		setGS("actModeLmStudioRepeatPenalty", (apiConfiguration as any).actModeLmStudioRepeatPenalty as any)
 
 		// Global state updates
 		setGS("ollamaBaseUrl", ollamaBaseUrl as any)
@@ -475,6 +486,12 @@ export class CacheService {
 			planModeOllamaModelId,
 			planModeLmStudioModelId,
 			planModeThinkingBudgetTokens,
+			// LM Studio sampling (Plan / Idea)
+			planIdeaModeEnabled: state.apiConfiguration?.planIdeaModeEnabled,
+			planModeLmStudioTemperature: state.apiConfiguration?.planModeLmStudioTemperature,
+			planModeLmStudioTopP: state.apiConfiguration?.planModeLmStudioTopP,
+			planModeLmStudioTopK: state.apiConfiguration?.planModeLmStudioTopK,
+			planModeLmStudioRepeatPenalty: state.apiConfiguration?.planModeLmStudioRepeatPenalty,
 
 			// Act mode configuration updates (local providers only)
 			actModeApiProvider,
@@ -483,6 +500,11 @@ export class CacheService {
 			actModeOllamaModelId,
 			actModeLmStudioModelId,
 			actModeThinkingBudgetTokens,
+			// LM Studio sampling (Act / Strict)
+			actModeLmStudioTemperature: state.apiConfiguration?.actModeLmStudioTemperature,
+			actModeLmStudioTopP: state.apiConfiguration?.actModeLmStudioTopP,
+			actModeLmStudioTopK: state.apiConfiguration?.actModeLmStudioTopK,
+			actModeLmStudioRepeatPenalty: state.apiConfiguration?.actModeLmStudioRepeatPenalty,
 		} satisfies GlobalState
 
 		// Populate global state cache directly
@@ -528,6 +550,12 @@ export class CacheService {
 			planModeOllamaModelId: this.globalStateCache["planModeOllamaModelId"],
 			planModeLmStudioModelId: this.globalStateCache["planModeLmStudioModelId"],
 			planModeThinkingBudgetTokens: this.globalStateCache["planModeThinkingBudgetTokens"],
+			// LM Studio sampling (Plan / Idea)
+			planIdeaModeEnabled: this.globalStateCache["planIdeaModeEnabled"],
+			planModeLmStudioTemperature: this.globalStateCache["planModeLmStudioTemperature"],
+			planModeLmStudioTopP: this.globalStateCache["planModeLmStudioTopP"],
+			planModeLmStudioTopK: this.globalStateCache["planModeLmStudioTopK"],
+			planModeLmStudioRepeatPenalty: this.globalStateCache["planModeLmStudioRepeatPenalty"],
 
 			// Act mode configurations (local providers only)
 			actModeApiProvider: this.globalStateCache["actModeApiProvider"],
@@ -536,6 +564,11 @@ export class CacheService {
 			actModeOllamaModelId: this.globalStateCache["actModeOllamaModelId"],
 			actModeLmStudioModelId: this.globalStateCache["actModeLmStudioModelId"],
 			actModeThinkingBudgetTokens: this.globalStateCache["actModeThinkingBudgetTokens"],
+			// LM Studio sampling (Act / Strict)
+			actModeLmStudioTemperature: this.globalStateCache["actModeLmStudioTemperature"],
+			actModeLmStudioTopP: this.globalStateCache["actModeLmStudioTopP"],
+			actModeLmStudioTopK: this.globalStateCache["actModeLmStudioTopK"],
+			actModeLmStudioRepeatPenalty: this.globalStateCache["actModeLmStudioRepeatPenalty"],
 
 			// Favorited model IDs
 			favoritedModelIds: this.globalStateCache["favoritedModelIds"],
