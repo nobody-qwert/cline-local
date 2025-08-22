@@ -1,5 +1,5 @@
 import type { AnthropicCompat as Anthropic } from "@/types/anthropic-compat"
-import { ApiConfiguration, ModelInfo } from "../shared/api"
+import { ApiConfiguration, ModelInfo, DEFAULT_LMSTUDIO_IDEA, DEFAULT_LMSTUDIO_STRICT } from "../shared/api"
 import { OllamaHandler } from "./providers/ollama"
 import { LmStudioHandler } from "./providers/lmstudio"
 import { ApiStream, ApiStreamUsageChunk } from "./transform/stream"
@@ -41,13 +41,17 @@ function createHandlerForProvider(
 			// Default Idea mode ON in Plan unless explicitly disabled
 			const useIdeaProfile = mode === "plan" && options.planIdeaModeEnabled !== false
 			const temperature = useIdeaProfile
-				? (options.planModeLmStudioTemperature ?? 0.9)
-				: (options.actModeLmStudioTemperature ?? 0.1)
-			const topP = useIdeaProfile ? (options.planModeLmStudioTopP ?? 0.95) : (options.actModeLmStudioTopP ?? 0.8)
-			const topK = useIdeaProfile ? (options.planModeLmStudioTopK ?? 40) : (options.actModeLmStudioTopK ?? 40)
+				? (options.planModeLmStudioTemperature ?? DEFAULT_LMSTUDIO_IDEA.temperature)
+				: (options.actModeLmStudioTemperature ?? DEFAULT_LMSTUDIO_STRICT.temperature)
+			const topP = useIdeaProfile
+				? (options.planModeLmStudioTopP ?? DEFAULT_LMSTUDIO_IDEA.topP)
+				: (options.actModeLmStudioTopP ?? DEFAULT_LMSTUDIO_STRICT.topP)
+			const topK = useIdeaProfile
+				? (options.planModeLmStudioTopK ?? DEFAULT_LMSTUDIO_IDEA.topK)
+				: (options.actModeLmStudioTopK ?? DEFAULT_LMSTUDIO_STRICT.topK)
 			const repeatPenalty = useIdeaProfile
-				? (options.planModeLmStudioRepeatPenalty ?? 1.05)
-				: (options.actModeLmStudioRepeatPenalty ?? 1.1)
+				? (options.planModeLmStudioRepeatPenalty ?? DEFAULT_LMSTUDIO_IDEA.repeatPenalty)
+				: (options.actModeLmStudioRepeatPenalty ?? DEFAULT_LMSTUDIO_STRICT.repeatPenalty)
 
 			return new LmStudioHandler({
 				lmStudioBaseUrl: options.lmStudioBaseUrl,

@@ -4,6 +4,7 @@ import { useExtensionState } from "@/context/ExtensionStateContext"
 import { useApiConfigurationHandlers } from "../utils/useApiConfigurationHandlers"
 import { DebouncedTextField } from "../common/DebouncedTextField"
 import Section from "../Section"
+import { DEFAULT_LMSTUDIO_IDEA, DEFAULT_LMSTUDIO_STRICT } from "@shared/api"
 
 /**
  * Inference parameters table (rows = params, columns = Idea / Strict)
@@ -48,16 +49,16 @@ const InferenceParamsSection = () => {
 						<div className="text-xs text-[var(--vscode-descriptionForeground)]">0–1</div>
 					</div>
 					<DebouncedTextField
-						initialValue={String(apiConfiguration?.planModeLmStudioTemperature ?? 0.9)}
+						initialValue={String(apiConfiguration?.planModeLmStudioTemperature ?? DEFAULT_LMSTUDIO_IDEA.temperature)}
 						onChange={(v) => {
-							const num = clampNum(v, 0, 1, 0.9)
+							const num = clampNum(v, 0, 1, DEFAULT_LMSTUDIO_IDEA.temperature)
 							handleFieldChange("planModeLmStudioTemperature" as any, num as any)
 						}}
 					/>
 					<DebouncedTextField
-						initialValue={String(apiConfiguration?.actModeLmStudioTemperature ?? 0.1)}
+						initialValue={String(apiConfiguration?.actModeLmStudioTemperature ?? DEFAULT_LMSTUDIO_STRICT.temperature)}
 						onChange={(v) => {
-							const num = clampNum(v, 0, 1, 0.1)
+							const num = clampNum(v, 0, 1, DEFAULT_LMSTUDIO_STRICT.temperature)
 							handleFieldChange("actModeLmStudioTemperature" as any, num as any)
 						}}
 					/>
@@ -67,16 +68,16 @@ const InferenceParamsSection = () => {
 						Top P<div className="text-xs text-[var(--vscode-descriptionForeground)]">0–1</div>
 					</div>
 					<DebouncedTextField
-						initialValue={String(apiConfiguration?.planModeLmStudioTopP ?? 0.95)}
+						initialValue={String(apiConfiguration?.planModeLmStudioTopP ?? DEFAULT_LMSTUDIO_IDEA.topP)}
 						onChange={(v) => {
-							const num = clampNum(v, 0, 1, 0.95)
+							const num = clampNum(v, 0, 1, DEFAULT_LMSTUDIO_IDEA.topP)
 							handleFieldChange("planModeLmStudioTopP" as any, num as any)
 						}}
 					/>
 					<DebouncedTextField
-						initialValue={String(apiConfiguration?.actModeLmStudioTopP ?? 1.0)}
+						initialValue={String(apiConfiguration?.actModeLmStudioTopP ?? DEFAULT_LMSTUDIO_STRICT.topP)}
 						onChange={(v) => {
-							const num = clampNum(v, 0, 1, 1.0)
+							const num = clampNum(v, 0, 1, DEFAULT_LMSTUDIO_STRICT.topP)
 							handleFieldChange("actModeLmStudioTopP" as any, num as any)
 						}}
 					/>
@@ -86,16 +87,16 @@ const InferenceParamsSection = () => {
 						Top K<div className="text-xs text-[var(--vscode-descriptionForeground)]">0–100</div>
 					</div>
 					<DebouncedTextField
-						initialValue={String(apiConfiguration?.planModeLmStudioTopK ?? 40)}
+						initialValue={String(apiConfiguration?.planModeLmStudioTopK ?? DEFAULT_LMSTUDIO_IDEA.topK)}
 						onChange={(v) => {
-							const num = clampNum(v, 0, 100, 40)
+							const num = clampNum(v, 0, 100, DEFAULT_LMSTUDIO_IDEA.topK)
 							handleFieldChange("planModeLmStudioTopK" as any, num as any)
 						}}
 					/>
 					<DebouncedTextField
-						initialValue={String(apiConfiguration?.actModeLmStudioTopK ?? 0)}
+						initialValue={String(apiConfiguration?.actModeLmStudioTopK ?? DEFAULT_LMSTUDIO_STRICT.topK)}
 						onChange={(v) => {
-							const num = clampNum(v, 0, 100, 0)
+							const num = clampNum(v, 0, 100, DEFAULT_LMSTUDIO_STRICT.topK)
 							handleFieldChange("actModeLmStudioTopK" as any, num as any)
 						}}
 					/>
@@ -106,16 +107,20 @@ const InferenceParamsSection = () => {
 						<div className="text-xs text-[var(--vscode-descriptionForeground)]">0–2</div>
 					</div>
 					<DebouncedTextField
-						initialValue={String(apiConfiguration?.planModeLmStudioRepeatPenalty ?? 1.05)}
+						initialValue={String(
+							apiConfiguration?.planModeLmStudioRepeatPenalty ?? DEFAULT_LMSTUDIO_IDEA.repeatPenalty,
+						)}
 						onChange={(v) => {
-							const num = clampNum(v, 0, 2, 1.05)
+							const num = clampNum(v, 0, 2, DEFAULT_LMSTUDIO_IDEA.repeatPenalty)
 							handleFieldChange("planModeLmStudioRepeatPenalty" as any, num as any)
 						}}
 					/>
 					<DebouncedTextField
-						initialValue={String(apiConfiguration?.actModeLmStudioRepeatPenalty ?? 1.1)}
+						initialValue={String(
+							apiConfiguration?.actModeLmStudioRepeatPenalty ?? DEFAULT_LMSTUDIO_STRICT.repeatPenalty,
+						)}
 						onChange={(v) => {
-							const num = clampNum(v, 0, 2, 1.0)
+							const num = clampNum(v, 0, 2, DEFAULT_LMSTUDIO_STRICT.repeatPenalty)
 							handleFieldChange("actModeLmStudioRepeatPenalty" as any, num as any)
 						}}
 					/>
@@ -126,10 +131,10 @@ const InferenceParamsSection = () => {
 						appearance="secondary"
 						onClick={() =>
 							handleFieldsChange({
-								planModeLmStudioTemperature: 0.9 as any,
-								planModeLmStudioTopP: 0.95 as any,
-								planModeLmStudioTopK: 40 as any,
-								planModeLmStudioRepeatPenalty: 1.05 as any,
+								planModeLmStudioTemperature: DEFAULT_LMSTUDIO_IDEA.temperature as any,
+								planModeLmStudioTopP: DEFAULT_LMSTUDIO_IDEA.topP as any,
+								planModeLmStudioTopK: DEFAULT_LMSTUDIO_IDEA.topK as any,
+								planModeLmStudioRepeatPenalty: DEFAULT_LMSTUDIO_IDEA.repeatPenalty as any,
 							})
 						}>
 						Reset Idea Defaults
@@ -138,10 +143,10 @@ const InferenceParamsSection = () => {
 						appearance="secondary"
 						onClick={() =>
 							handleFieldsChange({
-								actModeLmStudioTemperature: 0.1 as any,
-								actModeLmStudioTopP: 0.8 as any,
-								actModeLmStudioTopK: 40 as any,
-								actModeLmStudioRepeatPenalty: 1.1 as any,
+								actModeLmStudioTemperature: DEFAULT_LMSTUDIO_STRICT.temperature as any,
+								actModeLmStudioTopP: DEFAULT_LMSTUDIO_STRICT.topP as any,
+								actModeLmStudioTopK: DEFAULT_LMSTUDIO_STRICT.topK as any,
+								actModeLmStudioRepeatPenalty: DEFAULT_LMSTUDIO_STRICT.repeatPenalty as any,
 							})
 						}>
 						Reset Strict Defaults

@@ -142,3 +142,21 @@ export function getLmStudioModelInfoForModelId(modelId?: string): ModelInfo {
 
 // Azure OpenAI (kept for compatibility with OpenAI-compatible endpoints)
 export const azureOpenAiDefaultApiVersion = "2024-08-01-preview"
+
+/**
+ * Centralized LM Studio default sampling profiles
+ * Adjust here to keep Idea/Strict defaults consistent across UI and backend.
+ */
+export const DEFAULT_LMSTUDIO_IDEA = {
+	temperature: 0.8,
+	topP: 0.95,
+	topK: 40,
+	repeatPenalty: 1.05,
+}
+
+export const DEFAULT_LMSTUDIO_STRICT = {
+	temperature: 0.2,
+	topP: 0.95,
+	topK: 40,
+	repeatPenalty: 1.1,
+}
