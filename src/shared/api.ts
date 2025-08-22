@@ -155,8 +155,8 @@ export const DEFAULT_LMSTUDIO_IDEA = {
 }
 
 export const DEFAULT_LMSTUDIO_STRICT = {
-	temperature: 0.2,
-	topP: 0.95,
-	topK: 40,
-	repeatPenalty: 1.1,
+	temperature: 0.1,
+	topP: 1.0, // full nucleus to keep argmax-y behavior with low temp
+	topK: 0, // no top-k truncation; use 20 if Qwen feels better that way
+	repeatPenalty: 1.0, // keep structure & identifiers stable
 }
