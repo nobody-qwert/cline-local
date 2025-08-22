@@ -139,8 +139,8 @@ const InferenceParamsSection = () => {
 						onClick={() =>
 							handleFieldsChange({
 								actModeLmStudioTemperature: 0.1 as any,
-								actModeLmStudioTopP: 1.0 as any,
-								actModeLmStudioTopK: 0 as any,
+								actModeLmStudioTopP: 0.8 as any,
+								actModeLmStudioTopK: 40 as any,
 								actModeLmStudioRepeatPenalty: 1.1 as any,
 							})
 						}>
