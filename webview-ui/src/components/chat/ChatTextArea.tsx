@@ -259,6 +259,22 @@ const ModelButtonContent = styled.div`
 	white-space: nowrap;
 `
 
+const IdeaToggle = styled.div<{ enabled: boolean }>`
+	padding: 2px 8px;
+	border-radius: 12px;
+	font-size: 11px;
+	cursor: pointer;
+	user-select: none;
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	background-color: ${(p) => (p.enabled ? "rgba(210, 153, 34, 0.35)" : "rgba(255, 85, 85, 0.25)")};
+	color: var(--vscode-foreground);
+	border: 1px solid ${(p) => (p.enabled ? "transparent" : "var(--vscode-errorForeground)")};
+	padding-top: 3px;
+	padding-bottom: 3px;
+`
+
 const ChatTextArea = forwardRef<HTMLTextAreaElement, ChatTextAreaProps>(
 	(
 		{
@@ -1046,6 +1062,23 @@ const ChatTextArea = forwardRef<HTMLTextAreaElement, ChatTextAreaProps>(
 			}, changeModeDelay)
 		}, [mode, showModelSelector, submitApiConfig, inputValue, selectedImages, selectedFiles])
 
+		// Idea/Strict (Plan-only) toggle
+		const isIdeaEnabled = apiConfiguration?.planIdeaModeEnabled !== false // default ON when undefined
+		const onIdeaToggle = useCallback(async () => {
+			try {
+				await ModelsServiceClient.updateApiConfigurationProto(
+					UpdateApiConfigurationRequest.create({
+						apiConfiguration: convertApiConfigurationToProto({
+							...(apiConfiguration || ({} as any)),
+							planIdeaModeEnabled: !isIdeaEnabled as any,
+						}),
+					}),
+				)
+			} catch (error) {
+				console.error("Failed to toggle Idea Mode:", error)
+			}
+		}, [apiConfiguration, isIdeaEnabled])
+
 		useShortcut("Meta+Shift+a", onModeToggle, { disableTextInputs: false }) // important that we don't disable the text input here
 
 		const handleContextButtonClick = useCallback(() => {
@@ -1739,6 +1772,24 @@ const ChatTextArea = forwardRef<HTMLTextAreaElement, ChatTextAreaProps>(
 							</ModelContainer>
 						</ButtonGroup>
 					</div>
+					{/* Plan-mode Idea/Strict toggle (next to Plan/Act) */}
+					{mode === "plan" && (
+						<Tooltip
+							style={{ zIndex: 1000 }}
+							tipText={
+								isIdeaEnabled ? "Idea Mode: more creative responses" : "Strict Mode: more deterministic responses"
+							}>
+							<IdeaToggle
+								enabled={isIdeaEnabled}
+								onClick={onIdeaToggle}
+								role="button"
+								aria-label="Toggle Idea Mode"
+								style={{ marginRight: 8 }}>
+								<span>{isIdeaEnabled ? "💡 Idea" : "Strict"}</span>
+							</IdeaToggle>
+						</Tooltip>
+					)}
+
 					{/* Tooltip for Plan/Act toggle remains outside the conditional rendering */}
 					<Tooltip
 						style={{ zIndex: 1000 }}

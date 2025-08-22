@@ -38,7 +38,8 @@ function createHandlerForProvider(
 			})
 		case "lmstudio": {
 			// Determine Idea vs Strict profile
-			const useIdeaProfile = mode === "plan" && !!options.planIdeaModeEnabled
+			// Default Idea mode ON in Plan unless explicitly disabled
+			const useIdeaProfile = mode === "plan" && options.planIdeaModeEnabled !== false
 			const temperature = useIdeaProfile
 				? (options.planModeLmStudioTemperature ?? 0.9)
 				: (options.actModeLmStudioTemperature ?? 0.1)

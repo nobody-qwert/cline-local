@@ -6,6 +6,7 @@ import { updateSetting } from "../utils/settingsHandlers"
 import { McpDisplayMode } from "@shared/McpDisplayMode"
 import McpDisplayModeDropdown from "@/components/mcp/chat-display/McpDisplayModeDropdown"
 import Section from "../Section"
+import InferenceParamsSection from "./InferenceParamsSection"
 
 interface FeatureSettingsSectionProps {
 	renderSectionHeader: (tabId: string) => JSX.Element | null
@@ -151,6 +152,7 @@ const FeatureSettingsSection = ({ renderSectionHeader }: FeatureSettingsSectionP
 					)}
 				</div>
 			</Section>
+			<InferenceParamsSection />
 		</div>
 	)
 }

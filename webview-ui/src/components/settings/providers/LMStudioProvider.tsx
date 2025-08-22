@@ -1,4 +1,4 @@
-import { VSCodeDropdown, VSCodeOption, VSCodeLink, VSCodeCheckbox, VSCodeButton } from "@vscode/webview-ui-toolkit/react"
+import { VSCodeDropdown, VSCodeOption, VSCodeLink } from "@vscode/webview-ui-toolkit/react"
 import { useState, useCallback, useEffect, useRef } from "react"
 import { useInterval } from "react-use"
 import { DebouncedTextField } from "../common/DebouncedTextField"
@@ -25,7 +25,7 @@ interface LMStudioProviderProps {
  */
 export const LMStudioProvider = ({ showModelOptions, isPopup, currentMode }: LMStudioProviderProps) => {
 	const { apiConfiguration, openaiReasoningEffort } = useExtensionState()
-	const { handleFieldChange, handleModeFieldChange, handleFieldsChange } = useApiConfigurationHandlers()
+	const { handleFieldChange, handleModeFieldChange } = useApiConfigurationHandlers()
 
 	const { lmStudioModelId } = getModeSpecificFields(apiConfiguration, currentMode)
 
@@ -201,129 +201,7 @@ export const LMStudioProvider = ({ showModelOptions, isPopup, currentMode }: LMS
 				</div>
 			)}
 
-			{/* Sampling (LM Studio) */}
-			<div style={{ marginTop: 12, display: "flex", flexDirection: "column", gap: 12 }}>
-				{currentMode === "plan" && (
-					<div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-						<VSCodeCheckbox
-							checked={apiConfiguration?.planIdeaModeEnabled === true}
-							onChange={(e: any) => {
-								const checked = !!e.target.checked
-								handleFieldChange("planIdeaModeEnabled", checked as any)
-							}}>
-							Idea Mode (Plan only)
-						</VSCodeCheckbox>
-					</div>
-				)}
-
-				{/* Idea (Plan) */}
-				<div>
-					<div style={{ fontWeight: 600, marginBottom: 6 }}>Idea (Plan mode when Idea Mode is ON)</div>
-					<div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 8 }}>
-						<DebouncedTextField
-							initialValue={String(apiConfiguration?.planModeLmStudioTemperature ?? 0.9)}
-							onChange={(v) => {
-								const num = Math.max(0, Math.min(1, parseFloat(v)))
-								handleFieldChange("planModeLmStudioTemperature", (isNaN(num) ? 0.9 : num) as any)
-							}}>
-							<span>Temperature (0–1)</span>
-						</DebouncedTextField>
-						<DebouncedTextField
-							initialValue={String(apiConfiguration?.planModeLmStudioTopP ?? 0.95)}
-							onChange={(v) => {
-								const num = Math.max(0, Math.min(1, parseFloat(v)))
-								handleFieldChange("planModeLmStudioTopP", (isNaN(num) ? 0.95 : num) as any)
-							}}>
-							<span>Top P (0–1)</span>
-						</DebouncedTextField>
-						<DebouncedTextField
-							initialValue={String(apiConfiguration?.planModeLmStudioTopK ?? 40)}
-							onChange={(v) => {
-								const num = Math.max(0, Math.min(100, parseInt(v)))
-								handleFieldChange("planModeLmStudioTopK", (isNaN(num) ? 40 : num) as any)
-							}}>
-							<span>Top K (0–100)</span>
-						</DebouncedTextField>
-						<DebouncedTextField
-							initialValue={String(apiConfiguration?.planModeLmStudioRepeatPenalty ?? 1.05)}
-							onChange={(v) => {
-								const num = Math.max(0, Math.min(2, parseFloat(v)))
-								handleFieldChange("planModeLmStudioRepeatPenalty", (isNaN(num) ? 1.05 : num) as any)
-							}}>
-							<span>Repeat Penalty (0–2)</span>
-						</DebouncedTextField>
-					</div>
-					<div style={{ marginTop: 6 }}>
-						<VSCodeButton
-							appearance="secondary"
-							onClick={() =>
-								handleFieldsChange({
-									planModeLmStudioTemperature: 0.9 as any,
-									planModeLmStudioTopP: 0.95 as any,
-									planModeLmStudioTopK: 40 as any,
-									planModeLmStudioRepeatPenalty: 1.05 as any,
-								})
-							}>
-							Reset Idea Defaults
-						</VSCodeButton>
-					</div>
-				</div>
-
-				{/* Strict (Act) */}
-				<div>
-					<div style={{ fontWeight: 600, margin: "12px 0 6px" }}>
-						Strict (Act mode; and Plan mode when Idea Mode is OFF)
-					</div>
-					<div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 8 }}>
-						<DebouncedTextField
-							initialValue={String(apiConfiguration?.actModeLmStudioTemperature ?? 0.1)}
-							onChange={(v) => {
-								const num = Math.max(0, Math.min(1, parseFloat(v)))
-								handleFieldChange("actModeLmStudioTemperature", (isNaN(num) ? 0.1 : num) as any)
-							}}>
-							<span>Temperature (0–1)</span>
-						</DebouncedTextField>
-						<DebouncedTextField
-							initialValue={String(apiConfiguration?.actModeLmStudioTopP ?? 1.0)}
-							onChange={(v) => {
-								const num = Math.max(0, Math.min(1, parseFloat(v)))
-								handleFieldChange("actModeLmStudioTopP", (isNaN(num) ? 1.0 : num) as any)
-							}}>
-							<span>Top P (0–1)</span>
-						</DebouncedTextField>
-						<DebouncedTextField
-							initialValue={String(apiConfiguration?.actModeLmStudioTopK ?? 0)}
-							onChange={(v) => {
-								const num = Math.max(0, Math.min(100, parseInt(v)))
-								handleFieldChange("actModeLmStudioTopK", (isNaN(num) ? 0 : num) as any)
-							}}>
-							<span>Top K (0–100)</span>
-						</DebouncedTextField>
-						<DebouncedTextField
-							initialValue={String(apiConfiguration?.actModeLmStudioRepeatPenalty ?? 1.0)}
-							onChange={(v) => {
-								const num = Math.max(0, Math.min(2, parseFloat(v)))
-								handleFieldChange("actModeLmStudioRepeatPenalty", (isNaN(num) ? 1.0 : num) as any)
-							}}>
-							<span>Repeat Penalty (0–2)</span>
-						</DebouncedTextField>
-					</div>
-					<div style={{ marginTop: 6 }}>
-						<VSCodeButton
-							appearance="secondary"
-							onClick={() =>
-								handleFieldsChange({
-									actModeLmStudioTemperature: 0.1 as any,
-									actModeLmStudioTopP: 1.0 as any,
-									actModeLmStudioTopK: 0 as any,
-									actModeLmStudioRepeatPenalty: 1.0 as any,
-								})
-							}>
-							Reset Strict Defaults
-						</VSCodeButton>
-					</div>
-				</div>
-			</div>
+			{/* Inference parameter controls moved to Settings → Features → Inference Parameters */}
 
 			<p
 				style={{
