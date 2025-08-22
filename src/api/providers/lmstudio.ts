@@ -68,7 +68,7 @@ export class LmStudioHandler implements ApiHandler {
 				// Request usage in streaming chunks (OpenAI-compatible)
 				stream_options: { include_usage: true },
 				// Top-level reasoning effort per LM Studio GPT-OSS format
-				reasoning_effort: thinkingEnabled ? this.options.openaiReasoningEffort || "medium" : "low",
+				reasoning_effort: (this.options.openaiReasoningEffort as "low" | "medium" | "high") || "low",
 			}
 			try {
 				const resp = await fetch(url, {

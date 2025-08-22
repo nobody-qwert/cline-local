@@ -99,6 +99,9 @@ export async function updateSettings(controller: Controller, request: UpdateSett
 
 			if (controller.task) {
 				controller.task.openaiReasoningEffort = reasoningEffort
+				const currentMode = await controller.getCurrentMode()
+				const apiConfiguration = controller.cacheService.getApiConfiguration()
+				controller.task.api = buildApiHandler({ ...apiConfiguration, ulid: controller.task.ulid }, currentMode)
 			}
 
 			controller.cacheService.setGlobalState("openaiReasoningEffort", reasoningEffort)
