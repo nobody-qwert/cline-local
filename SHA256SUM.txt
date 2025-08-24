@@ -1,1 +1,1 @@
-83b8f4306a3804dd207519c8da8c4845ed5cff7c51cc2422f46bad42dcdc7b8e  cline-local-0.2.1.vsix
+3011909e7b79fafffa3c8d84a3b1c835eef33793266be98d699286c6b27317fe  cline-local-0.2.2.vsix
