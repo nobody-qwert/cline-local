@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>Remote GPU Server · Cline Local</title>
+		<meta
+			name="description"
+			content="Quick start guide to host a large coding model on a GPU server and connect from a separate machine running Cline Local." />
+		<link rel="stylesheet" href="../styles.css" />
+	</head>
+	<body>
+		<header class="site-header">
+			<div class="container header-inner">
+				<div class="brand">
+					<span class="logo" aria-hidden="true">⌁</span>
+					<a class="brand-name" href="../index.html">Cline Local</a>
+				</div>
+				<nav class="nav">
+					<a href="./corporate-laptop.html">Corporate Laptop</a>
+					<a href="./remote-server.html">Remote GPU Server</a>
+					<a href="../quick-tips.html">Quick Tips</a>
+					<a href="https://github.com/nobody-qwert/cline-local" rel="noopener">GitHub</a>
+				</nav>
+			</div>
+		</header>
+
+		<main class="container page">
+			<h1>Remote GPU Server</h1>
+			<p class="lede">
+				Host a larger coding model on a workstation / server (e.g., 4060/3090/4090/M‑series Ultra) and connect to it from
+				a separate machine running VS Code + Cline Local.
+			</p>
+
+			<div class="note">
+				<strong>Who this is for:</strong> You have a capable GPU box for inference and want better quality/latency than a
+				laptop can provide. Your client machine connects over LAN/VPN.
+			</div>
+
+			<section>
+				<h2>Topology</h2>
+				<p class="subtle">Client (VS Code + Cline Local) connects over network to the model server.</p>
+				<div class="term">
+					<div class="term-header">
+						<span class="dots"><span class="dot"></span><span class="dot"></span><span class="dot"></span></span>
+						<span>server:~ — remote</span>
+					</div>
+					<div class="term-body">
+						<!-- Inline diagram -->
+						<svg
+							width="100%"
+							height="180"
+							viewBox="0 0 900 180"
+							xmlns="http://www.w3.org/2000/svg"
+							role="img"
+							aria-label="Remote server topology">
+							<defs>
+								<marker
+									id="arrowDark"
+									viewBox="0 0 5 5"
+									refX="4.5"
+									refY="2.5"
+									markerWidth="5"
+									markerHeight="5"
+									orient="auto-start-reverse">
+									<path d="M0,0 L5,2.5 L0,5 z" fill="#3a3f45"></path>
+								</marker>
+							</defs>
+							<rect x="20" y="30" width="300" height="120" rx="12" fill="#ffffff" stroke="#dcdfe4" />
+							<text x="170" y="60" text-anchor="middle" fill="#1b1d21" font-size="14">Client Machine</text>
+							<text x="170" y="78" text-anchor="middle" fill="#6b717a" font-size="12">VS Code + Cline Local</text>
+
+							<rect x="580" y="30" width="300" height="120" rx="12" fill="#ffffff" stroke="#dcdfe4" />
+							<text x="730" y="60" text-anchor="middle" fill="#1b1d21" font-size="14">GPU Server</text>
+							<text x="730" y="78" text-anchor="middle" fill="#6b717a" font-size="12">
+								LM Studio API: http://0.0.0.0:1234
+							</text>
+							<text x="730" y="98" text-anchor="middle" fill="#6b717a" font-size="12">
+								Model: Qwen2.5‑Coder 32B / GPT‑OSS‑120B
+							</text>
+
+							<line
+								x1="330"
+								y1="90"
+								x2="570"
+								y2="90"
+								stroke="#3a3f45"
+								stroke-width="4"
+								marker-end="url(#arrowDark)" />
+							<text x="450" y="80" text-anchor="middle" fill="#6b717a" font-size="12">LAN / VPN</text>
+						</svg>
+					</div>
+				</div>
+			</section>
+
+			<section>
+				<h2>Recommended Models</h2>
+				<ul>
+					<li><strong>Qwen2.5‑Coder 32B</strong> (or Qwen Coder 30B A3A) — strong default for coding quality.</li>
+					<li><strong>GPT‑OSS‑120B</strong> — top‑tier quality; requires server‑class hardware.</li>
+				</ul>
+				<p class="subtle">
+					See <a href="../quick-tips.html">Quick Tips</a> for what to avoid (e.g., GPT‑OSS‑20B) and low‑resource
+					local‑only fallbacks.
+				</p>
+			</section>
+
+			<section>
+				<h2>Server Setup (GPU box)</h2>
+				<ol>
+					<li>
+						<strong>Install LM Studio</strong><br />
+						Download from https://lmstudio.ai and install on the GPU server.
+					</li>
+					<li>
+						<strong>Download your model</strong><br />
+						In LM Studio, search and download <em>Qwen2.5‑Coder‑32B‑Instruct</em> (or GPT‑OSS‑120B if your hardware
+						supports it).
+					</li>
+					<li>
+						<strong>Start the API server (listen on network)</strong><br />
+						- Open <em>Server</em> tab in LM Studio<br />
+						- Host: <code>0.0.0.0</code> (listen on all interfaces)<br />
+						- Port: <code>1234</code><br />
+						- Enable CORS and keep‑alive<br />
+						- Start server; ensure the model is loaded
+						<div class="note">
+							Test from the server itself:
+							<pre><code>curl http://127.0.0.1:1234/v1/models</code></pre>
+						</div>
+					</li>
+					<li>
+						<strong>Find the server IP</strong><br />
+						- Windows: <code>ipconfig</code><br />
+						- Linux/macOS: <code>ip addr</code> or <code>ifconfig</code><br />
+						Use the LAN/VPN IP reachable by the client.
+					</li>
+					<li>
+						<strong>Open firewall for the port</strong><br />
+						- Windows (PowerShell as admin):<br />
+						<code
+							>New-NetFirewallRule -DisplayName "LM Studio 1234" -Direction Inbound -Action Allow -Protocol TCP
+							-LocalPort 1234</code
+						><br />
+						- Linux (ufw): <code>sudo ufw allow 1234/tcp</code>
+					</li>
+					<li>
+						<strong>Optional: Reverse proxy + TLS</strong><br />
+						If exposing beyond LAN, put NGINX/Caddy in front, terminate TLS, and restrict access (IP
+						allowlists/VPN/auth). Prefer <em>VPN (WireGuard/Tailscale)</em> over direct WAN exposure.
+					</li>
+				</ol>
+			</section>
+
+			<section>
+				<h2>Client Setup (VS Code machine)</h2>
+				<ol>
+					<li>
+						<strong>Install Cline Local (VSIX)</strong><br />
+						Download the latest release VSIX from
+						<a href="https://github.com/nobody-qwert/cline-local/releases/latest" rel="noopener">Releases</a>.<br />
+						In VS Code: Extensions → ••• → Install from VSIX… → pick the file → Reload.
+					</li>
+					<li>Open Cline Local settings within VS Code.</li>
+					<li>Provider: <strong>LM Studio</strong> (or OpenAI‑compatible if using an alternative server).</li>
+					<li>
+						Endpoint: <code>http://SERVER_IP:1234</code> (replace <code>SERVER_IP</code> with the GPU server's IP).
+					</li>
+					<li>Model: the exact model name shown by the server (e.g., <code>qwen2.5-coder-32b-instruct</code>).</li>
+					<li>Run a small coding task and verify token streaming.</li>
+				</ol>
+				<div class="note">
+					Alternative servers: You can run an OpenAI‑compatible server (e.g., vLLM) on the GPU box and point Cline Local
+					to it. Steps are similar: bind to <code>0.0.0.0</code>, enable CORS, open firewall, and use the server IP in
+					Cline settings.
+				</div>
+			</section>
+
+			<section>
+				<h2>Troubleshooting</h2>
+				<ul>
+					<li>
+						<strong>Connection refused/timeouts:</strong> Ensure server host is <code>0.0.0.0</code>, the port
+						matches, and firewall allows inbound TCP on 1234.
+					</li>
+					<li><strong>CORS errors:</strong> Enable CORS on the server.</li>
+					<li>
+						<strong>Model not found / 404:</strong> Make sure the model is loaded and the name in Cline matches
+						exactly.
+					</li>
+					<li>
+						<strong>Slow tokens / high latency:</strong> Check GPU utilization, reduce context length, prefer LAN/VPN,
+						and avoid heavy OS tasks on the server.
+					</li>
+					<li>
+						<strong>Security:</strong> Avoid exposing the server to the public internet. Use a VPN
+						(WireGuard/Tailscale) or IP allowlists + TLS if external access is necessary.
+					</li>
+				</ul>
+			</section>
+
+			<div class="subtle" style="margin-top: 18px">
+				Need quick model guidance? See <a href="../quick-tips.html">Quick Tips</a>.
+			</div>
+		</main>
+
+		<footer class="site-footer">
+			<div class="container footer-inner">
+				<div><strong>Cline Local</strong> · Remote GPU server quick start</div>
+				<div class="links">
+					<a href="../index.html">Home</a>
+					<a href="../guides/corporate-laptop.html">Corporate Laptop</a>
+					<a href="../quick-tips.html">Quick Tips</a>
+				</div>
+			</div>
+		</footer>
+	</body>
+</html>

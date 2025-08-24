@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>Quick Tips · Cline Local</title>
+		<meta
+			name="description"
+			content="Quick tips for choosing models and setups for Cline Local. Recommended, not recommended, and low-resource local-only fallbacks." />
+		<link rel="stylesheet" href="./styles.css" />
+	</head>
+	<body>
+		<header class="site-header">
+			<div class="container header-inner">
+				<div class="brand">
+					<span class="logo" aria-hidden="true">⌁</span>
+					<a class="brand-name" href="./index.html">Cline Local</a>
+				</div>
+				<nav class="nav">
+					<a href="./guides/corporate-laptop.html">Corporate Laptop</a>
+					<a href="./guides/remote-server.html">Remote GPU Server</a>
+					<a href="./quick-tips.html">Quick Tips</a>
+					<a href="https://github.com/nobody-qwert/cline-local" rel="noopener">GitHub</a>
+				</nav>
+			</div>
+		</header>
+
+		<main class="container page">
+			<h1>Quick Tips</h1>
+			<p class="lede">
+				Model guidance at a glance. What to use, what to avoid, and what to try only when hardware is very limited.
+			</p>
+
+			<section>
+				<h2>Recommended for real work</h2>
+				<ul>
+					<li>
+						<strong>Qwen2.5‑Coder 32B</strong> (or <strong>Qwen Coder 30B A3A</strong>) — excellent coding quality and
+						a strong default choice.
+					</li>
+					<li>
+						<strong>GPT‑OSS‑120B</strong> — top‑tier quality; typically requires a proper GPU server, not a laptop.
+					</li>
+				</ul>
+				<div class="tip">
+					If you have a capable workstation or server (e.g., 3090 / 4090 / A‑series / M‑series Ultra), consider hosting
+					the model remotely and using the <a href="./guides/remote-server.html">Remote GPU Server</a> setup.
+				</div>
+			</section>
+
+			<section>
+				<h2>Not recommended for professional use</h2>
+				<ul>
+					<li><strong>GPT‑OSS‑20B</strong> — generally insufficient in practice for real‑world coding workloads.</li>
+				</ul>
+				<div class="warn">
+					You can run GPT‑OSS‑20B as a last‑resort fallback on restricted hardware, but expect quality limitations.
+				</div>
+			</section>
+
+			<section>
+				<h2>Low‑resource fallbacks (local‑only)</h2>
+				<p class="subtle">
+					These options are for single‑machine setups where VS Code + Cline Local + the model all run on the same
+					laptop/PC. They are not intended for server mode.
+				</p>
+				<ul>
+					<li>
+						<strong>Qwen 32B (4‑bit quantized)</strong> — reduced VRAM requirement at the cost of quality/latency.
+					</li>
+					<li><strong>GPT‑OSS‑20B</strong> — use only if you cannot run the recommended models.</li>
+				</ul>
+				<div class="note">
+					Expect trade‑offs: slower token speeds, lower quality on complex tasks, and potential context limitations. If
+					possible, prefer a remote GPU server and the recommended models.
+				</div>
+			</section>
+
+			<section>
+				<h2>Sizing notes</h2>
+				<ul>
+					<li>
+						<strong>32B class</strong>: prefer ≥24&nbsp;GB VRAM for smooth experience. 4‑bit quantization can reduce
+						memory needs.
+					</li>
+					<li>
+						<strong>120B class</strong>: server‑grade hardware; plan for multi‑GPU or very high VRAM, and use the
+						<a href="./guides/remote-server.html">Remote GPU Server</a> guide.
+					</li>
+				</ul>
+			</section>
+
+			<section>
+				<h2>Provider & naming</h2>
+				<ul>
+					<li>
+						LM Studio is a simple way to run models locally or on a server. Match the model name exactly as LM Studio
+						displays it.
+					</li>
+					<li>
+						Cline Local supports LM Studio and OpenAI‑compatible endpoints. Configure the provider and endpoint in
+						Cline settings.
+					</li>
+				</ul>
+			</section>
+		</main>
+
+		<footer class="site-footer">
+			<div class="container footer-inner">
+				<div><strong>Cline Local</strong> · Model quick tips</div>
+				<div class="links">
+					<a href="./index.html">Home</a>
+					<a href="./guides/corporate-laptop.html">Corporate Laptop</a>
+					<a href="./guides/remote-server.html">Remote GPU Server</a>
+				</div>
+			</div>
+		</footer>
+	</body>
+</html>
