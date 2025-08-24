@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>Corporate Laptop · Cline Local</title>
+		<meta name="description" content="Quick start guide to run LM Studio and Cline Local on a single corporate laptop." />
+		<link rel="stylesheet" href="../styles.css" />
+	</head>
+	<body>
+		<header class="site-header">
+			<div class="container header-inner">
+				<div class="brand">
+					<span class="logo" aria-hidden="true">⌁</span>
+					<a class="brand-name" href="../index.html">Cline Local</a>
+				</div>
+				<nav class="nav">
+					<a href="./corporate-laptop.html">Corporate Laptop</a>
+					<a href="./remote-server.html">Remote GPU Server</a>
+					<a href="../quick-tips.html">Quick Tips</a>
+					<a href="https://github.com/nobody-qwert/cline-local" rel="noopener">GitHub</a>
+				</nav>
+			</div>
+		</header>
+
+		<main class="container page">
+			<h1>Corporate Laptop</h1>
+			<p class="lede">
+				Everything on one machine: VS Code + Cline Local + LM Studio. Minimal to set up and privacy-friendly.
+			</p>
+
+			<div class="note">
+				<strong>Who this is for:</strong> Standard corporate laptops or desktops, possibly with limited GPU. If you have a
+				strong GPU workstation or server, see <a href="./remote-server.html">Remote GPU Server</a>.
+			</div>
+
+			<section>
+				<h2>Topology</h2>
+				<p class="subtle">All components run locally.</p>
+				<div class="term">
+					<div class="term-header">
+						<span class="dots"><span class="dot"></span><span class="dot"></span><span class="dot"></span></span>
+						<span>laptop:~ — local</span>
+					</div>
+					<div class="term-body">
+						<!-- Inline diagram -->
+						<svg
+							width="100%"
+							height="140"
+							viewBox="0 0 900 140"
+							xmlns="http://www.w3.org/2000/svg"
+							role="img"
+							aria-label="Local laptop topology">
+							<defs>
+								<marker
+									id="arrowDark"
+									viewBox="0 0 5 5"
+									refX="4.5"
+									refY="2.5"
+									markerWidth="5"
+									markerHeight="5"
+									orient="auto-start-reverse">
+									<path d="M0,0 L5,2.5 L0,5 z" fill="#3a3f45"></path>
+								</marker>
+							</defs>
+							<rect x="10" y="10" width="880" height="120" rx="12" fill="#ffffff" stroke="#dcdfe4" />
+							<rect x="40" y="35" width="200" height="70" rx="10" fill="#ffffff" stroke="#dcdfe4" />
+							<text x="140" y="64" text-anchor="middle" fill="#1b1d21" font-size="14">VS Code</text>
+							<text x="140" y="84" text-anchor="middle" fill="#6b717a" font-size="12">Cline Local</text>
+
+							<line
+								x1="252"
+								y1="70"
+								x2="330"
+								y2="70"
+								stroke="#3a3f45"
+								stroke-width="4"
+								marker-end="url(#arrowDark)" />
+
+							<rect x="340" y="35" width="220" height="70" rx="10" fill="#ffffff" stroke="#dcdfe4" />
+							<text x="450" y="64" text-anchor="middle" fill="#1b1d21" font-size="14">LM Studio API</text>
+							<text x="450" y="84" text-anchor="middle" fill="#6b717a" font-size="12">http://127.0.0.1:1234</text>
+
+							<line
+								x1="562"
+								y1="70"
+								x2="640"
+								y2="70"
+								stroke="#3a3f45"
+								stroke-width="4"
+								marker-end="url(#arrowDark)" />
+
+							<rect x="650" y="35" width="210" height="70" rx="10" fill="#ffffff" stroke="#dcdfe4" />
+							<text x="755" y="56" text-anchor="middle" fill="#1b1d21" font-size="14">Model</text>
+							<text x="755" y="76" text-anchor="middle" fill="#6b717a" font-size="12">
+								Qwen2.5‑Coder 32B (preferred)
+							</text>
+						</svg>
+					</div>
+				</div>
+			</section>
+
+			<section>
+				<h2>Recommended Models</h2>
+				<ul>
+					<li><strong>Qwen2.5‑Coder 32B</strong> (or Qwen Coder 30B A3A) — best balance of quality for coding.</li>
+					<li><strong>GPT‑OSS‑120B</strong> — top-tier quality, but generally too heavy for laptops.</li>
+				</ul>
+				<div class="tip">
+					On constrained hardware, consider <strong>Qwen 32B 4‑bit quantized</strong> as a low-resource fallback. Expect
+					quality/latency trade‑offs. See <a href="../quick-tips.html">Quick Tips</a>.
+				</div>
+			</section>
+
+			<section>
+				<h2>Step‑by‑Step</h2>
+				<ol>
+					<li>
+						<strong>Install Cline Local (VSIX)</strong><br />
+						Download the latest release VSIX from
+						<a href="https://github.com/nobody-qwert/cline-local/releases/latest" rel="noopener">Releases</a>.<br />
+						In VS Code: Extensions → ••• → Install from VSIX… → pick the file → Reload.
+					</li>
+					<li>
+						<strong>Install LM Studio</strong><br />
+						Download from https://lmstudio.ai and install. Launch LM Studio.
+					</li>
+					<li>
+						<strong>Download a model</strong><br />
+						In LM Studio, search for <em>Qwen2.5‑Coder‑32B‑Instruct</em> (or Qwen Coder 30B A3A). Download the variant
+						your hardware supports.<br />
+						<span class="subtle"
+							>If VRAM is limited, try a 4‑bit quantized build. Quality may drop vs full precision.</span
+						>
+					</li>
+					<li>
+						<strong>Start the LM Studio API server</strong><br />
+						- Open the <em>Server</em> tab in LM Studio<br />
+						- Host: <code>127.0.0.1</code> &nbsp; Port: <code>1234</code><br />
+						- Enable CORS and keep‑alive<br />
+						- Start server; ensure the model is loaded
+						<div class="note">
+							Test locally:
+							<pre><code>curl http://127.0.0.1:1234/v1/models</code></pre>
+						</div>
+					</li>
+					<li>
+						<strong>Configure Cline Local</strong><br />
+						In Cline Local settings (within VS Code):<br />
+						- Provider: <strong>LM Studio</strong><br />
+						- Endpoint: <code>http://127.0.0.1:1234</code><br />
+						- Model: the exact name LM Studio shows (e.g., <code>qwen2.5-coder-32b-instruct</code>)
+					</li>
+					<li>
+						<strong>Run a quick test</strong><br />
+						Start a small coding task and confirm tokens stream. If not, see troubleshooting below.
+					</li>
+				</ol>
+			</section>
+
+			<section>
+				<h2>Troubleshooting</h2>
+				<ul>
+					<li><strong>404 / 503:</strong> Ensure the LM Studio server is running and the model is loaded.</li>
+					<li><strong>CORS errors:</strong> Enable CORS in LM Studio server settings.</li>
+					<li>
+						<strong>Connection refused:</strong> Confirm host is <code>127.0.0.1</code> and port matches. Check local
+						firewall rules.
+					</li>
+					<li>
+						<strong>Slow tokens / stalling:</strong> Try a lighter quantization, reduce context length, close heavy
+						apps, or switch to the <a href="./remote-server.html">Remote GPU Server</a> setup.
+					</li>
+				</ul>
+			</section>
+
+			<div class="subtle" style="margin-top: 18px">
+				Looking for model selection tips? See <a href="../quick-tips.html">Quick Tips</a>.
+			</div>
+		</main>
+
+		<footer class="site-footer">
+			<div class="container footer-inner">
+				<div><strong>Cline Local</strong> · Corporate laptop quick start</div>
+				<div class="links">
+					<a href="../index.html">Home</a>
+					<a href="../quick-tips.html">Quick Tips</a>
+				</div>
+			</div>
+		</footer>
+	</body>
+</html>

@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>Cline Local — Minimal Setup Guides</title>
+		<meta
+			name="description"
+			content="Run top coding models locally or on your LAN with Cline Local. Minimal guides for corporate laptops and remote GPU servers." />
+		<link rel="stylesheet" href="./styles.css" />
+	</head>
+	<body>
+		<header class="site-header">
+			<div class="container header-inner">
+				<div class="brand">
+					<span class="logo" aria-hidden="true">⌁</span>
+					<a class="brand-name" href="./index.html">Cline Local</a>
+				</div>
+				<nav class="nav">
+					<a href="./guides/corporate-laptop.html">Corporate Laptop</a>
+					<a href="./guides/remote-server.html">Remote GPU Server</a>
+					<a href="./quick-tips.html">Quick Tips</a>
+					<a href="https://github.com/nobody-qwert/cline-local" rel="noopener">GitHub</a>
+				</nav>
+			</div>
+		</header>
+
+		<main class="container">
+			<section class="hero">
+				<h1>Private, Fast, Local‑first AI for Coding</h1>
+				<p class="lede">
+					Run high‑quality coding models locally or on your LAN. Minimal setup. Privacy by default. Built for real work.
+				</p>
+				<div class="cta">
+					<a class="btn" href="./guides/corporate-laptop.html">Quick Start: Corporate Laptop</a>
+					<a class="btn outline" href="./guides/remote-server.html">Quick Start: Remote GPU Server</a>
+				</div>
+				<p class="subtle">New to models and hardware sizing? See <a href="./quick-tips.html">Quick Tips</a>.</p>
+			</section>
+
+			<section class="cards">
+				<article class="card">
+					<h2>Why Cline Local</h2>
+					<ul>
+						<li>Plan/Act workflows in VS Code</li>
+						<li>MCP tools and extensible providers</li>
+						<li>No external data required</li>
+						<li>Works with LM Studio</li>
+					</ul>
+				</article>
+
+				<article class="card">
+					<h2>Recommended Models</h2>
+					<ul>
+						<li><strong>Qwen2.5‑Coder 32B</strong> (or Qwen Coder 30B A3A)</li>
+						<li><strong>GPT‑OSS‑120B</strong> for top‑tier quality (server‑class)</li>
+					</ul>
+					<p class="subtle">
+						For restricted hardware, see low‑resource local options in <a href="./quick-tips.html">Quick Tips</a>.
+					</p>
+				</article>
+
+				<article class="card">
+					<h2>Two Common Setups</h2>
+					<ol>
+						<li><strong>Corporate Laptop</strong>: VS Code + Cline Local + LM Studio on the same machine.</li>
+						<li>
+							<strong>Remote GPU Server</strong>: Model runs on a workstation/server; client machine runs Cline
+							Local over LAN/VPN.
+						</li>
+					</ol>
+				</article>
+			</section>
+
+			<section class="next-steps">
+				<h2>Get Started</h2>
+				<div class="steps">
+					<a class="step" href="./guides/corporate-laptop.html">
+						<h3>Corporate Laptop</h3>
+						<p>Everything on one machine with LM Studio.</p>
+					</a>
+					<a class="step" href="./guides/remote-server.html">
+						<h3>Remote GPU Server</h3>
+						<p>Serve a large model from a dedicated GPU box.</p>
+					</a>
+					<a class="step" href="./quick-tips.html">
+						<h3>Quick Tips</h3>
+						<p>Model recommendations and low‑resource fallbacks.</p>
+					</a>
+				</div>
+			</section>
+		</main>
+
+		<footer class="site-footer">
+			<div class="container footer-inner">
+				<div><strong>Cline Local</strong> · Minimal setup guides</div>
+				<div class="links">
+					<a href="https://github.com/nobody-qwert/cline-local" rel="noopener">GitHub Repo</a>
+					<a href="https://github.com/nobody-qwert/cline-local/blob/main/README.md" rel="noopener">README</a>
+					<a href="./quick-tips.html">Quick Tips</a>
+				</div>
+			</div>
+		</footer>
+	</body>
+</html>

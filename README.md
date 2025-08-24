@@ -191,6 +191,23 @@ When merging relevant changes from upstream Cline:
 
 ---
 
+## Website (GitHub Pages)
+
+- Live site: https://nobody-qwert.github.io/cline-local/
+- Source directory: `website/`
+- Deployment: GitHub Actions workflow at `.github/workflows/deploy-pages.yml`
+
+First-time setup:
+1. In GitHub: Settings → Pages → Build and deployment → Source: select “GitHub Actions”.
+2. Push to `main` to trigger the workflow. It will upload `website/` and deploy to Pages.
+3. The workflow summary shows the published URL. Default: https://nobody-qwert.github.io/cline-local/
+
+Local preview:
+- Open `website/index.html` in your browser, or use a simple static server (e.g., VSCode Live Server).
+
+Custom domain (optional):
+- Configure a CNAME in repository Settings → Pages. If you set a custom domain, update any hardcoded links accordingly.
+
 ## Troubleshooting
 
 - Build: `npm run check-types`, `npm run lint`, `npm test`
