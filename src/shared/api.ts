@@ -99,6 +99,16 @@ export function getLmStudioModelInfoForModelId(modelId?: string): ModelInfo {
 		return { ...base, contextWindow: 131_072, supportsReasoning: true }
 	}
 
+	// Qwen "next" family (new additions)
+	// - qwen3-next-a3b-thinking: 256K window, supports reasoning
+	if (id.includes("qwen3-next-a3b-thinking")) {
+		return { ...base, contextWindow: 262_144, supportsReasoning: true }
+	}
+	// - qwen/qwen3-next-80b: 256K window, no explicit reasoning stream
+	if (id.includes("qwen3-next-80b")) {
+		return { ...base, contextWindow: 262_144, supportsReasoning: false }
+	}
+
 	// Qwen 30B families (context windows and thinking support)
 	const isQwenThinking2507 =
 		id.includes("qwen3-30b-a3b-thinking-2507") || (id.includes("qwen3-30b-a3b") && id.includes("thinking"))

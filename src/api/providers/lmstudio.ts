@@ -102,8 +102,9 @@ export class LmStudioHandler implements ApiHandler {
 									if (delta?.content) {
 										yield { type: "text", text: delta.content }
 									}
-									if (delta && "reasoning" in delta && delta.reasoning) {
-										yield { type: "reasoning", reasoning: (delta.reasoning as string | undefined) || "" }
+									const reasoningText = this.extractReasoningFromDelta(delta)
+									if (reasoningText) {
+										yield { type: "reasoning", reasoning: reasoningText }
 									}
 									const usage = (chunk as any)?.usage
 									if (usage && (usage.prompt_tokens !== null || usage.completion_tokens !== null)) {
@@ -135,8 +136,9 @@ export class LmStudioHandler implements ApiHandler {
 							if (delta?.content) {
 								yield { type: "text", text: delta.content }
 							}
-							if (delta && "reasoning" in delta && delta.reasoning) {
-								yield { type: "reasoning", reasoning: (delta.reasoning as string | undefined) || "" }
+							const reasoningText = this.extractReasoningFromDelta(delta)
+							if (reasoningText) {
+								yield { type: "reasoning", reasoning: reasoningText }
 							}
 							const usage = (chunk as any)?.usage
 							if (usage && (usage.prompt_tokens !== null || usage.completion_tokens !== null)) {
@@ -188,8 +190,9 @@ export class LmStudioHandler implements ApiHandler {
 					if (delta?.content) {
 						yield { type: "text", text: delta.content }
 					}
-					if (delta && "reasoning" in delta && delta.reasoning) {
-						yield { type: "reasoning", reasoning: (delta.reasoning as string | undefined) || "" }
+					const reasoningText = this.extractReasoningFromDelta(delta)
+					if (reasoningText) {
+						yield { type: "reasoning", reasoning: reasoningText }
 					}
 					// Emit usage if LM Studio provides it (OpenAI-compatible include_usage)
 					const usage = (chunk as any)?.usage
@@ -218,6 +221,25 @@ export class LmStudioHandler implements ApiHandler {
 				this.abortController = undefined
 			}
 		}
+	}
+
+	private extractReasoningFromDelta(delta: any): string | undefined {
+		if (!delta) return undefined
+		// LM Studio / OpenAI-compatible fields:
+		// - delta.reasoning (string or { content: string })
+		// - delta.reasoning_content (string)
+		if (typeof delta.reasoning === "string" && delta.reasoning.length > 0) {
+			return delta.reasoning
+		}
+		const r = (delta as any).reasoning
+		if (r && typeof r.content === "string" && r.content.length > 0) {
+			return r.content
+		}
+		const rc = (delta as any).reasoning_content
+		if (typeof rc === "string" && rc.length > 0) {
+			return rc
+		}
+		return undefined
 	}
 
 	getApiStreamUsage = async (): Promise<ApiStreamUsageChunk | undefined> => {
