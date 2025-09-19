@@ -97,7 +97,7 @@ export class E2ETestHelper {
 
 	public async signin(webview: Frame): Promise<void> {
 		const byokButton = webview.getByRole("button", {
-			name: "Use your own API key",
+			name: "Configure provider",
 		})
 		await expect(byokButton).toBeVisible()
 

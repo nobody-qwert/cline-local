@@ -3,7 +3,7 @@ import { addSelectedCodeToClineWebview, getClineEditorWebviewFrame, openTab, tog
 import { e2e } from "./utils/helpers"
 
 e2e("code actions and editor panel", async ({ page, sidebar, helper }) => {
-	await sidebar.getByRole("button", { name: "Get Started for Free" }).click({ delay: 100 })
+	await sidebar.getByRole("button", { name: "Configure provider" }).click({ delay: 100 })
 	// Sidebar - input should start empty
 	const sidebarInput = sidebar.getByTestId("chat-input")
 	await sidebarInput.click()

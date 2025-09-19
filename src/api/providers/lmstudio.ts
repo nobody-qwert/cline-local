@@ -85,7 +85,9 @@ export class LmStudioHandler implements ApiHandler {
 				let buffer = ""
 				while (true) {
 					const { done, value } = await reader.read()
-					if (done) break
+					if (done) {
+						break
+					}
 					buffer += decoder.decode(value, { stream: true })
 					let newlineIndex = buffer.indexOf("\n")
 					while (newlineIndex !== -1) {
@@ -224,7 +226,9 @@ export class LmStudioHandler implements ApiHandler {
 	}
 
 	private extractReasoningFromDelta(delta: any): string | undefined {
-		if (!delta) return undefined
+		if (!delta) {
+			return undefined
+		}
 		// LM Studio / OpenAI-compatible fields:
 		// - delta.reasoning (string or { content: string })
 		// - delta.reasoning_content (string)

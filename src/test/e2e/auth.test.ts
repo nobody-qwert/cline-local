@@ -5,11 +5,10 @@ import { e2e } from "./utils/helpers"
 e2e("Auth - can set up API keys", async ({ page, sidebar }) => {
 	// Use the page object to interact with editor outside the sidebar
 	// Verify initial state
-	await expect(sidebar.getByRole("button", { name: "Get Started for Free" })).toBeVisible()
-	await expect(sidebar.getByRole("button", { name: "Use your own API key" })).toBeVisible()
+	await expect(sidebar.getByRole("button", { name: "Configure provider" })).toBeVisible()
 
 	// Navigate to API key setup
-	await sidebar.getByRole("button", { name: "Use your own API key" }).click()
+	await sidebar.getByRole("button", { name: "Configure provider" }).click()
 
 	const providerSelector = sidebar.locator("#api-provider div").first()
 
@@ -34,7 +33,7 @@ e2e("Auth - can set up API keys", async ({ page, sidebar }) => {
 	const submitButton = sidebar.getByRole("button", { name: "Let's go!" })
 	await expect(submitButton).toBeEnabled()
 	await submitButton.click({ delay: 100 })
-	await expect(sidebar.getByRole("button", { name: "Get Started for Free" })).not.toBeVisible()
+	await expect(sidebar.getByRole("button", { name: "Configure provider" })).not.toBeVisible()
 
 	// Verify start up page is no longer visible
 	await expect(apiKeyInput).not.toBeVisible()

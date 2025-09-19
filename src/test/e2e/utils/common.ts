@@ -33,7 +33,7 @@ export const toggleNotifications = async (_page: Page) => {
 }
 
 export const closeBanners = async (sidebar: Page) => {
-	const banners = ["Get Started for Free", "Close banner and enable"]
+	const banners = ["Configure provider", "Close banner and enable"]
 
 	for (const banner of banners) {
 		await sidebar.getByRole("button", { name: banner }).click({ delay: 100 })
@@ -41,7 +41,7 @@ export const closeBanners = async (sidebar: Page) => {
 }
 
 export async function cleanChatView(sidebar: Page): Promise<Page> {
-	const signUpBtn = sidebar.getByRole("button", { name: "Get Started for Free" })
+	const signUpBtn = sidebar.getByRole("button", { name: "Configure provider" })
 	if (await signUpBtn.isVisible()) {
 		await signUpBtn.click({ delay: 50 })
 	}

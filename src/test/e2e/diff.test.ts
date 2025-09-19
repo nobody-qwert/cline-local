@@ -3,7 +3,7 @@ import { cleanChatView } from "./utils/common"
 import { e2e } from "./utils/helpers"
 
 e2e("Diff editor", async ({ page, sidebar, helper }) => {
-	await sidebar.getByRole("button", { name: "Get Started for Free" }).click({ delay: 100 })
+	await sidebar.getByRole("button", { name: "Configure provider" }).click({ delay: 100 })
 	// Submit a message
 	await cleanChatView(page)
 
