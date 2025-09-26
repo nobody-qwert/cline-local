@@ -5,6 +5,21 @@ All notable changes to the Cline Local fork will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.3.0 - 2025-09-26
+
+### Added
+- LM Studio provider now automatically retrieves model context length from the provider, improving context window management
+- Added support for Qwen3-Next-80B model in the model catalog
+- GitHub Pages documentation site with guides and quick tips
+
+### Changed
+- Improved model context length handling for better conversation management
+- Enhanced documentation with new website structure and deployment workflow
+
+### Fixed
+- Test suite improvements and cleanup
+- Removed legacy prompt handling code for better maintainability
+
 ## 0.2.2 - 2025-08-24
 
 ### Fixed

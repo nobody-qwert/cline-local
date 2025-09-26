@@ -2,7 +2,7 @@
 	"name": "cline-local",
 	"displayName": "Cline Local",
 	"description": "Lean, local-only fork of Cline - autonomous coding agent focused on privacy and local development with no cloud dependencies, telemetry, or background processes.",
-	"version": "0.2.2",
+	"version": "0.3.0",
 	"icon": "assets/icons/icon.png",
 	"engines": {
 		"vscode": "^1.84.0"
