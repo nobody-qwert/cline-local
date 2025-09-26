@@ -6,7 +6,7 @@ Cline Local is a lean, local‑only fork of the Cline VSCode extension. It prese
 
 ## Latest Release
 
-- v0.2.2: [Release notes](https://github.com/nobody-qwert/cline-local/releases/tag/v0.2.2) • [Download VSIX](https://github.com/nobody-qwert/cline-local/releases/download/v0.2.2/cline-local-0.2.2.vsix)
+- v0.3.0: [Release notes](https://github.com/nobody-qwert/cline-local/releases/tag/v0.3.0) • [Download VSIX](https://github.com/nobody-qwert/cline-local/releases/download/v0.3.0/cline-local-0.3.0.vsix)
 
 ## Compatibility (v0.1.0)
 
