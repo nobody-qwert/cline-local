@@ -44,11 +44,20 @@ export function normalizeApiConfiguration(
 		default: {
 			const modelId =
 				currentMode === "plan" ? apiConfiguration?.planModeLmStudioModelId : apiConfiguration?.actModeLmStudioModelId
+			const defaultInfo = getLmStudioModelInfoForModelId(modelId || "")
+			const configuredMaxTokens = Number(apiConfiguration?.lmStudioMaxTokens)
+			const contextWindowOverride =
+				Number.isFinite(configuredMaxTokens) && configuredMaxTokens > 0 ? configuredMaxTokens : undefined
+
+			const selectedModelInfo = {
+				...defaultInfo,
+				contextWindow: contextWindowOverride ?? defaultInfo.contextWindow,
+			}
+
 			return {
 				selectedProvider: "lmstudio",
 				selectedModelId: modelId || "",
-				// LM Studio sane defaults with overrides (gpt-oss => 131k, unknown => 128k)
-				selectedModelInfo: getLmStudioModelInfoForModelId(modelId || ""),
+				selectedModelInfo,
 			}
 		}
 	}

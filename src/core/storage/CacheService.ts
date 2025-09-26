@@ -193,6 +193,7 @@ export class CacheService {
 			ollamaApiKey,
 			ollamaApiOptionsCtxNum,
 			lmStudioBaseUrl,
+			lmStudioMaxTokens,
 			// Plan mode configurations (local providers only)
 			planModeApiProvider,
 			planModeApiModelId,
@@ -240,6 +241,7 @@ export class CacheService {
 		setGS("ollamaBaseUrl", ollamaBaseUrl as any)
 		setGS("ollamaApiOptionsCtxNum", ollamaApiOptionsCtxNum as any)
 		setGS("lmStudioBaseUrl", lmStudioBaseUrl as any)
+		setGS("lmStudioMaxTokens", lmStudioMaxTokens as any)
 		setGS("favoritedModelIds", favoritedModelIds as any)
 		setGS("requestTimeoutMs", requestTimeoutMs as any)
 		setGS("openaiReasoningEffort", openaiReasoningEffort as any)
@@ -415,6 +417,7 @@ export class CacheService {
 			ollamaApiKey,
 			ollamaApiOptionsCtxNum,
 			lmStudioBaseUrl,
+			lmStudioMaxTokens,
 			// Plan mode configurations
 			planModeApiProvider,
 			planModeApiModelId,
@@ -465,6 +468,7 @@ export class CacheService {
 			ollamaBaseUrl,
 			ollamaApiOptionsCtxNum,
 			lmStudioBaseUrl,
+			lmStudioMaxTokens,
 			favoritedModelIds,
 			requestTimeoutMs,
 
@@ -520,6 +524,7 @@ export class CacheService {
 			ollamaApiKey: this.secretsCache["ollamaApiKey"],
 			ollamaApiOptionsCtxNum: this.globalStateCache["ollamaApiOptionsCtxNum"],
 			lmStudioBaseUrl: this.globalStateCache["lmStudioBaseUrl"],
+			lmStudioMaxTokens: this.globalStateCache["lmStudioMaxTokens"],
 
 			// Plan mode configurations (local providers only)
 			planModeApiProvider: this.globalStateCache["planModeApiProvider"],

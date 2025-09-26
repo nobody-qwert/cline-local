@@ -1,5 +1,5 @@
-import { VSCodeDropdown, VSCodeOption, VSCodeLink } from "@vscode/webview-ui-toolkit/react"
-import { useState, useCallback, useEffect, useRef } from "react"
+import { VSCodeDropdown, VSCodeOption, VSCodeLink, VSCodeTextField } from "@vscode/webview-ui-toolkit/react"
+import { useState, useCallback, useEffect, useRef, useMemo } from "react"
 import { useInterval } from "react-use"
 import { DebouncedTextField } from "../common/DebouncedTextField"
 import { ModelsServiceClient } from "@/services/grpc-client"
@@ -11,67 +11,102 @@ import { useExtensionState } from "@/context/ExtensionStateContext"
 import { getModeSpecificFields, normalizeApiConfiguration } from "../utils/providerUtils"
 import ThinkingBudgetSlider from "../ThinkingBudgetSlider"
 import { Mode, OpenaiReasoningEffort } from "@shared/storage/types"
-/**
- * Props for the LMStudioProvider component
- */
+
 interface LMStudioProviderProps {
 	showModelOptions: boolean
 	isPopup?: boolean
 	currentMode: Mode
 }
 
-/**
- * The LM Studio provider configuration component
- */
-export const LMStudioProvider = ({ showModelOptions, isPopup, currentMode }: LMStudioProviderProps) => {
+interface LMStudioModelMetadata {
+	id: string
+	object?: "model"
+	type?: string
+	publisher?: string
+	arch?: string
+	compatibility_type?: string
+	quantization?: string
+	state?: string
+	max_context_length?: number
+	loaded_context_length?: number
+	[key: string]: unknown
+}
+
+export const LMStudioProvider = ({ currentMode }: LMStudioProviderProps) => {
 	const { apiConfiguration, openaiReasoningEffort } = useExtensionState()
 	const { handleFieldChange, handleModeFieldChange } = useApiConfigurationHandlers()
 
 	const { lmStudioModelId } = getModeSpecificFields(apiConfiguration, currentMode)
 
-	const [lmStudioModels, setLmStudioModels] = useState<string[]>([])
-
-	// Connection status
+	const [lmStudioModels, setLmStudioModels] = useState<LMStudioModelMetadata[]>([])
 	const [connOk, setConnOk] = useState<boolean | null>(null)
 	const [statusText, setStatusText] = useState<string>("")
 	const [statusTip, setStatusTip] = useState<string | undefined>(undefined)
 
 	const inFlightRef = useRef(false)
 
-	// Poll LM Studio models
+	const endpoint = useMemo(
+		() => apiConfiguration?.lmStudioBaseUrl?.trim() || "http://localhost:1234",
+		[apiConfiguration?.lmStudioBaseUrl],
+	)
+
+	const currentLMStudioModel = useMemo(
+		() => lmStudioModels.find((model) => model.id === lmStudioModelId),
+		[lmStudioModels, lmStudioModelId],
+	)
+
+	const availableModelIds = useMemo(
+		() => lmStudioModels.map((model) => model.id).filter((id): id is string => Boolean(id)),
+		[lmStudioModels],
+	)
+
+	const currentDropdownValue = useMemo(() => {
+		if (lmStudioModelId && availableModelIds.includes(lmStudioModelId)) {
+			return lmStudioModelId
+		}
+		return availableModelIds[0] ?? lmStudioModelId ?? ""
+	}, [availableModelIds, lmStudioModelId])
+
 	const requestLmStudioModels = useCallback(async () => {
-		if (inFlightRef.current) return
+		if (inFlightRef.current) {
+			return
+		}
 		inFlightRef.current = true
 		try {
-			const response = await ModelsServiceClient.getLmStudioModels({
-				value: apiConfiguration?.lmStudioBaseUrl || "",
-			} as any)
-			if (response && Array.isArray(response.values)) {
-				// Sort models alphabetically for a predictable dropdown order
-				const sorted = [...response.values].sort((a, b) => a.localeCompare(b))
+			const response = await ModelsServiceClient.getLmStudioModels({ value: endpoint } as any)
+			const values = response?.values ?? []
+			const parsed = values
+				.map((rawValue) => {
+					try {
+						return JSON.parse(rawValue) as LMStudioModelMetadata
+					} catch (error) {
+						console.error("Failed to parse LM Studio model metadata:", error)
+						return null
+					}
+				})
+				.filter(Boolean) as LMStudioModelMetadata[]
+
+			if (parsed.length > 0) {
+				const sorted = [...parsed].sort((a, b) => (a.id || "").localeCompare(b.id || ""))
 				setLmStudioModels(sorted)
 				setConnOk(true)
 				setStatusText(`Connected — ${sorted.length} models`)
 				setStatusTip(undefined)
 
-				// Auto-select first model if none selected or current selection not present
+				const allIds = sorted.map((model) => model.id).filter(Boolean) as string[]
 				const current = lmStudioModelId || ""
-				if (!current || !sorted.includes(current)) {
-					const first = sorted[0]
-					if (first) {
-						handleModeFieldChange(
-							{ plan: "planModeLmStudioModelId", act: "actModeLmStudioModelId" },
-							first,
-							currentMode,
-						)
-					}
+				if ((!current || !allIds.includes(current)) && sorted[0]?.id) {
+					handleModeFieldChange(
+						{ plan: "planModeLmStudioModelId", act: "actModeLmStudioModelId" },
+						sorted[0].id,
+						currentMode,
+					)
 				}
 			} else {
-				// Treat invalid response shape as a failed connection
 				setLmStudioModels([])
 				setConnOk(false)
 				setStatusText("Cannot connect")
-				setStatusTip("Unexpected response from LM Studio")
+				setStatusTip("No models returned by LM Studio")
 			}
 		} catch (error: any) {
 			console.error("Failed to fetch LM Studio models:", error)
@@ -82,16 +117,32 @@ export const LMStudioProvider = ({ showModelOptions, isPopup, currentMode }: LMS
 		} finally {
 			inFlightRef.current = false
 		}
-	}, [apiConfiguration?.lmStudioBaseUrl, currentMode, handleModeFieldChange, lmStudioModelId])
+	}, [endpoint, handleModeFieldChange, currentMode, lmStudioModelId])
 
 	useEffect(() => {
 		setConnOk(null)
 		requestLmStudioModels()
-	}, [apiConfiguration?.lmStudioBaseUrl])
+	}, [endpoint])
 
 	useInterval(requestLmStudioModels, connOk === false ? 2000 : null)
 
-	// Determine if the selected model supports "thinking" and whether it's GPT-OSS (effort-based)
+	const lmStudioMaxTokens = useMemo(() => currentLMStudioModel?.max_context_length?.toString(), [currentLMStudioModel])
+	const currentLoadedContext = useMemo(() => currentLMStudioModel?.loaded_context_length?.toString(), [currentLMStudioModel])
+
+	useEffect(() => {
+		const loaded = currentLMStudioModel?.loaded_context_length?.toString()
+		const max = currentLMStudioModel?.max_context_length?.toString()
+		const choice = apiConfiguration?.lmStudioMaxTokens ?? max
+		if (loaded && loaded !== choice) {
+			handleFieldChange("lmStudioMaxTokens", loaded)
+		}
+	}, [
+		currentLMStudioModel?.loaded_context_length,
+		currentLMStudioModel?.max_context_length,
+		apiConfiguration?.lmStudioMaxTokens,
+		handleFieldChange,
+	])
+
 	const { selectedModelInfo, selectedModelId } = normalizeApiConfiguration(apiConfiguration, currentMode)
 	const modelIdForCheck = (selectedModelId || lmStudioModelId || "").toLowerCase()
 	const isGptOss =
@@ -99,12 +150,9 @@ export const LMStudioProvider = ({ showModelOptions, isPopup, currentMode }: LMS
 		modelIdForCheck.includes("/gpt-oss") ||
 		modelIdForCheck.includes("openai/gpt-oss")
 
-	// Mode fields (thinking tokens) for current mode
 	const modeFields = getModeSpecificFields(apiConfiguration, currentMode)
-
 	const DEFAULT_MIN_VALID_TOKENS = 1024
-	// Ensure GPT‑OSS models always have "thinking enabled" (non-zero tokens) for internal consistency.
-	// Numeric value is ignored by GPT‑OSS, but non-zero keeps downstream logic uniform.
+
 	useEffect(() => {
 		if (isGptOss && (modeFields.thinkingBudgetTokens || 0) <= 0) {
 			handleModeFieldChange(
@@ -132,7 +180,7 @@ export const LMStudioProvider = ({ showModelOptions, isPopup, currentMode }: LMS
 				/>
 			</div>
 
-			{lmStudioModels.length === 0 && (
+			{availableModelIds.length === 0 ? (
 				<DebouncedTextField
 					initialValue={lmStudioModelId || ""}
 					onChange={(value) =>
@@ -146,11 +194,9 @@ export const LMStudioProvider = ({ showModelOptions, isPopup, currentMode }: LMS
 					placeholder={"e.g. meta-llama-3.1-8b-instruct"}>
 					<span style={{ fontWeight: 500 }}>Model ID</span>
 				</DebouncedTextField>
-			)}
-
-			{lmStudioModels.length > 0 && (
+			) : (
 				<VSCodeDropdown
-					currentValue={lmStudioModels.includes(lmStudioModelId || "") ? lmStudioModelId : lmStudioModels[0]}
+					currentValue={currentDropdownValue}
 					onChange={(e: any) => {
 						const value = e?.target?.currentValue as string | undefined
 						if (value) {
@@ -164,14 +210,20 @@ export const LMStudioProvider = ({ showModelOptions, isPopup, currentMode }: LMS
 					style={{ position: "relative", zIndex: 9999 }}
 					className="w-full">
 					{lmStudioModels.map((model) => (
-						<VSCodeOption key={model} value={model}>
-							{model}
+						<VSCodeOption key={model.id ?? "(unknown)"} value={model.id ?? ""}>
+							{model.id ?? "(unknown id)"}
 						</VSCodeOption>
 					))}
 				</VSCodeDropdown>
 			)}
 
-			{/* Thinking controls */}
+			<VSCodeTextField
+				className="w-full pointer-events-none"
+				disabled={true}
+				title="Not editable - the value is returned by the connected endpoint"
+				value={String(currentLoadedContext ?? lmStudioMaxTokens ?? "0")}
+			/>
+
 			{selectedModelInfo?.supportsReasoning && (
 				<div style={{ marginTop: 10, display: "flex", flexDirection: "column", gap: 8 }}>
 					{isGptOss ? (

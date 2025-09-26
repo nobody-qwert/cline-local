@@ -9,6 +9,7 @@ import { withRetry } from "../retry"
 interface LmStudioHandlerOptions {
 	lmStudioBaseUrl?: string
 	lmStudioModelId?: string
+	lmStudioMaxTokens?: string
 	thinkingBudgetTokens?: number
 	openaiReasoningEffort?: string
 }
@@ -37,6 +38,14 @@ export class LmStudioHandler implements ApiHandler {
 		return this.client
 	}
 
+	private getConfiguredContextWindow(): number | undefined {
+		const maxTokens = Number(this.options.lmStudioMaxTokens)
+		if (Number.isFinite(maxTokens) && maxTokens > 0) {
+			return maxTokens
+		}
+		return undefined
+	}
+
 	@withRetry({ retryAllErrors: true })
 	async *createMessage(systemPrompt: string, messages: Anthropic.Messages.MessageParam[]): ApiStream {
 		const client = this.ensureClient()
@@ -47,6 +56,8 @@ export class LmStudioHandler implements ApiHandler {
 		const modelId = this.getModel().id || ""
 		const lowerId = modelId.toLowerCase()
 		const isGptOss = lowerId.startsWith("gpt-oss") || lowerId.includes("/gpt-oss") || lowerId.includes("openai/gpt-oss")
+
+		const configuredContextWindow = this.getConfiguredContextWindow()
 
 		// For LM Studio models, add reasoning control to the system message
 		// based on whether thinking is enabled via the UI toggle (ThinkingBudgetSlider).
@@ -65,10 +76,9 @@ export class LmStudioHandler implements ApiHandler {
 				model: this.getModel().id,
 				messages: openAiMessages,
 				stream: true,
-				// Request usage in streaming chunks (OpenAI-compatible)
 				stream_options: { include_usage: true },
-				// Top-level reasoning effort per LM Studio GPT-OSS format
 				reasoning_effort: (this.options.openaiReasoningEffort as "low" | "medium" | "high") || "low",
+				max_completion_tokens: configuredContextWindow,
 			}
 			try {
 				const resp = await fetch(url, {
@@ -128,7 +138,6 @@ export class LmStudioHandler implements ApiHandler {
 						newlineIndex = buffer.indexOf("\n")
 					}
 				}
-				// Flush any remaining buffer content
 				if (buffer.startsWith("data:")) {
 					const dataStr = buffer.slice(5).trim()
 					if (dataStr && dataStr !== "[DONE]") {
@@ -160,30 +169,25 @@ export class LmStudioHandler implements ApiHandler {
 					}
 				}
 			} catch (error) {
-				// Swallow aborts; propagate other errors
 				if (error instanceof Error && (error.name === "AbortError" || error.message?.includes("aborted"))) {
 					return
 				}
 				throw new Error(`LM Studio (GPT-OSS) request failed: ${error instanceof Error ? error.message : String(error)}`)
 			} finally {
-				// Clear controller on exit of this branch
 				this.abortController = undefined
 			}
 		} else {
-			// Non-GPT-OSS path: use OpenAI SDK
 			try {
 				const req: any = {
 					model: this.getModel().id,
 					messages: openAiMessages,
 					stream: true,
-					// Request usage in streaming chunks (OpenAI-compatible)
 					stream_options: { include_usage: true },
+					max_completion_tokens: configuredContextWindow,
 				}
-				// If thinking budget is enabled, include OpenAI-compatible reasoning params
 				if (this.options.thinkingBudgetTokens && this.options.thinkingBudgetTokens > 0) {
 					req.reasoning = { budget_tokens: this.options.thinkingBudgetTokens }
 				} else {
-					// Explicitly disable reasoning when thinking is not enabled
 					req.reasoning = false
 				}
 				const stream = (await (client as any).chat.completions.create(req, { signal: controller.signal })) as any
@@ -196,7 +200,6 @@ export class LmStudioHandler implements ApiHandler {
 					if (reasoningText) {
 						yield { type: "reasoning", reasoning: reasoningText }
 					}
-					// Emit usage if LM Studio provides it (OpenAI-compatible include_usage)
 					const usage = (chunk as any)?.usage
 					if (usage && (usage.prompt_tokens !== null || usage.completion_tokens !== null)) {
 						const usageChunk: ApiStreamUsageChunk = {
@@ -211,11 +214,9 @@ export class LmStudioHandler implements ApiHandler {
 					}
 				}
 			} catch (error) {
-				// Handle aborts gracefully; otherwise surface a helpful error
 				if (error instanceof Error && (error.name === "AbortError" || error.message?.includes("aborted"))) {
 					return
 				}
-				// LM Studio doesn't return an error code/body for now
 				throw new Error(
 					"Please check the LM Studio developer logs to debug what went wrong. You may need to load the model with a larger context length to work with Cline's prompts.",
 				)
@@ -229,9 +230,6 @@ export class LmStudioHandler implements ApiHandler {
 		if (!delta) {
 			return undefined
 		}
-		// LM Studio / OpenAI-compatible fields:
-		// - delta.reasoning (string or { content: string })
-		// - delta.reasoning_content (string)
 		if (typeof delta.reasoning === "string" && delta.reasoning.length > 0) {
 			return delta.reasoning
 		}
@@ -251,13 +249,14 @@ export class LmStudioHandler implements ApiHandler {
 	}
 
 	getModel(): { id: string; info: ModelInfo } {
+		const info = getLmStudioModelInfoForModelId(this.options.lmStudioModelId || "")
+		const override = this.getConfiguredContextWindow()
 		return {
 			id: this.options.lmStudioModelId || "",
-			info: getLmStudioModelInfoForModelId(this.options.lmStudioModelId || ""),
+			info: override ? { ...info, contextWindow: override } : info,
 		}
 	}
 
-	// Allow Task/Controller to cancel an in-flight request
 	cancelActiveRequest(): void {
 		try {
 			this.abortController?.abort()

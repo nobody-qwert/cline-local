@@ -15,6 +15,7 @@ export interface ApiHandlerOptions {
 	ollamaApiKey?: string
 	ollamaApiOptionsCtxNum?: string
 	lmStudioBaseUrl?: string
+	lmStudioMaxTokens?: string
 
 	// Plan mode configurations
 	planModeApiModelId?: string

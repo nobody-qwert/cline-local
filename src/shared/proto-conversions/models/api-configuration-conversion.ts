@@ -34,6 +34,7 @@ export function convertApiConfigurationToProto(config: ApiConfiguration): ProtoA
 		ollamaBaseUrl: config.ollamaBaseUrl,
 		ollamaApiKey: config.ollamaApiKey,
 		lmStudioBaseUrl: config.lmStudioBaseUrl,
+		lmStudioMaxTokens: config.lmStudioMaxTokens,
 
 		// Plan mode configurations (local providers only)
 		planModeApiProvider: config.planModeApiProvider ? convertApiProviderToProto(config.planModeApiProvider) : undefined,
@@ -63,6 +64,7 @@ export function convertProtoToApiConfiguration(protoConfig: ProtoApiConfiguratio
 		ollamaBaseUrl: protoConfig.ollamaBaseUrl,
 		ollamaApiKey: protoConfig.ollamaApiKey,
 		lmStudioBaseUrl: protoConfig.lmStudioBaseUrl,
+		lmStudioMaxTokens: protoConfig.lmStudioMaxTokens,
 
 		// Plan mode configurations (local providers only)
 		planModeApiProvider:

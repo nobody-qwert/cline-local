@@ -16,11 +16,12 @@ export async function getLmStudioModels(controller: Controller, request: StringR
 			return StringArray.create({ values: [] })
 		}
 
-		const response = await axios.get(`${baseUrl}/v1/models`)
-		const modelsArray = response.data?.data?.map((model: any) => model.id) || []
-		const models = [...new Set<string>(modelsArray)]
+		const endpoint = new URL("api/v0/models", baseUrl)
+		const response = await axios.get(endpoint.toString())
+		const modelsArray = response.data?.data || []
+		const serializedModels = modelsArray.map((model: unknown) => JSON.stringify(model))
 
-		return StringArray.create({ values: models })
+		return StringArray.create({ values: serializedModels })
 	} catch (error) {
 		return StringArray.create({ values: [] })
 	}

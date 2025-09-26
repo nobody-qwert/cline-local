@@ -40,6 +40,7 @@ function createHandlerForProvider(
 			return new LmStudioHandler({
 				lmStudioBaseUrl: options.lmStudioBaseUrl,
 				lmStudioModelId: mode === "plan" ? options.planModeLmStudioModelId : options.actModeLmStudioModelId,
+				lmStudioMaxTokens: options.lmStudioMaxTokens,
 				thinkingBudgetTokens:
 					mode === "plan" ? options.planModeThinkingBudgetTokens : options.actModeThinkingBudgetTokens,
 				openaiReasoningEffort: options.openaiReasoningEffort,

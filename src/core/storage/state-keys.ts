@@ -16,6 +16,7 @@ export type GlobalStateKey =
 	| "ollamaBaseUrl"
 	| "ollamaApiOptionsCtxNum"
 	| "lmStudioBaseUrl"
+	| "lmStudioMaxTokens"
 	| "autoApprovalSettings"
 	| "globalClineRulesToggles"
 	| "globalWorkflowToggles"
@@ -64,6 +65,7 @@ export interface GlobalState {
 	ollamaBaseUrl: string | undefined
 	ollamaApiOptionsCtxNum: string | undefined
 	lmStudioBaseUrl: string | undefined
+	lmStudioMaxTokens: string | undefined
 	autoApprovalSettings: AutoApprovalSettings
 	globalClineRulesToggles: ClineRulesToggles
 	globalWorkflowToggles: ClineRulesToggles

@@ -115,6 +115,7 @@ message ModelsApiConfiguration {
   optional string ollama_api_key = 3;
   optional string lm_studio_base_url = 4;
   optional int32 request_timeout_ms = 5;
+  optional string lm_studio_max_tokens = 6;
 
   // Plan mode configurations (local-only)
   optional ApiProvider plan_mode_api_provider = 100;
